@@ -65,9 +65,12 @@ export default function StudentCard({
     const flightDate = new Date(student.lastFlightDate)
     const now = new Date()
 
-    // Calculate difference in milliseconds
-    const diffMs = now.getTime() - flightDate.getTime()
-    const diffDays = diffMs / (1000 * 60 * 60 * 24)
+    // Normalize to calendar day midnights (in local time)
+    const flightMidnight = new Date(flightDate.getFullYear(), flightDate.getMonth(), flightDate.getDate())
+    const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+    const diffMs = nowMidnight.getTime() - flightMidnight.getTime()
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24))
 
     // Calculate gradient color:
     // Today (0 days) = Green: RGB(16, 185, 129)
@@ -78,19 +81,14 @@ export default function StudentCard({
     const b = Math.round(129 + (68 - 129) * ratio)
     const color = `rgb(${r}, ${g}, ${b})`
 
-    // Nice text label
+    // Nice text label on calendar days basis
     let text = ''
-    if (diffDays < 1) {
-      const hours = Math.floor(diffMs / (1000 * 60 * 60))
-      if (hours < 1) {
-        text = 'Last flown: Today'
-      } else {
-        text = 'Last flown: Today'
-      }
-    } else if (diffDays < 2) {
+    if (diffDays <= 0) {
+      text = 'Last flown: Today'
+    } else if (diffDays === 1) {
       text = 'Last flown: Yesterday'
     } else {
-      text = `Last flown: ${Math.floor(diffDays)} days ago`
+      text = `Last flown: ${diffDays} days ago`
     }
 
     return { text, color }
