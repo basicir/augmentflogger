@@ -19,20 +19,27 @@ export default function DashboardPage() {
   useEffect(() => {
     const loadData = async () => {
       const { data: { user: authUser } } = await supabase.auth.getUser()
-      if (!authUser) return
+      if (!authUser) {
+        setLoading(false)
+        return
+      }
 
-      const { data: profile } = await supabase
+      const fallbackUsername = authUser.user_metadata?.username || authUser.email?.split('@')[0] || 'instructor'
+
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('username, fl_api_key, pinned_students')
         .eq('id', authUser.id)
-        .single()
+        .maybeSingle()
 
-      if (profile) {
-        setUser({ id: authUser.id, username: profile.username })
-        setHasApiKey(!!profile.fl_api_key)
-        setPinnedStudents((profile.pinned_students as PinnedStudent[]) ?? [])
+      if (error) {
+        console.error('Error loading dashboard profile:', error)
       }
 
+      const currentUsername = profile?.username || fallbackUsername
+      setUser({ id: authUser.id, username: currentUsername })
+      setHasApiKey(!!profile?.fl_api_key)
+      setPinnedStudents((profile?.pinned_students as PinnedStudent[]) ?? [])
       setLoading(false)
     }
 
@@ -50,8 +57,14 @@ export default function DashboardPage() {
 
     await supabase
       .from('profiles')
-      .update({ pinned_students: updated })
-      .eq('id', user.id)
+      .upsert(
+        {
+          id: user.id,
+          username: user.username,
+          pinned_students: updated,
+        },
+        { onConflict: 'id' }
+      )
   }
 
   const handleUnpin = async (id: string) => {
@@ -61,8 +74,14 @@ export default function DashboardPage() {
 
     await supabase
       .from('profiles')
-      .update({ pinned_students: updated })
-      .eq('id', user.id)
+      .upsert(
+        {
+          id: user.id,
+          username: user.username,
+          pinned_students: updated,
+        },
+        { onConflict: 'id' }
+      )
   }
 
   if (loading) {

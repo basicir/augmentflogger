@@ -12,6 +12,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [testing, setTesting] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [saveError, setSaveError] = useState('')
   const [testStatus, setTestStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [testMessage, setTestMessage] = useState('')
 
@@ -20,21 +21,30 @@ export default function SettingsPage() {
   useEffect(() => {
     const loadData = async () => {
       const { data: { user: authUser } } = await supabase.auth.getUser()
-      if (!authUser) return
+      if (!authUser) {
+        setLoading(false)
+        return
+      }
 
-      const { data: profile } = await supabase
+      const fallbackUsername = authUser.user_metadata?.username || authUser.email?.split('@')[0] || 'instructor'
+
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('username, fl_api_key')
         .eq('id', authUser.id)
-        .single()
+        .maybeSingle()
 
-      if (profile) {
-        setUser({ id: authUser.id, username: profile.username })
-        setApiKey(profile.fl_api_key ?? '')
-        setSavedApiKey(profile.fl_api_key ?? '')
+      if (error) {
+        console.error('Error fetching profile:', error)
       }
+
+      const currentUsername = profile?.username || fallbackUsername
+      setUser({ id: authUser.id, username: currentUsername })
+      setApiKey(profile?.fl_api_key ?? '')
+      setSavedApiKey(profile?.fl_api_key ?? '')
       setLoading(false)
     }
+
     loadData()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -42,20 +52,33 @@ export default function SettingsPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user) return
+
     setSaving(true)
     setSaveStatus('idle')
+    setSaveError('')
+
+    const cleanKey = apiKey.trim() || null
 
     const { error } = await supabase
       .from('profiles')
-      .update({ fl_api_key: apiKey.trim() || null })
-      .eq('id', user.id)
+      .upsert(
+        {
+          id: user.id,
+          username: user.username,
+          fl_api_key: cleanKey,
+        },
+        { onConflict: 'id' }
+      )
 
     if (error) {
+      console.error('Error saving API key:', error)
       setSaveStatus('error')
+      setSaveError(error.message || 'Failed to save API key.')
     } else {
-      setSavedApiKey(apiKey.trim())
+      setSavedApiKey(cleanKey ?? '')
+      setApiKey(cleanKey ?? '')
       setSaveStatus('success')
-      setTimeout(() => setSaveStatus('idle'), 3000)
+      setTimeout(() => setSaveStatus('idle'), 4000)
     }
     setSaving(false)
   }
@@ -77,7 +100,6 @@ export default function SettingsPage() {
         setTestStatus('error')
         setTestMessage('Invalid API key — FlightLogger rejected the request.')
       } else {
-        // Any response that isn't an auth error = key works
         setTestStatus('success')
         setTestMessage('API key is valid! FlightLogger connection successful.')
       }
@@ -87,6 +109,30 @@ export default function SettingsPage() {
     } finally {
       setTesting(false)
     }
+  }
+
+  const handleRemove = async () => {
+    if (!user) return
+    setSaving(true)
+
+    const { error } = await supabase
+      .from('profiles')
+      .upsert(
+        {
+          id: user.id,
+          username: user.username,
+          fl_api_key: null,
+        },
+        { onConflict: 'id' }
+      )
+
+    if (!error) {
+      setApiKey('')
+      setSavedApiKey('')
+      setSaveStatus('success')
+      setTimeout(() => setSaveStatus('idle'), 3000)
+    }
+    setSaving(false)
   }
 
   const hasChanges = apiKey.trim() !== savedApiKey
@@ -187,7 +233,7 @@ export default function SettingsPage() {
                 )}
               </div>
 
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                 <button
                   type="submit"
                   className="btn btn-primary"
@@ -201,13 +247,13 @@ export default function SettingsPage() {
                 </button>
 
                 {saveStatus === 'success' && (
-                  <span style={{ color: 'var(--accent-success)', fontSize: '0.875rem' }}>
-                    ✓ Saved successfully
+                  <span style={{ color: 'var(--accent-success)', fontSize: '0.875rem', fontWeight: 600 }}>
+                    ✓ API Key Saved Successfully!
                   </span>
                 )}
                 {saveStatus === 'error' && (
                   <span style={{ color: 'var(--accent-danger)', fontSize: '0.875rem' }}>
-                    ✕ Save failed. Try again.
+                    ✕ {saveError || 'Save failed. Try again.'}
                   </span>
                 )}
               </div>
@@ -227,13 +273,8 @@ export default function SettingsPage() {
               type="button"
               className="btn btn-danger btn-sm"
               style={{ width: 'auto' }}
-              disabled={!savedApiKey}
-              onClick={async () => {
-                if (!user) return
-                setApiKey('')
-                setSavedApiKey('')
-                await supabase.from('profiles').update({ fl_api_key: null }).eq('id', user.id)
-              }}
+              disabled={!savedApiKey || saving}
+              onClick={handleRemove}
               id="remove-api-key-btn"
             >
               Remove API Key
