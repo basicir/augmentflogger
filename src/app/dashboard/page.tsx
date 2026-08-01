@@ -50,7 +50,7 @@ export default function DashboardPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Derive unique groups from pinned students
+  // Unique list of groups
   const availableGroups = useMemo(() => {
     const set = new Set<string>()
     pinnedStudents.forEach((s) => {
@@ -59,12 +59,36 @@ export default function DashboardPage() {
     return Array.from(set).sort()
   }, [pinnedStudents])
 
-  // Filtered students based on group tab
-  const filteredStudents = useMemo(() => {
-    if (selectedGroupFilter === '__ALL__') return pinnedStudents
-    if (selectedGroupFilter === '__UNASSIGNED__') return pinnedStudents.filter((s) => !s.group)
-    return pinnedStudents.filter((s) => s.group === selectedGroupFilter)
-  }, [pinnedStudents, selectedGroupFilter])
+  // Grouped map: groupName -> array of PinnedStudent
+  const groupedStudentsMap = useMemo(() => {
+    const map: Record<string, PinnedStudent[]> = {}
+
+    // Add entries for all existing groups
+    availableGroups.forEach((g) => {
+      map[g] = []
+    })
+    map['__UNASSIGNED__'] = []
+
+    pinnedStudents.forEach((student) => {
+      const key = student.group || '__UNASSIGNED__'
+      if (!map[key]) map[key] = []
+      map[key].push(student)
+    })
+
+    return map
+  }, [pinnedStudents, availableGroups])
+
+  // Which groups to display based on tab filter
+  const displayGroups = useMemo(() => {
+    if (selectedGroupFilter === '__ALL__') {
+      const list = [...availableGroups]
+      if ((groupedStudentsMap['__UNASSIGNED__'] ?? []).length > 0) {
+        list.push('__UNASSIGNED__')
+      }
+      return list
+    }
+    return [selectedGroupFilter]
+  }, [selectedGroupFilter, availableGroups, groupedStudentsMap])
 
   const savePinnedStudents = async (updated: PinnedStudent[]) => {
     if (!user) return
@@ -114,7 +138,11 @@ export default function DashboardPage() {
   }
 
   const handleDeleteGroup = async (groupName: string) => {
-    if (!confirm(`Are you sure you want to remove the group "${groupName}"? Students in this group will become unassigned.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to remove the group "${groupName}"? Students in this group will become unassigned.`
+      )
+    ) {
       return
     }
     const updated = pinnedStudents.map((s) => (s.group === groupName ? { ...s, group: null } : s))
@@ -174,18 +202,25 @@ export default function DashboardPage() {
                 </button>
 
                 {availableGroups.map((group) => {
-                  const count = pinnedStudents.filter((s) => s.group === group).length
+                  const count = (groupedStudentsMap[group] ?? []).length
+                  const isActive = selectedGroupFilter === group
                   return (
-                    <div key={group} className="group-tab-wrapper">
+                    <div
+                      key={group}
+                      className={`group-tab-wrapper ${isActive ? 'active' : ''}`}
+                    >
                       <button
-                        className={`group-tab ${selectedGroupFilter === group ? 'active' : ''}`}
+                        className="group-tab-title"
                         onClick={() => setSelectedGroupFilter(group)}
                       >
                         📁 {group} ({count})
                       </button>
                       <button
                         className="group-delete-btn"
-                        onClick={() => handleDeleteGroup(group)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteGroup(group)
+                        }}
                         title={`Delete group ${group}`}
                       >
                         ✕
@@ -194,12 +229,14 @@ export default function DashboardPage() {
                   )
                 })}
 
-                <button
-                  className={`group-tab ${selectedGroupFilter === '__UNASSIGNED__' ? 'active' : ''}`}
-                  onClick={() => setSelectedGroupFilter('__UNASSIGNED__')}
-                >
-                  Unassigned ({pinnedStudents.filter((s) => !s.group).length})
-                </button>
+                {(groupedStudentsMap['__UNASSIGNED__'] ?? []).length > 0 && (
+                  <button
+                    className={`group-tab ${selectedGroupFilter === '__UNASSIGNED__' ? 'active' : ''}`}
+                    onClick={() => setSelectedGroupFilter('__UNASSIGNED__')}
+                  >
+                    Unassigned ({(groupedStudentsMap['__UNASSIGNED__'] ?? []).length})
+                  </button>
+                )}
 
                 {!creatingGroup ? (
                   <button
@@ -270,25 +307,44 @@ export default function DashboardPage() {
                 </Link>
               )}
             </div>
-          ) : filteredStudents.length === 0 ? (
-            <div className="empty-state" style={{ padding: '40px 20px' }}>
-              <div className="empty-state-icon" style={{ fontSize: '2.5rem' }}>📁</div>
-              <h2 className="empty-state-title">No students in this group</h2>
-              <p className="empty-state-desc">
-                Assign students to this group from their student cards or select &ldquo;All Students&rdquo;.
-              </p>
-            </div>
           ) : (
-            <div className="students-grid">
-              {filteredStudents.map((student) => (
-                <StudentCard
-                  key={student.id}
-                  student={student}
-                  availableGroups={availableGroups}
-                  onUnpin={handleUnpin}
-                  onUpdateGroup={handleUpdateGroup}
-                />
-              ))}
+            <div className="dashboard-groups-container">
+              {displayGroups.map((groupKey) => {
+                const students = groupedStudentsMap[groupKey] ?? []
+                if (students.length === 0 && selectedGroupFilter === '__ALL__') return null
+
+                const isUnassigned = groupKey === '__UNASSIGNED__'
+                const groupTitle = isUnassigned ? '🏷️ Unassigned Students' : `📁 ${groupKey}`
+
+                return (
+                  <section key={groupKey} className="group-section">
+                    <div className="group-section-header">
+                      <h2 className="group-section-title">{groupTitle}</h2>
+                      <span className="group-section-count">
+                        {students.length} student{students.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+
+                    {students.length > 0 ? (
+                      <div className="students-grid">
+                        {students.map((student) => (
+                          <StudentCard
+                            key={student.id}
+                            student={student}
+                            availableGroups={availableGroups}
+                            onUnpin={handleUnpin}
+                            onUpdateGroup={handleUpdateGroup}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="group-empty-placeholder">
+                        No students in this group yet. Use the group badge on a student card to assign them here.
+                      </div>
+                    )}
+                  </section>
+                )
+              })}
             </div>
           )}
         </div>
