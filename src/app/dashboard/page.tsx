@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Navbar from '@/components/Navbar'
 import StudentCard, { type PinnedStudent } from '@/components/StudentCard'
@@ -13,6 +13,9 @@ export default function DashboardPage() {
   const [hasApiKey, setHasApiKey] = useState(false)
   const [loading, setLoading] = useState(true)
   const [showSearch, setShowSearch] = useState(false)
+  const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>('__ALL__')
+  const [creatingGroup, setCreatingGroup] = useState(false)
+  const [groupInput, setGroupInput] = useState('')
 
   const supabase = createClient()
 
@@ -47,15 +50,27 @@ export default function DashboardPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handlePin = async (student: PinnedStudent) => {
-    if (!user) return
-    const alreadyPinned = pinnedStudents.some((s) => s.id === student.id)
-    if (alreadyPinned) return
+  // Derive unique groups from pinned students
+  const availableGroups = useMemo(() => {
+    const set = new Set<string>()
+    pinnedStudents.forEach((s) => {
+      if (s.group) set.add(s.group)
+    })
+    return Array.from(set).sort()
+  }, [pinnedStudents])
 
-    const updated = [...pinnedStudents, student]
+  // Filtered students based on group tab
+  const filteredStudents = useMemo(() => {
+    if (selectedGroupFilter === '__ALL__') return pinnedStudents
+    if (selectedGroupFilter === '__UNASSIGNED__') return pinnedStudents.filter((s) => !s.group)
+    return pinnedStudents.filter((s) => s.group === selectedGroupFilter)
+  }, [pinnedStudents, selectedGroupFilter])
+
+  const savePinnedStudents = async (updated: PinnedStudent[]) => {
+    if (!user) return
     setPinnedStudents(updated)
 
-    await supabase
+    const { error } = await supabase
       .from('profiles')
       .upsert(
         {
@@ -65,23 +80,48 @@ export default function DashboardPage() {
         },
         { onConflict: 'id' }
       )
+
+    if (error) {
+      console.error('Error saving pinned students:', error)
+    }
+  }
+
+  const handlePin = async (student: PinnedStudent) => {
+    const alreadyPinned = pinnedStudents.some((s) => s.id === student.id)
+    if (alreadyPinned) return
+    const updated = [...pinnedStudents, student]
+    await savePinnedStudents(updated)
   }
 
   const handleUnpin = async (id: string) => {
-    if (!user) return
     const updated = pinnedStudents.filter((s) => s.id !== id)
-    setPinnedStudents(updated)
+    await savePinnedStudents(updated)
+  }
 
-    await supabase
-      .from('profiles')
-      .upsert(
-        {
-          id: user.id,
-          username: user.username,
-          pinned_students: updated,
-        },
-        { onConflict: 'id' }
-      )
+  const handleUpdateGroup = async (studentId: string, group: string | null) => {
+    const updated = pinnedStudents.map((s) => (s.id === studentId ? { ...s, group } : s))
+    await savePinnedStudents(updated)
+  }
+
+  const handleCreateGroup = (e: React.FormEvent) => {
+    e.preventDefault()
+    const trimmed = groupInput.trim()
+    if (trimmed) {
+      setSelectedGroupFilter(trimmed)
+    }
+    setGroupInput('')
+    setCreatingGroup(false)
+  }
+
+  const handleDeleteGroup = async (groupName: string) => {
+    if (!confirm(`Are you sure you want to remove the group "${groupName}"? Students in this group will become unassigned.`)) {
+      return
+    }
+    const updated = pinnedStudents.map((s) => (s.group === groupName ? { ...s, group: null } : s))
+    if (selectedGroupFilter === groupName) {
+      setSelectedGroupFilter('__ALL__')
+    }
+    await savePinnedStudents(updated)
   }
 
   if (loading) {
@@ -106,8 +146,8 @@ export default function DashboardPage() {
               <h1 className="dashboard-title">My Students</h1>
               <p className="dashboard-subtitle">
                 {pinnedStudents.length > 0
-                  ? `${pinnedStudents.length} student${pinnedStudents.length !== 1 ? 's' : ''} pinned`
-                  : 'Pin students to monitor them quickly'}
+                  ? `${pinnedStudents.length} student${pinnedStudents.length !== 1 ? 's' : ''} pinned across ${availableGroups.length} group${availableGroups.length !== 1 ? 's' : ''}`
+                  : 'Pin students to monitor and organize them in groups'}
               </p>
             </div>
             <button
@@ -121,6 +161,79 @@ export default function DashboardPage() {
               <span>+</span> Pin Student
             </button>
           </div>
+
+          {/* Group Filter Tabs Bar */}
+          {pinnedStudents.length > 0 && (
+            <div className="groups-bar">
+              <div className="groups-tabs">
+                <button
+                  className={`group-tab ${selectedGroupFilter === '__ALL__' ? 'active' : ''}`}
+                  onClick={() => setSelectedGroupFilter('__ALL__')}
+                >
+                  All Students ({pinnedStudents.length})
+                </button>
+
+                {availableGroups.map((group) => {
+                  const count = pinnedStudents.filter((s) => s.group === group).length
+                  return (
+                    <div key={group} className="group-tab-wrapper">
+                      <button
+                        className={`group-tab ${selectedGroupFilter === group ? 'active' : ''}`}
+                        onClick={() => setSelectedGroupFilter(group)}
+                      >
+                        📁 {group} ({count})
+                      </button>
+                      <button
+                        className="group-delete-btn"
+                        onClick={() => handleDeleteGroup(group)}
+                        title={`Delete group ${group}`}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )
+                })}
+
+                <button
+                  className={`group-tab ${selectedGroupFilter === '__UNASSIGNED__' ? 'active' : ''}`}
+                  onClick={() => setSelectedGroupFilter('__UNASSIGNED__')}
+                >
+                  Unassigned ({pinnedStudents.filter((s) => !s.group).length})
+                </button>
+
+                {!creatingGroup ? (
+                  <button
+                    className="group-tab group-tab-add"
+                    onClick={() => setCreatingGroup(true)}
+                  >
+                    + Add Group
+                  </button>
+                ) : (
+                  <form onSubmit={handleCreateGroup} className="new-group-inline-form">
+                    <input
+                      type="text"
+                      className="new-group-inline-input"
+                      placeholder="Group name (e.g. PPL Batch)"
+                      value={groupInput}
+                      onChange={(e) => setGroupInput(e.target.value)}
+                      autoFocus
+                    />
+                    <button type="submit" className="btn btn-primary btn-sm" style={{ padding: '4px 10px' }}>
+                      Add
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      style={{ padding: '4px 8px' }}
+                      onClick={() => setCreatingGroup(false)}
+                    >
+                      ✕
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="dashboard-content">
@@ -139,7 +252,7 @@ export default function DashboardPage() {
               <div className="empty-state-icon">✈</div>
               <h2 className="empty-state-title">No pinned students yet</h2>
               <p className="empty-state-desc">
-                Search by callsign and pin students to keep them on your dashboard for quick access.
+                Search by callsign to pin students and organize them into custom groups (e.g., PPL, CPL, Solo).
               </p>
               {hasApiKey && (
                 <button
@@ -157,13 +270,23 @@ export default function DashboardPage() {
                 </Link>
               )}
             </div>
+          ) : filteredStudents.length === 0 ? (
+            <div className="empty-state" style={{ padding: '40px 20px' }}>
+              <div className="empty-state-icon" style={{ fontSize: '2.5rem' }}>📁</div>
+              <h2 className="empty-state-title">No students in this group</h2>
+              <p className="empty-state-desc">
+                Assign students to this group from their student cards or select &ldquo;All Students&rdquo;.
+              </p>
+            </div>
           ) : (
             <div className="students-grid">
-              {pinnedStudents.map((student) => (
+              {filteredStudents.map((student) => (
                 <StudentCard
                   key={student.id}
                   student={student}
+                  availableGroups={availableGroups}
                   onUnpin={handleUnpin}
+                  onUpdateGroup={handleUpdateGroup}
                 />
               ))}
             </div>
@@ -173,6 +296,7 @@ export default function DashboardPage() {
 
       {showSearch && (
         <SearchModal
+          availableGroups={availableGroups}
           onClose={() => setShowSearch(false)}
           onPin={(student) => {
             handlePin(student)

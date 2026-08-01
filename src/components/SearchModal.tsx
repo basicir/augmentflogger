@@ -12,17 +12,24 @@ interface SearchResult {
 }
 
 interface SearchModalProps {
+  availableGroups: string[]
   onClose: () => void
   onPin: (student: PinnedStudent) => void
   pinnedIds: string[]
 }
 
-export default function SearchModal({ onClose, onPin, pinnedIds }: SearchModalProps) {
+export default function SearchModal({
+  availableGroups,
+  onClose,
+  onPin,
+  pinnedIds,
+}: SearchModalProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
   const [apiError, setApiError] = useState('')
+  const [selectedGroupMap, setSelectedGroupMap] = useState<Record<string, string>>({})
 
   const search = useCallback(async (callSign: string) => {
     if (!callSign.trim()) {
@@ -58,7 +65,6 @@ export default function SearchModal({ onClose, onPin, pinnedIds }: SearchModalPr
     }
   }, [])
 
-  // Search on Enter key
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       search(query)
@@ -68,14 +74,12 @@ export default function SearchModal({ onClose, onPin, pinnedIds }: SearchModalPr
     }
   }
 
-  // Close on backdrop click
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose()
     }
   }
 
-  // Trap focus inside modal
   useEffect(() => {
     const el = document.getElementById('search-input')
     el?.focus()
@@ -91,7 +95,7 @@ export default function SearchModal({ onClose, onPin, pinnedIds }: SearchModalPr
     >
       <div className="modal-box">
         <div className="modal-header">
-          <h2 className="modal-title">Search Student</h2>
+          <h2 className="modal-title">Search Student to Pin</h2>
           <button
             className="modal-close"
             onClick={onClose}
@@ -139,6 +143,8 @@ export default function SearchModal({ onClose, onPin, pinnedIds }: SearchModalPr
             {results.map((user) => {
               const isPinned = pinnedIds.includes(user.id)
               const initials = `${user.firstName[0] ?? ''}${user.lastName[0] ?? ''}`.toUpperCase()
+              const selectedGroup = selectedGroupMap[user.id] || ''
+
               return (
                 <li key={user.id} className="result-item" role="listitem">
                   {user.avatarUrl ? (
@@ -168,6 +174,24 @@ export default function SearchModal({ onClose, onPin, pinnedIds }: SearchModalPr
                       <div className="result-callsign">{user.callSign}</div>
                     )}
                   </div>
+
+                  {!isPinned && availableGroups.length > 0 && (
+                    <select
+                      className="modal-group-select"
+                      value={selectedGroup}
+                      onChange={(e) =>
+                        setSelectedGroupMap((prev) => ({ ...prev, [user.id]: e.target.value }))
+                      }
+                    >
+                      <option value="">No Group</option>
+                      {availableGroups.map((g) => (
+                        <option key={g} value={g}>
+                          {g}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+
                   <button
                     className={`result-pin-btn ${isPinned ? 'pinned' : ''}`}
                     onClick={() => {
@@ -178,6 +202,7 @@ export default function SearchModal({ onClose, onPin, pinnedIds }: SearchModalPr
                           lastName: user.lastName,
                           callSign: user.callSign,
                           avatarUrl: user.avatarUrl,
+                          group: selectedGroup || null,
                         })
                       }
                     }}

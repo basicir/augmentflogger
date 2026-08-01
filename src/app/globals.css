@@ -597,8 +597,185 @@ body {
   border: 1px solid rgba(6, 182, 212, 0.2);
   border-radius: var(--radius-full);
   padding: 3px 10px;
-  margin-bottom: 8px;
 }
+
+/* Groups Bar & Tabs */
+.groups-bar {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.groups-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.groups-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.group-tab-wrapper {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+.group-tab {
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.group-tab:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.group-tab.active {
+  background: var(--accent-primary);
+  color: #fff;
+  border-color: var(--accent-primary);
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+}
+
+.group-tab-add {
+  background: rgba(59, 130, 246, 0.08);
+  border-style: dashed;
+  color: var(--accent-primary);
+}
+
+.group-tab-add:hover {
+  background: rgba(59, 130, 246, 0.16);
+}
+
+.group-delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  margin-left: -8px;
+
+  transition: color var(--transition-fast);
+}
+
+.group-delete-btn:hover {
+  color: var(--accent-danger);
+}
+
+/* Group Badge on Student Card */
+.group-badge-wrapper {
+  display: inline-block;
+}
+
+.student-group-badge {
+  font-size: 0.75rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
+  cursor: pointer;
+  outline: none;
+  transition: all var(--transition-fast);
+  appearance: none;
+  -webkit-appearance: none;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%2394a3b8' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 22px;
+}
+
+.student-group-badge.has-group {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--accent-success);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.student-group-badge.has-group:hover {
+  background-color: rgba(16, 185, 129, 0.2);
+  border-color: var(--accent-success);
+}
+
+.student-group-badge.no-group {
+  background-color: var(--bg-elevated);
+  color: var(--text-muted);
+  border: 1px dashed var(--border-default);
+}
+
+.student-group-badge.no-group:hover {
+  background-color: var(--bg-card-hover);
+  color: var(--text-secondary);
+  border-style: solid;
+}
+
+/* Inline Group Input Form */
+.new-group-form, .new-group-inline-form {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.new-group-input, .new-group-inline-input {
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  background: var(--bg-input);
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  outline: none;
+  width: 130px;
+}
+
+.btn-group-save, .btn-group-cancel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-group-save:hover {
+  background: var(--accent-success);
+  color: white;
+}
+
+.btn-group-cancel:hover {
+  background: var(--accent-danger);
+  color: white;
+}
+
+.modal-group-select {
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  outline: none;
+}
+
 
 /* Empty State */
 .empty-state {
