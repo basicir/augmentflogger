@@ -501,8 +501,17 @@ body {
   padding: 24px;
   position: relative;
   transition: all var(--transition-base);
-  cursor: default;
+  cursor: pointer;
   overflow: hidden;
+}
+
+.student-card-link-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
 }
 
 .student-card::before {
@@ -1306,27 +1315,175 @@ body {
   50% { opacity: 0.5; }
 }
 
-/* Responsive */
+/* Responsive & Mobile Optimization */
 @media (max-width: 768px) {
-  .dashboard-header,
+  /* Prevent iOS input zoom (minimum 16px font-size) */
+  .form-input,
+  .search-input,
+  .api-key-input,
+  .new-group-input,
+  .new-group-inline-input,
+  .modal-group-select,
+  .student-group-badge {
+    font-size: 16px !important;
+  }
+
+  .dashboard-header {
+    padding: 24px 16px 16px;
+  }
+  
   .dashboard-content {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding: 16px;
   }
 
   .students-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .settings-layout {
     padding: 24px 16px;
   }
 
-  .auth-card {
-    padding: 28px 24px;
+  .settings-section {
+    padding: 20px;
+    margin-bottom: 16px;
   }
 
-  .navbar {
-    padding: 0 16px;
+  .auth-card {
+    padding: 28px 20px;
+  }
+
+  /* Touch Targets Sizing */
+  .student-card-unpin {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+    top: 6px;
+    right: 6px;
+  }
+
+  .group-delete-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  .student-group-badge {
+    padding: 8px 24px 8px 12px;
+    font-size: 0.85rem;
+  }
+
+  /* Smooth scroll for horizontal tab list */
+  .groups-tabs {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .groups-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Touch target sizes for tabs */
+  .group-tab,
+  .group-tab-wrapper {
+    padding: 8px 16px;
+  }
+
+  /* Modal adjustments for mobile */
+  .modal-overlay {
+    padding: 16px 12px;
+  }
+
+  .modal-box {
+    max-height: calc(100vh - 32px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-results {
+    max-height: none;
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .result-item {
+    padding: 16px;
+  }
+
+  .result-pin-btn {
+    padding: 10px 16px; /* Larger tap targets */
   }
 }
+
+@media (max-width: 600px) {
+  /* Navbar Compact Sizing */
+  .navbar {
+    padding: 0 12px;
+    gap: 8px;
+    height: 56px;
+  }
+
+  .navbar-brand-name {
+    font-size: 0.95rem;
+  }
+
+  .navbar-brand-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
+
+  .nav-link-text,
+  .navbar-username {
+    display: none; /* Hide text on small screens, keep icons */
+  }
+
+  .navbar-link {
+    padding: 8px;
+    font-size: 1.1rem; /* Make icons slightly larger for tapping */
+  }
+
+  .navbar-divider {
+    height: 18px;
+    margin: 0 2px;
+  }
+
+  .btn-ghost {
+    padding: 8px;
+  }
+
+  .dashboard-header-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .dashboard-header-top .btn {
+    width: 100%;
+  }
+
+  .api-key-field {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .api-key-field .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 12px;
+  }
+
+  .auth-logo {
+    margin-bottom: 24px;
+  }
+
+  .auth-card {
+    padding: 24px 16px;
+    border-radius: var(--radius-lg);
+  }
+}
+

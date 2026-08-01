@@ -36,7 +36,7 @@ export default function Navbar({ username }: NavbarProps) {
           id="nav-dashboard"
         >
           <span>⊞</span>
-          Dashboard
+          <span className="nav-link-text">Dashboard</span>
         </Link>
 
         <Link
@@ -45,13 +45,13 @@ export default function Navbar({ username }: NavbarProps) {
           id="nav-settings"
         >
           <span>⚙</span>
-          Settings
+          <span className="nav-link-text">Settings</span>
         </Link>
 
         <div className="navbar-divider" aria-hidden="true" />
 
         {username && (
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', padding: '0 4px' }}>
+          <span className="navbar-username" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', padding: '0 4px' }}>
             {username}
           </span>
         )}
@@ -63,7 +63,14 @@ export default function Navbar({ username }: NavbarProps) {
           id="nav-logout"
           aria-label="Sign out"
         >
-          {loggingOut ? <span className="spinner spinner-sm" /> : '→ Sign out'}
+          {loggingOut ? (
+            <span className="spinner spinner-sm" />
+          ) : (
+            <>
+              <span className="nav-logout-icon">→</span>
+              <span className="nav-link-text">Sign out</span>
+            </>
+          )}
         </button>
       </div>
     </nav>

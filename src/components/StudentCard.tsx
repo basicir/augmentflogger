@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 export interface PinnedStudent {
   id: string
@@ -96,11 +97,14 @@ export default function StudentCard({
 
   return (
     <article className="student-card" aria-label={`Pinned student: ${fullName}`}>
+      <Link href={`/student/${student.id}`} className="student-card-link-overlay" aria-label={`View ${fullName} details`} />
+      
       <button
         className="student-card-unpin"
         onClick={() => onUnpin(student.id)}
         aria-label={`Unpin ${fullName}`}
         title="Unpin student"
+        style={{ position: 'relative', zIndex: 10 }}
       >
         ✕
       </button>
@@ -138,7 +142,7 @@ export default function StudentCard({
         <span>✈</span> {flightDetails.text}
       </div>
 
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 8 }}>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 8, position: 'relative', zIndex: 10 }}>
         {student.callSign && (
           <div className="student-callsign">
             <span>✦</span>

@@ -37,14 +37,14 @@ export async function POST(request: Request) {
         return `
           ${safeAlias}: user(id: "${id}") {
             id
-            lastFlights: flights(last: 1) {
+            lastFlights: flights(last: 1, all: true) {
               nodes {
                 primaryLog {
                   startsAt
                 }
               }
             }
-            firstFlights: flights(first: 1) {
+            firstFlights: flights(first: 1, all: true) {
               nodes {
                 primaryLog {
                   startsAt

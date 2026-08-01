@@ -12,14 +12,14 @@ const SEARCH_USERS_QUERY = `
         lastName
         callSign
         avatarUrl
-        lastFlights: flights(last: 1) {
+        lastFlights: flights(last: 1, all: true) {
           nodes {
             primaryLog {
               startsAt
             }
           }
         }
-        firstFlights: flights(first: 1) {
+        firstFlights: flights(first: 1, all: true) {
           nodes {
             primaryLog {
               startsAt
