@@ -37,7 +37,14 @@ export async function POST(request: Request) {
         return `
           ${safeAlias}: user(id: "${id}") {
             id
-            flights(first: 1) {
+            lastFlights: flights(last: 1) {
+              nodes {
+                primaryLog {
+                  startsAt
+                }
+              }
+            }
+            firstFlights: flights(first: 1) {
               nodes {
                 primaryLog {
                   startsAt
@@ -82,8 +89,18 @@ export async function POST(request: Request) {
     Object.keys(data).forEach((safeAlias) => {
       const originalId = aliasMap[safeAlias]
       if (originalId) {
-        const startsAt = data[safeAlias]?.flights?.nodes?.[0]?.primaryLog?.startsAt || null
-        lastFlightDates[originalId] = startsAt
+        const u = data[safeAlias]
+        const d1 = u?.firstFlights?.nodes?.[0]?.primaryLog?.startsAt || null
+        const d2 = u?.lastFlights?.nodes?.[0]?.primaryLog?.startsAt || null
+        
+        let newestDate = null
+        if (d1 && d2) {
+          newestDate = new Date(d1) > new Date(d2) ? d1 : d2
+        } else {
+          newestDate = d1 || d2 || null
+        }
+        
+        lastFlightDates[originalId] = newestDate
       }
     })
 

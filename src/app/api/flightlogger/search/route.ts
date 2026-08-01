@@ -12,7 +12,14 @@ const SEARCH_USERS_QUERY = `
         lastName
         callSign
         avatarUrl
-        flights(first: 1) {
+        lastFlights: flights(last: 1) {
+          nodes {
+            primaryLog {
+              startsAt
+            }
+          }
+        }
+        firstFlights: flights(first: 1) {
           nodes {
             primaryLog {
               startsAt
@@ -105,7 +112,16 @@ export async function POST(request: Request) {
 
     const rawUsers = flData.data?.users?.nodes ?? []
     const users = rawUsers.map((u: any) => {
-      const lastFlightDate = u.flights?.nodes?.[0]?.primaryLog?.startsAt || null
+      const d1 = u.firstFlights?.nodes?.[0]?.primaryLog?.startsAt || null
+      const d2 = u.lastFlights?.nodes?.[0]?.primaryLog?.startsAt || null
+      
+      let lastFlightDate = null
+      if (d1 && d2) {
+        lastFlightDate = new Date(d1) > new Date(d2) ? d1 : d2
+      } else {
+        lastFlightDate = d1 || d2 || null
+      }
+
       return {
         id: u.id,
         firstName: u.firstName,
