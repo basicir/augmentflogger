@@ -582,8 +582,23 @@ body {
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.01em;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
+
+.student-last-flown {
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.95;
+}
+
+.student-last-flown span {
+  font-size: 0.85rem;
+}
+
 
 .student-callsign {
   display: inline-flex;

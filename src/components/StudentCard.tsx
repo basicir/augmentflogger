@@ -9,6 +9,7 @@ export interface PinnedStudent {
   callSign: string | null
   avatarUrl: string | null
   group?: string | null
+  lastFlightDate?: string | null
 }
 
 interface StudentCardProps {
@@ -52,6 +53,49 @@ export default function StudentCard({
     setEditingGroup(false)
   }
 
+  // Calculate relative date string & color gradient
+  const flightDetails = (() => {
+    if (!student.lastFlightDate) {
+      return {
+        text: 'Never flown',
+        color: '#94a3b8', // Gray
+      }
+    }
+
+    const flightDate = new Date(student.lastFlightDate)
+    const now = new Date()
+
+    // Calculate difference in milliseconds
+    const diffMs = now.getTime() - flightDate.getTime()
+    const diffDays = diffMs / (1000 * 60 * 60 * 24)
+
+    // Calculate gradient color:
+    // Today (0 days) = Green: RGB(16, 185, 129)
+    // 1 Month (30+ days) = Red: RGB(239, 68, 68)
+    const ratio = Math.max(0, Math.min(1, diffDays / 30))
+    const r = Math.round(16 + (239 - 16) * ratio)
+    const g = Math.round(185 + (68 - 185) * ratio)
+    const b = Math.round(129 + (68 - 129) * ratio)
+    const color = `rgb(${r}, ${g}, ${b})`
+
+    // Nice text label
+    let text = ''
+    if (diffDays < 1) {
+      const hours = Math.floor(diffMs / (1000 * 60 * 60))
+      if (hours < 1) {
+        text = 'Last flown: Today'
+      } else {
+        text = 'Last flown: Today'
+      }
+    } else if (diffDays < 2) {
+      text = 'Last flown: Yesterday'
+    } else {
+      text = `Last flown: ${Math.floor(diffDays)} days ago`
+    }
+
+    return { text, color }
+  })()
+
   return (
     <article className="student-card" aria-label={`Pinned student: ${fullName}`}>
       <button
@@ -87,7 +131,16 @@ export default function StudentCard({
 
       <div className="student-name">{fullName}</div>
 
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 4 }}>
+      {/* Last Flown Parameter */}
+      <div
+        className="student-last-flown"
+        style={{ color: flightDetails.color }}
+        title={student.lastFlightDate ? new Date(student.lastFlightDate).toLocaleString() : undefined}
+      >
+        <span>✈</span> {flightDetails.text}
+      </div>
+
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 8 }}>
         {student.callSign && (
           <div className="student-callsign">
             <span>✦</span>

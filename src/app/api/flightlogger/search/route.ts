@@ -12,6 +12,13 @@ const SEARCH_USERS_QUERY = `
         lastName
         callSign
         avatarUrl
+        flights(first: 1) {
+          nodes {
+            primaryLog {
+              startsAt
+            }
+          }
+        }
       }
     }
   }
@@ -96,7 +103,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: errorMsg }, { status: 400 })
     }
 
-    const users = flData.data?.users?.nodes ?? []
+    const rawUsers = flData.data?.users?.nodes ?? []
+    const users = rawUsers.map((u: any) => {
+      const lastFlightDate = u.flights?.nodes?.[0]?.primaryLog?.startsAt || null
+      return {
+        id: u.id,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        callSign: u.callSign,
+        avatarUrl: u.avatarUrl,
+        lastFlightDate,
+      }
+    })
     return NextResponse.json({ users })
   } catch (error) {
     console.error('FlightLogger proxy error:', error)

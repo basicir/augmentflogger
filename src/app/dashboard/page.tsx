@@ -41,9 +41,45 @@ export default function DashboardPage() {
 
       const currentUsername = profile?.username || fallbackUsername
       setUser({ id: authUser.id, username: currentUsername })
-      setHasApiKey(!!profile?.fl_api_key)
-      setPinnedStudents((profile?.pinned_students as PinnedStudent[]) ?? [])
+      const keyExists = !!profile?.fl_api_key
+      setHasApiKey(keyExists)
+      
+      const initialStudents = (profile?.pinned_students as PinnedStudent[]) ?? []
+      setPinnedStudents(initialStudents)
       setLoading(false)
+
+      // Fetch fresh last-flown dates if they exist and key is present
+      if (keyExists && initialStudents.length > 0) {
+        try {
+          const res = await fetch('/api/flightlogger/last-flown', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ studentIds: initialStudents.map((s) => s.id) }),
+          })
+          if (res.ok) {
+            const { lastFlightDates } = await res.json()
+            const updated = initialStudents.map((s) => ({
+              ...s,
+              lastFlightDate: lastFlightDates[s.id] !== undefined ? lastFlightDates[s.id] : s.lastFlightDate,
+            }))
+            
+            // Save updated cache to Supabase & state
+            setPinnedStudents(updated)
+            await supabase
+              .from('profiles')
+              .upsert(
+                {
+                  id: authUser.id,
+                  username: currentUsername,
+                  pinned_students: updated,
+                },
+                { onConflict: 'id' }
+              )
+          }
+        } catch (e) {
+          console.error('Error refreshing last flight dates:', e)
+        }
+      }
     }
 
     loadData()
