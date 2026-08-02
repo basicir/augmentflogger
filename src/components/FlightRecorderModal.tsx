@@ -35,7 +35,7 @@ export default function FlightRecorderModal() {
     phases: PhaseData[];
   }
 
-  const [activeTab, setActiveTab] = useState<'flight-parameters' | 'task-parameters'>('flight-parameters')
+  const [activeTab, setActiveTab] = useState<'flight-parameters' | 'task-parameters' | 'comments'>('flight-parameters')
   const [programs, setPrograms] = useState<ProgramData[]>([])
   const [selectedProgram, setSelectedProgram] = useState('')
   const [selectedTask, setSelectedTask] = useState('')
@@ -196,7 +196,7 @@ export default function FlightRecorderModal() {
     }
 
     // Use cache if this is the currently cached task
-    if (ongoingFlight.task_exercises_cache && ongoingFlight.selected_task === selectedTask) {
+    if (ongoingFlight.task_exercises_cache && ongoingFlight.task_exercises_cache.length > 0 && ongoingFlight.selected_task === selectedTask) {
       setTaskExercises(ongoingFlight.task_exercises_cache);
       if (ongoingFlight.task_description_cache) setTaskDescription(ongoingFlight.task_description_cache);
       return;
@@ -337,30 +337,40 @@ export default function FlightRecorderModal() {
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-default)', background: 'var(--bg-elevated)' }}>
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-default)', background: 'var(--bg-elevated)', overflowX: 'auto' }}>
           <button
             onClick={() => setActiveTab('flight-parameters')}
             style={{
-              flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'flight-parameters' ? 'var(--primary)' : 'var(--text-secondary)',
+              flex: 1, padding: '12px', background: 'none', border: 'none', color: activeTab === 'flight-parameters' ? 'var(--primary)' : 'var(--text-secondary)',
               borderBottom: activeTab === 'flight-parameters' ? '2px solid var(--primary)' : '2px solid transparent',
-              fontWeight: activeTab === 'flight-parameters' ? 600 : 500, cursor: 'pointer'
+              fontWeight: activeTab === 'flight-parameters' ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap'
             }}
           >
-            Flight Parameters
+            Flight
           </button>
           <button
             onClick={() => setActiveTab('task-parameters')}
             style={{
-              flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'task-parameters' ? 'var(--primary)' : 'var(--text-secondary)',
+              flex: 1, padding: '12px', background: 'none', border: 'none', color: activeTab === 'task-parameters' ? 'var(--primary)' : 'var(--text-secondary)',
               borderBottom: activeTab === 'task-parameters' ? '2px solid var(--primary)' : '2px solid transparent',
-              fontWeight: activeTab === 'task-parameters' ? 600 : 500, cursor: 'pointer'
+              fontWeight: activeTab === 'task-parameters' ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap'
             }}
           >
-            Task Parameters
+            Grading
+          </button>
+          <button
+            onClick={() => setActiveTab('comments')}
+            style={{
+              flex: 1, padding: '12px', background: 'none', border: 'none', color: activeTab === 'comments' ? 'var(--primary)' : 'var(--text-secondary)',
+              borderBottom: activeTab === 'comments' ? '2px solid var(--primary)' : '2px solid transparent',
+              fontWeight: activeTab === 'comments' ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap'
+            }}
+          >
+            Comments
           </button>
         </div>
 
-        <div style={{ padding: '24px', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ padding: '16px', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {activeTab === 'flight-parameters' && (
             <>
               <div>
@@ -370,7 +380,7 @@ export default function FlightRecorderModal() {
                 setAircraft(e.target.value);
                 updateFlight({ aircraft_registration: e.target.value });
               }}
-              style={{ width: '100%', padding: '16px', fontSize: '18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', fontWeight: 'bold' }}
+              style={{ width: '100%', padding: '12px', fontSize: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', fontWeight: 'bold' }}
             >
               <option value="">✈️ Select Aircraft</option>
               {availableAircraft.length === 0 ? (
@@ -383,34 +393,34 @@ export default function FlightRecorderModal() {
             </select>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
-              <button onClick={cyclePilotFunction} style={{ position: 'relative', width: '100%', padding: '24px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'center', fontWeight: '900', fontSize: '20px' }}>
+              <button onClick={cyclePilotFunction} style={{ position: 'relative', width: '100%', padding: '16px 8px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'center', fontWeight: '900', fontSize: '16px' }}>
                 <span>{pilotFunction === 'Not Specified' ? 'N/S' : pilotFunction}</span>
-                <span style={{ position: 'absolute', top: '6px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(pilotFunctionOpts, pilotFunction)}</span>
+                <span style={{ position: 'absolute', top: '4px', right: '8px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(pilotFunctionOpts, pilotFunction)}</span>
               </button>
             </div>
             <div>
-              <button onClick={cycleFlightRules} style={{ position: 'relative', width: '100%', padding: '24px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'center', fontWeight: '900', fontSize: '20px' }}>
+              <button onClick={cycleFlightRules} style={{ position: 'relative', width: '100%', padding: '16px 8px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'center', fontWeight: '900', fontSize: '16px' }}>
                 <span>{flightRules === 'Not Specified' ? 'N/S' : flightRules}</span>
-                <span style={{ position: 'absolute', top: '6px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(flightRulesOpts, flightRules)}</span>
+                <span style={{ position: 'absolute', top: '4px', right: '8px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(flightRulesOpts, flightRules)}</span>
               </button>
             </div>
             <div>
-              <button onClick={cycleTimeOfDay} style={{ position: 'relative', width: '100%', padding: '24px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'center', fontWeight: '900', fontSize: '20px' }}>
+              <button onClick={cycleTimeOfDay} style={{ position: 'relative', width: '100%', padding: '16px 8px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'center', fontWeight: '900', fontSize: '16px' }}>
                 <span>{timeOfDay === 'Not Specified' ? 'N/S' : timeOfDay}</span>
-                <span style={{ position: 'absolute', top: '6px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(timeOfDayOpts, timeOfDay)}</span>
+                <span style={{ position: 'absolute', top: '4px', right: '8px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(timeOfDayOpts, timeOfDay)}</span>
               </button>
             </div>
             <div>
-              <button onClick={cycleFlightType} style={{ position: 'relative', width: '100%', padding: '24px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'center', fontWeight: '900', fontSize: '20px' }}>
+              <button onClick={cycleFlightType} style={{ position: 'relative', width: '100%', padding: '16px 8px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'center', fontWeight: '900', fontSize: '16px' }}>
                 <span>{flightType === 'Not Specified' ? 'N/S' : flightType}</span>
-                <span style={{ position: 'absolute', top: '6px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(flightTypeOpts, flightType)}</span>
+                <span style={{ position: 'absolute', top: '4px', right: '8px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(flightTypeOpts, flightType)}</span>
               </button>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
             <div>
               <input 
                 type="text" 
@@ -418,8 +428,8 @@ export default function FlightRecorderModal() {
                 value={departure} 
                 onChange={e => setDeparture(e.target.value.toUpperCase())}
                 onBlur={e => handleAerodromeBlur('departure_aerodrome', e.target.value.toUpperCase())}
-                placeholder="🛫 Departure (e.g. LHBP)"
-                style={{ width: '100%', padding: '16px', fontSize: '18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', fontWeight: 'bold', textAlign: 'center' }}
+                placeholder="🛫 Dep (e.g. LHBP)"
+                style={{ width: '100%', padding: '12px', fontSize: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', fontWeight: 'bold', textAlign: 'center' }}
               />
             </div>
             <div>
@@ -429,8 +439,8 @@ export default function FlightRecorderModal() {
                 value={destination} 
                 onChange={e => setDestination(e.target.value.toUpperCase())}
                 onBlur={e => handleAerodromeBlur('destination_aerodrome', e.target.value.toUpperCase())}
-                placeholder="🛬 Destination (e.g. LHSM)"
-                style={{ width: '100%', padding: '16px', fontSize: '18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', fontWeight: 'bold', textAlign: 'center' }}
+                placeholder="🛬 Dest (e.g. LHSM)"
+                style={{ width: '100%', padding: '12px', fontSize: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', fontWeight: 'bold', textAlign: 'center' }}
               />
             </div>
             <datalist id="recent-aero">
@@ -439,25 +449,25 @@ export default function FlightRecorderModal() {
           </div>
 
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', justifyContent: 'center', background: 'var(--bg-elevated)', padding: '24px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center', background: 'var(--bg-elevated)', padding: '16px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
-                <button onClick={() => adjustTime(60)} style={{ width: '80px', padding: '12px', fontSize: '18px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+1h</button>
-                <span style={{ fontSize: '36px', fontWeight: '900' }}>{desiredTime.split(':')[0] || '01'}</span>
-                <button onClick={() => adjustTime(-60)} style={{ width: '80px', padding: '12px', fontSize: '18px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>-1h</button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+                <button onClick={() => adjustTime(60)} style={{ width: '60px', padding: '8px', fontSize: '14px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+1h</button>
+                <span style={{ fontSize: '28px', fontWeight: '900' }}>{desiredTime.split(':')[0] || '01'}</span>
+                <button onClick={() => adjustTime(-60)} style={{ width: '60px', padding: '8px', fontSize: '14px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>-1h</button>
               </div>
               
-              <span style={{ fontSize: '36px', fontWeight: '900' }}>:</span>
+              <span style={{ fontSize: '28px', fontWeight: '900' }}>:</span>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => adjustTime(5)} style={{ width: '60px', padding: '12px', fontSize: '16px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+5m</button>
-                  <button onClick={() => adjustTime(10)} style={{ width: '60px', padding: '12px', fontSize: '16px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+10m</button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button onClick={() => adjustTime(5)} style={{ width: '48px', padding: '8px', fontSize: '12px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+5m</button>
+                  <button onClick={() => adjustTime(10)} style={{ width: '48px', padding: '8px', fontSize: '12px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+10m</button>
                 </div>
-                <span style={{ fontSize: '36px', fontWeight: '900' }}>{desiredTime.split(':')[1] || '00'}</span>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => adjustTime(-5)} style={{ width: '60px', padding: '12px', fontSize: '16px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>-5m</button>
-                  <button onClick={() => adjustTime(-10)} style={{ width: '60px', padding: '12px', fontSize: '16px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>-10m</button>
+                <span style={{ fontSize: '28px', fontWeight: '900' }}>{desiredTime.split(':')[1] || '00'}</span>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button onClick={() => adjustTime(-5)} style={{ width: '48px', padding: '8px', fontSize: '12px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>-5m</button>
+                  <button onClick={() => adjustTime(-10)} style={{ width: '48px', padding: '8px', fontSize: '12px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>-10m</button>
                 </div>
               </div>
 
@@ -553,20 +563,8 @@ export default function FlightRecorderModal() {
                               <div key={ex.id} style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', height: '64px' }}>
                                   
-                                  {/* Left Arrow Toggle for Comments */}
-                                  <button 
-                                    onClick={() => setExpandedComments(prev => ({ ...prev, [ex.id]: !prev[ex.id] }))}
-                                    style={{ position: 'relative', width: '32px', height: '100%', background: 'none', border: 'none', color: exerciseComments[ex.id] ? 'var(--primary)' : 'var(--text-secondary)', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
-                                  >
-                                    {expandedComments[ex.id] ? '▼' : '▶'}
-                                    {/* Indicator dot if there's a comment but drawer is closed */}
-                                    {exerciseComments[ex.id] && !expandedComments[ex.id] && (
-                                      <span style={{ position: 'absolute', top: '24px', right: '0px', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)' }} />
-                                    )}
-                                  </button>
-
-                                  {/* Competency Title (25% width container) */}
-                                  <div style={{ width: '25%', height: '100%', display: 'flex', alignItems: 'center', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '8px', containerType: 'inline-size' }}>
+                                  {/* Competency Title (30% width container) */}
+                                  <div style={{ width: '30%', height: '100%', display: 'flex', alignItems: 'center', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '8px', containerType: 'inline-size' }}>
                                     <span style={{ fontSize: 'clamp(9px, 12cqw, 14px)', fontWeight: 600, lineHeight: 1.1, wordBreak: 'normal', color: 'var(--text-primary)', display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                       {ex.name}
                                     </span>
@@ -587,22 +585,6 @@ export default function FlightRecorderModal() {
                                     >+</button>
                                   </div>
                                 </div>
-
-                                {expandedComments[ex.id] && (
-                                  <div style={{ marginTop: '8px', animation: 'fadeIn 0.2s ease-in-out' }}>
-                                    <textarea 
-                                      placeholder="✏️ Write a comment for this specific competency..." 
-                                      value={exerciseComments[ex.id] || ''}
-                                      onChange={e => {
-                                        e.target.style.height = 'auto';
-                                        e.target.style.height = e.target.scrollHeight + 'px';
-                                        setExerciseComments(prev => ({ ...prev, [ex.id]: e.target.value }));
-                                      }}
-                                      onBlur={() => updateFlight({ exercise_comments: exerciseComments })}
-                                      style={{ width: '100%', padding: '16px', fontSize: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'rgba(0,0,0,0.3)', color: 'white', minHeight: '80px', overflow: 'hidden', resize: 'none' }}
-                                    />
-                                  </div>
-                                )}
                               </div>
                             ))}
                           </div>
@@ -612,23 +594,58 @@ export default function FlightRecorderModal() {
                   ) : (
                     <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>No exercises found for this task.</p>
                   )}
-
-                  <div style={{ marginTop: '24px' }}>
-                    <textarea 
-                      value={generalComment}
-                      onChange={e => {
-                        e.target.style.height = 'auto';
-                        e.target.style.height = e.target.scrollHeight + 'px';
-                        setGeneralComment(e.target.value);
-                      }}
-                      onBlur={() => updateFlight({ general_comment: generalComment })}
-                      placeholder="📝 General comment for this task..."
-                      style={{ width: '100%', minHeight: '120px', padding: '16px', fontSize: '18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', overflow: 'hidden', resize: 'none' }}
-                    />
-                  </div>
                 </div>
               )}
             </>
+          )}
+
+          {activeTab === 'comments' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <h3 style={{ fontSize: '16px', fontWeight: 600, borderBottom: '1px solid var(--border-default)', paddingBottom: '8px', marginBottom: '12px' }}>
+                  General Comment
+                </h3>
+                <textarea 
+                  value={generalComment}
+                  onChange={e => {
+                    e.target.style.height = 'auto';
+                    e.target.style.height = e.target.scrollHeight + 'px';
+                    setGeneralComment(e.target.value);
+                  }}
+                  onBlur={() => updateFlight({ general_comment: generalComment })}
+                  placeholder="📝 Write a general comment for this task..."
+                  style={{ width: '100%', minHeight: '100px', padding: '16px', fontSize: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', overflow: 'hidden', resize: 'none' }}
+                />
+              </div>
+
+              {taskExercises.length > 0 && (
+                <div>
+                  <h3 style={{ fontSize: '16px', fontWeight: 600, borderBottom: '1px solid var(--border-default)', paddingBottom: '8px', marginBottom: '12px' }}>
+                    Specific Competency Comments
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {taskExercises.map(ex => (
+                      <div key={ex.id} style={{ padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
+                          {ex.name}
+                        </div>
+                        <textarea 
+                          placeholder="✏️ Write a comment..." 
+                          value={exerciseComments[ex.id] || ''}
+                          onChange={e => {
+                            e.target.style.height = 'auto';
+                            e.target.style.height = e.target.scrollHeight + 'px';
+                            setExerciseComments(prev => ({ ...prev, [ex.id]: e.target.value }));
+                          }}
+                          onBlur={() => updateFlight({ exercise_comments: exerciseComments })}
+                          style={{ width: '100%', padding: '12px', fontSize: '14px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', color: 'white', minHeight: '60px', overflow: 'hidden', resize: 'none' }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

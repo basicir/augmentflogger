@@ -31,7 +31,7 @@ export default function FlightRecorderGlobal() {
     setIsDragging(false)
     
     if (info.point.x < 150) {
-      if (window.confirm('Are you sure you want to stop and delete this flight recording?')) {
+      if (window.confirm('Are you sure you want to stop this flight recording?')) {
         stopFlight()
       }
       setShowTrash(false)
