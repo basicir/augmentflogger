@@ -13,22 +13,16 @@ export async function GET(request: Request) {
   if (!apiKey) return NextResponse.json({ error: 'No API key' }, { status: 400 })
 
   const query = `
-    query {
-      trainings(first: 200, all: true, status: [NOT_FLOWN]) {
-        nodes {
-          id
-          status
-          lecture { id name }
-          userCategories {
-            id
+    query UserLecture_fetchExistingUserLecture($userLectureId: String!) {
+      userLecture(id: $userLectureId) {
+        id
+        title
+        categories {
+          name
+          exercises {
             name
-            exercises {
-              id
-              name
-              gradedCompetencies {
-                id
-                coreCompetencyName
-              }
+            gradedCompetencies {
+              coreCompetencyId
             }
           }
         }
@@ -39,39 +33,17 @@ export async function GET(request: Request) {
   const res = await fetch(FLIGHTLOGGER_GRAPHQL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-    body: JSON.stringify({ query }),
+    body: JSON.stringify({ 
+      query: query,
+      variables: { userLectureId: "8439502" } // The ID from the user's dump
+    }),
     cache: 'no-store',
   })
 
   const rawData = await res.json()
-  
-  // Find a training that actually has gradedCompetencies
-  let exampleTraining = null;
-  if (rawData.data?.trainings?.nodes) {
-    for (const t of rawData.data.trainings.nodes) {
-      if (t.userCategories && t.userCategories.length > 0) {
-        let hasCompetencies = false;
-        for (const cat of t.userCategories) {
-          if (cat.exercises) {
-            for (const ex of cat.exercises) {
-              if (ex.gradedCompetencies && ex.gradedCompetencies.length > 0) {
-                hasCompetencies = true;
-                break;
-              }
-            }
-          }
-          if (hasCompetencies) break;
-        }
-        if (hasCompetencies) {
-          exampleTraining = t;
-          break;
-        }
-      }
-    }
-  }
 
   return NextResponse.json({ 
-    foundTraining: exampleTraining || 'No training with CBTA competencies found in the first 200 trainings. Try increasing the limit or checking if your program uses CBTA.', 
+    foundTraining: 'Testing internal query', 
     rawData 
   })
 }
