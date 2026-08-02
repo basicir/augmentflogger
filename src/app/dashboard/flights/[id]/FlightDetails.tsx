@@ -112,7 +112,7 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
         {/* EDIT HEADER */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <h3 style={{ fontSize: '13px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0, fontWeight: 700 }}>
-            {activeTab === 'flight-parameters' ? 'CALL SIGN' : (activeTab === 'task-parameters' ? 'GRADING DETAILS' : 'COMMENTS')}
+            {activeTab === 'flight-parameters' ? '' : (activeTab === 'task-parameters' ? 'GRADING DETAILS' : 'COMMENTS')}
           </h3>
           {!isEditing ? (
             <div style={{ display: 'flex', gap: '8px' }}>
