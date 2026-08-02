@@ -14,7 +14,7 @@ export async function GET(request: Request) {
 
   const query = `
     query {
-      trainings(first: 20, all: true) {
+      trainings(first: 200, all: true, status: [NOT_FLOWN]) {
         nodes {
           id
           status
