@@ -1,0 +1,36 @@
+async function run() {
+    const q = `
+  query {
+    __schema {
+      types {
+        name
+        fields {
+          name
+        }
+      }
+    }
+  }
+`;
+    const res = await fetch('https://api.flightlogger.net/graphql', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer 7f695d9df5bded7e30aca3188f08705b`
+        },
+        body: JSON.stringify({ query: q })
+    });
+    
+    const data = await res.json();
+    
+    const typesWithDescription = data.data.__schema.types.filter(t => 
+        t.name && !t.name.startsWith('__') && 
+        t.fields && 
+        t.fields.some(f => f.name === 'description')
+    );
+    
+    const result = typesWithDescription.map(t => t.name);
+    
+    console.log("Types with 'description' field:");
+    console.log(JSON.stringify(result, null, 2));
+}
+run();

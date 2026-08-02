@@ -35,7 +35,7 @@ export default function FlightRecorderModal() {
     phases: PhaseData[];
   }
 
-  const [activeTab, setActiveTab] = useState<'flight-parameters' | 'task-parameters' | 'task-description'>('flight-parameters')
+  const [activeTab, setActiveTab] = useState<'flight-parameters' | 'task-parameters'>('flight-parameters')
   const [programs, setPrograms] = useState<ProgramData[]>([])
   const [selectedProgram, setSelectedProgram] = useState('')
   const [selectedTask, setSelectedTask] = useState('')
@@ -301,16 +301,6 @@ export default function FlightRecorderModal() {
           >
             Task Parameters
           </button>
-          <button
-            onClick={() => setActiveTab('task-description')}
-            style={{
-              flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'task-description' ? 'var(--primary)' : 'var(--text-secondary)',
-              borderBottom: activeTab === 'task-description' ? '2px solid var(--primary)' : '2px solid transparent',
-              fontWeight: activeTab === 'task-description' ? 600 : 500, cursor: 'pointer'
-            }}
-          >
-            Task Description
-          </button>
         </div>
 
         <div style={{ padding: '24px', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -405,18 +395,6 @@ export default function FlightRecorderModal() {
             />
               </div>
             </>
-          )}
-
-          {activeTab === 'task-description' && (
-            <div style={{ padding: '16px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', color: 'white', lineHeight: '1.6' }}>
-              {loadingTaskDetails ? (
-                <p style={{ color: 'var(--text-secondary)' }}>Loading task details...</p>
-              ) : taskDescription ? (
-                <div dangerouslySetInnerHTML={{ __html: taskDescription }} />
-              ) : (
-                <p style={{ color: 'var(--text-secondary)' }}>No description available for this task. Please select a task first.</p>
-              )}
-            </div>
           )}
 
           {activeTab === 'task-parameters' && (
