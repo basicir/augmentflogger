@@ -12,6 +12,7 @@ export default function DashboardPage() {
   const [pinnedStudents, setPinnedStudents] = useState<PinnedStudent[]>([])
   const [hasApiKey, setHasApiKey] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [isGroupingEnabled, setIsGroupingEnabled] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>('__ALL__')
   const [creatingGroup, setCreatingGroup] = useState(false)
@@ -214,16 +215,26 @@ export default function DashboardPage() {
                   : 'Pin students to monitor and organize them in groups'}
               </p>
             </div>
-            <button
-              className="btn btn-primary"
-              style={{ width: 'auto' }}
-              onClick={() => setShowSearch(true)}
-              disabled={!hasApiKey}
-              id="open-search-btn"
-              title={!hasApiKey ? 'Add your FlightLogger API key in Settings first' : 'Search for a student'}
-            >
-              <span>+</span> Pin Student
-            </button>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                className={`btn ${isGroupingEnabled ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ width: 'auto' }}
+                onClick={() => setIsGroupingEnabled(!isGroupingEnabled)}
+                title="Toggle student grouping mode"
+              >
+                <span>📁</span> {isGroupingEnabled ? 'Done Grouping' : 'Group Students'}
+              </button>
+              <button
+                className="btn btn-primary"
+                style={{ width: 'auto' }}
+                onClick={() => setShowSearch(true)}
+                disabled={!hasApiKey}
+                id="open-search-btn"
+                title={!hasApiKey ? 'Add your FlightLogger API key in Settings first' : 'Search for a student'}
+              >
+                <span>+</span> Pin Student
+              </button>
+            </div>
           </div>
 
           {/* Group Filter Tabs Bar */}
@@ -368,6 +379,7 @@ export default function DashboardPage() {
                             key={student.id}
                             student={student}
                             availableGroups={availableGroups}
+                            isGroupingEnabled={isGroupingEnabled}
                             onUnpin={handleUnpin}
                             onUpdateGroup={handleUpdateGroup}
                           />

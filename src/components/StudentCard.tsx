@@ -18,6 +18,7 @@ interface StudentCardProps {
   availableGroups: string[]
   onUnpin: (id: string) => void
   onUpdateGroup: (id: string, group: string | null) => void
+  isGroupingEnabled?: boolean
 }
 
 export default function StudentCard({
@@ -25,6 +26,7 @@ export default function StudentCard({
   availableGroups,
   onUnpin,
   onUpdateGroup,
+  isGroupingEnabled = false,
 }: StudentCardProps) {
   const [editingGroup, setEditingGroup] = useState(false)
   const [newGroupInput, setNewGroupInput] = useState('')
@@ -153,50 +155,45 @@ export default function StudentCard({
       </div>
 
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 8, position: 'relative', zIndex: 10 }}>
-        {student.callSign && (
-          <div className="student-callsign">
-            <span>✦</span>
-            {student.callSign}
-          </div>
-        )}
-
         {/* Group Badge / Selector */}
-        {!editingGroup ? (
-          <div className="group-badge-wrapper">
-            <select
-              className={`student-group-badge ${student.group ? 'has-group' : 'no-group'}`}
-              value={student.group ?? '__NONE__'}
-              onChange={(e) => handleSelectGroup(e.target.value)}
-              title="Click to assign or change group"
-            >
-              <option value="__NONE__">🏷️ No Group</option>
-              {availableGroups.map((g) => (
-                <option key={g} value={g}>
-                  📁 {g}
-                </option>
-              ))}
-              <option value="__NEW__">+ New Group…</option>
-            </select>
-          </div>
-        ) : (
-          <form onSubmit={handleSaveNewGroup} className="new-group-form">
-            <input
-              type="text"
-              className="new-group-input"
-              placeholder="Group name..."
-              value={newGroupInput}
-              onChange={(e) => setNewGroupInput(e.target.value)}
-              autoFocus
-            />
-            <button type="submit" className="btn-group-save">✓</button>
-            <button
-              type="button"
-              className="btn-group-cancel"
-              onClick={() => setEditingGroup(false)}
-            >
-              ✕
-            </button>
-          </form>
+        {isGroupingEnabled && (
+          !editingGroup ? (
+            <div className="group-badge-wrapper">
+              <select
+                className={`student-group-badge ${student.group ? 'has-group' : 'no-group'}`}
+                value={student.group ?? '__NONE__'}
+                onChange={(e) => handleSelectGroup(e.target.value)}
+                title="Click to assign or change group"
+              >
+                <option value="__NONE__">🏷️ No Group</option>
+                {availableGroups.map((g) => (
+                  <option key={g} value={g}>
+                    📁 {g}
+                  </option>
+                ))}
+                <option value="__NEW__">+ New Group…</option>
+              </select>
+            </div>
+          ) : (
+            <form onSubmit={handleSaveNewGroup} className="new-group-form">
+              <input
+                type="text"
+                className="new-group-input"
+                placeholder="Group name..."
+                value={newGroupInput}
+                onChange={(e) => setNewGroupInput(e.target.value)}
+                autoFocus
+              />
+              <button type="submit" className="btn-group-save">✓</button>
+              <button
+                type="button"
+                className="btn-group-cancel"
+                onClick={() => setEditingGroup(false)}
+              >
+                ✕
+              </button>
+            </form>
+          )
         )}
       </div>
     </article>
