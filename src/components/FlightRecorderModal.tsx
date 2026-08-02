@@ -59,10 +59,10 @@ export default function FlightRecorderModal() {
   useEffect(() => {
     if (ongoingFlight) {
       setAircraft(ongoingFlight.aircraft_registration || '')
-      setPilotFunction(ongoingFlight.pilot_function || 'DUAL')
-      setFlightRules(ongoingFlight.flight_rules || 'VFR')
-      setTimeOfDay(ongoingFlight.time_of_day || 'DAY')
-      setFlightType(ongoingFlight.flight_type || 'LOCAL')
+      setPilotFunction(ongoingFlight.pilot_function || 'Not Specified')
+      setFlightRules(ongoingFlight.flight_rules || 'Not Specified')
+      setTimeOfDay(ongoingFlight.time_of_day || 'Not Specified')
+      setFlightType(ongoingFlight.flight_type || 'Not Specified')
       setDeparture(ongoingFlight.departure_aerodrome || '')
       setDestination(ongoingFlight.destination_aerodrome || '')
       setDesiredTime(ongoingFlight.desired_flight_time || '')
@@ -91,23 +91,31 @@ export default function FlightRecorderModal() {
     if (isModalOpen) fetchProfile()
   }, [isModalOpen, supabase])
 
+  const FALLBACK_AIRPORTS = ["EPKR","EPML","EPRZ","LBHC","LHBC","LHBP","LHBS","LHBY","LHDB","LHDC","LHDK","LHEM","LHER","LHHO","LHJK","LHKE","LHKK","LHKM","LHMC","LHMR","LHNK","LHNY","LHPK","LHPP","LHPR","LHSA","LHSK","LHSM","LHSN","LHTJ","LHTL","LHUD","LHZK","LRAR","LRBM","LROD","LRSM","LRSN","LRTR","LZKC","LZKZ","LZSL","LZTT","ZZZZ"]
+
   useEffect(() => {
     const fetchAirports = async () => {
       try {
         const res = await fetch('/api/flightlogger/airports')
         if (res.ok) {
           const data = await res.json()
-          if (data.airports) {
+          if (data.airports && data.airports.length > 0) {
             // Merge with current recentAerodromes to avoid duplicates
             setRecentAerodromes(prev => {
-              const combined = new Set([...prev, ...data.airports])
+              const combined = new Set([...prev, ...data.airports, ...FALLBACK_AIRPORTS])
               return Array.from(combined).sort()
             })
+            return
           }
         }
       } catch (e) {
         console.error('Failed to fetch past airports from FlightLogger', e)
       }
+      // Fallback
+      setRecentAerodromes(prev => {
+        const combined = new Set([...prev, ...FALLBACK_AIRPORTS])
+        return Array.from(combined).sort()
+      })
     }
     if (isModalOpen) {
       fetchAirports()
@@ -243,40 +251,55 @@ export default function FlightRecorderModal() {
 
   if (!isModalOpen || !ongoingFlight) return null
 
-  const handleSave = async () => {
-    await updateFlight({
-      aircraft_registration: aircraft,
-      pilot_function: pilotFunction,
-      flight_rules: flightRules,
-      time_of_day: timeOfDay,
-      flight_type: flightType,
-      departure_aerodrome: departure,
-      destination_aerodrome: destination,
-      desired_flight_time: desiredTime,
-      selected_program: selectedProgram,
-      selected_task: selectedTask,
-      grades,
-      exercise_comments: exerciseComments,
-      general_comment: generalComment,
-    })
+  const cyclePilotFunction = () => {
+    const opts = ['Not Specified', 'DUAL', 'PIC', 'SPIC', 'PICUS'];
+    const idx = opts.indexOf(pilotFunction);
+    const next = opts[(idx + 1) % opts.length];
+    setPilotFunction(next);
+    updateFlight({ pilot_function: next });
+  };
 
-    // Optionally save new aerodromes to profile
-    const newRecent = new Set([...recentAerodromes, departure, destination].filter(Boolean))
-    if (newRecent.size > recentAerodromes.length) {
-      const { data: { user } } = await supabase.auth.getUser()
+  const cycleFlightRules = () => {
+    const opts = ['Not Specified', 'VFR', 'IFR', 'SVFR'];
+    const idx = opts.indexOf(flightRules);
+    const next = opts[(idx + 1) % opts.length];
+    setFlightRules(next);
+    updateFlight({ flight_rules: next });
+  };
+
+  const cycleTimeOfDay = () => {
+    const opts = ['Not Specified', 'DAY', 'NIGHT'];
+    const idx = opts.indexOf(timeOfDay);
+    const next = opts[(idx + 1) % opts.length];
+    setTimeOfDay(next);
+    updateFlight({ time_of_day: next });
+  };
+
+  const cycleFlightType = () => {
+    const opts = ['Not Specified', 'LOCAL', 'CROSS_COUNTRY'];
+    const idx = opts.indexOf(flightType);
+    const next = opts[(idx + 1) % opts.length];
+    setFlightType(next);
+    updateFlight({ flight_type: next });
+  };
+
+  const handleAerodromeBlur = async (field: 'departure_aerodrome' | 'destination_aerodrome', value: string) => {
+    updateFlight({ [field]: value });
+    if (value && !recentAerodromes.includes(value)) {
+      const newRecent = [...recentAerodromes, value].sort();
+      setRecentAerodromes(newRecent);
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await supabase.from('profiles').update({ recent_aerodromes: Array.from(newRecent) }).eq('id', user.id)
+        await supabase.from('profiles').update({ recent_aerodromes: newRecent }).eq('id', user.id);
       }
     }
-    setIsModalOpen(false)
-  }
+  };
 
   return (
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setIsModalOpen(false) }}>
       <div className="modal-box" style={{ maxWidth: '600px', width: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
         <div className="modal-header">
           <h2 className="modal-title">Flight Recorder - {ongoingFlight.student_name}</h2>
-          <button className="modal-close" onClick={() => setIsModalOpen(false)}>✕</button>
         </div>
 
         {/* Tabs */}
@@ -310,7 +333,10 @@ export default function FlightRecorderModal() {
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Aircraft Registration</label>
             <select 
               value={aircraft} 
-              onChange={e => setAircraft(e.target.value)}
+              onChange={e => {
+                setAircraft(e.target.value);
+                updateFlight({ aircraft_registration: e.target.value });
+              }}
               style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}
             >
               <option value="">Select Aircraft</option>
@@ -327,32 +353,19 @@ export default function FlightRecorderModal() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Pilot Function</label>
-              <select value={pilotFunction} onChange={e => setPilotFunction(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}>
-                <option value="SPIC">SPIC</option>
-                <option value="DUAL">DUAL</option>
-                <option value="SOLO">SOLO</option>
-              </select>
+              <button onClick={cyclePilotFunction} style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left' }}>{pilotFunction}</button>
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Flight Rules</label>
-              <select value={flightRules} onChange={e => setFlightRules(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}>
-                <option value="VFR">VFR</option>
-                <option value="IFR">IFR</option>
-              </select>
+              <button onClick={cycleFlightRules} style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left' }}>{flightRules}</button>
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Time of Day</label>
-              <select value={timeOfDay} onChange={e => setTimeOfDay(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}>
-                <option value="DAY">DAY</option>
-                <option value="NIGHT">NIGHT</option>
-              </select>
+              <button onClick={cycleTimeOfDay} style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left' }}>{timeOfDay}</button>
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Flight Type</label>
-              <select value={flightType} onChange={e => setFlightType(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}>
-                <option value="LOCAL">LOCAL</option>
-                <option value="X-COUNTRY">X-COUNTRY</option>
-              </select>
+              <button onClick={cycleFlightType} style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left' }}>{flightType}</button>
             </div>
           </div>
 
@@ -364,6 +377,7 @@ export default function FlightRecorderModal() {
                 list="recent-aero" 
                 value={departure} 
                 onChange={e => setDeparture(e.target.value.toUpperCase())}
+                onBlur={e => handleAerodromeBlur('departure_aerodrome', e.target.value.toUpperCase())}
                 placeholder="e.g. LHBP"
                 style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}
               />
@@ -375,6 +389,7 @@ export default function FlightRecorderModal() {
                 list="recent-aero" 
                 value={destination} 
                 onChange={e => setDestination(e.target.value.toUpperCase())}
+                onBlur={e => handleAerodromeBlur('destination_aerodrome', e.target.value.toUpperCase())}
                 placeholder="e.g. LHSM"
                 style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}
               />
@@ -390,6 +405,7 @@ export default function FlightRecorderModal() {
               type="text" 
               value={desiredTime} 
               onChange={e => setDesiredTime(e.target.value)}
+              onBlur={e => updateFlight({ desired_flight_time: e.target.value })}
               placeholder="01:30"
               style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}
             />
@@ -536,12 +552,6 @@ export default function FlightRecorderModal() {
           )}
           
           <div style={{ display: 'flex', gap: '12px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-default)' }}>
-            <button 
-              onClick={handleSave}
-              style={{ flex: 1, padding: '12px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: 'pointer' }}
-            >
-              Save Parameters
-            </button>
             <button 
               onClick={stopFlight}
               style={{ flex: 1, padding: '12px', background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: 'pointer' }}
