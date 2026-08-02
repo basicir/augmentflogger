@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import FlightList from '@/components/FlightList'
+import FlightList, { Flight } from '@/components/FlightList'
 
 export const metadata = {
   title: 'My Flights - AugmentFlogger',
@@ -65,7 +65,7 @@ export default async function FlightsPage() {
           <p>Start a flight from a student&apos;s profile page.</p>
         </div>
       ) : (
-        <FlightList flights={flights} utcOffsetHours={utcOffsetHours} />
+        <FlightList flights={flights as Flight[]} utcOffsetHours={utcOffsetHours} />
       )}
     </div>
   )

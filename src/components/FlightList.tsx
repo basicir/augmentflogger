@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-interface Flight {
+export interface Flight {
   id: string
   student_id: string
   student_name: string
