@@ -14,6 +14,15 @@ export default async function FlightsPage() {
     redirect('/login')
   }
 
+  // Fetch user profile for utc_offset
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('utc_offset')
+    .eq('id', user.id)
+    .single()
+    
+  const utcOffsetHours = profile?.utc_offset || 0
+
   // Fetch all completed flights for the logged in instructor
   const { data: flights, error } = await supabase
     .from('flights')
@@ -64,12 +73,18 @@ export default async function FlightsPage() {
             const hours = Math.floor(diffMins / 60)
             const mins = diffMins % 60
             
-            const monthShort = start.toLocaleString('en-US', { month: 'short' }).toUpperCase()
-            const day = start.getDate()
-            const year = start.getFullYear()
+            const startMs = start.getTime() + (utcOffsetHours * 60 * 60 * 1000)
+            const endMs = end.getTime() + (utcOffsetHours * 60 * 60 * 1000)
+            const localStart = new Date(startMs)
+            const localEnd = new Date(endMs)
             
-            const depTime = start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false})
-            const arrTime = end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false})
+            const monthShort = localStart.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' }).toUpperCase()
+            const day = localStart.getUTCDate()
+            const year = localStart.getUTCFullYear()
+            
+            const formatTime = (d: Date) => `${d.getUTCHours().toString().padStart(2, '0')}:${d.getUTCMinutes().toString().padStart(2, '0')}`
+            const depTime = formatTime(localStart)
+            const arrTime = formatTime(localEnd)
             
             const durationFormatted = `${hours}:${mins.toString().padStart(2, '0')}`
 
@@ -128,12 +143,9 @@ export default async function FlightsPage() {
                   </div>
 
                   {/* Arrival Side */}
-                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', width: '80px' }}>
-                    <div style={{ fontSize: '10px', color: '#94A3B8' }}>(UTC+00:00)</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginTop: 'auto', marginBottom: 'auto' }}>
-                       <div style={{ fontSize: '18px', fontWeight: 700, lineHeight: 1.2 }}>{arrTime}</div>
-                       <div style={{ fontSize: '12px', fontWeight: 500 }}>{flight.destination_aerodrome || 'N/A'}</div>
-                    </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', width: '60px' }}>
+                    <div style={{ fontSize: '18px', fontWeight: 700, lineHeight: 1.2 }}>{arrTime}</div>
+                    <div style={{ fontSize: '12px', fontWeight: 500 }}>{flight.destination_aerodrome || 'N/A'}</div>
                   </div>
                 </div>
                 </div>

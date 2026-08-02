@@ -9,6 +9,8 @@ export default function SettingsPage() {
   const [user, setUser] = useState<{ id: string; username: string } | null>(null)
   const [apiKey, setApiKey] = useState('')
   const [savedApiKey, setSavedApiKey] = useState('')
+  const [utcOffset, setUtcOffset] = useState<number>(0)
+  const [savedUtcOffset, setSavedUtcOffset] = useState<number>(0)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [testing, setTesting] = useState(false)
@@ -38,7 +40,7 @@ export default function SettingsPage() {
 
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('username, fl_api_key')
+        .select('username, fl_api_key, utc_offset')
         .eq('id', authUser.id)
         .maybeSingle()
 
@@ -50,6 +52,8 @@ export default function SettingsPage() {
       setUser({ id: authUser.id, username: currentUsername })
       setApiKey(profile?.fl_api_key ?? '')
       setSavedApiKey(profile?.fl_api_key ?? '')
+      setUtcOffset(profile?.utc_offset ?? 0)
+      setSavedUtcOffset(profile?.utc_offset ?? 0)
       setLoading(false)
     }
 
@@ -74,17 +78,19 @@ export default function SettingsPage() {
           id: user.id,
           username: user.username,
           fl_api_key: cleanKey,
+          utc_offset: utcOffset,
         },
         { onConflict: 'id' }
       )
 
     if (error) {
-      console.error('Error saving API key:', error)
+      console.error('Error saving settings:', error)
       setSaveStatus('error')
-      setSaveError(error.message || 'Failed to save API key.')
+      setSaveError(error.message || 'Failed to save settings.')
     } else {
       setSavedApiKey(cleanKey ?? '')
       setApiKey(cleanKey ?? '')
+      setSavedUtcOffset(utcOffset)
       setSaveStatus('success')
       setTimeout(() => setSaveStatus('idle'), 4000)
     }
@@ -143,7 +149,7 @@ export default function SettingsPage() {
     setSaving(false)
   }
 
-  const hasChanges = apiKey.trim() !== savedApiKey
+    const hasChanges = apiKey.trim() !== savedApiKey || utcOffset !== savedUtcOffset
 
   if (loading) {
     return (
@@ -241,22 +247,47 @@ export default function SettingsPage() {
                 )}
               </div>
 
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <div className="form-group" style={{ marginTop: 24 }}>
+                <label htmlFor="utc-offset-input" className="form-label">UTC Offset</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <select
+                    id="utc-offset-input"
+                    className="form-input"
+                    value={utcOffset}
+                    onChange={(e) => setUtcOffset(Number(e.target.value))}
+                    style={{ width: '200px' }}
+                  >
+                    {[...Array(27)].map((_, i) => {
+                      const offset = i - 12;
+                      return (
+                        <option key={offset} value={offset}>
+                          UTC {offset >= 0 ? `+${offset}` : offset}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <p className="form-hint" style={{ margin: 0 }}>
+                    Select your timezone offset for displaying flight times.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 32 }}>
                 <button
                   type="submit"
                   className="btn btn-primary"
                   style={{ width: 'auto' }}
                   disabled={saving || !hasChanges}
-                  id="save-api-key-btn"
+                  id="save-settings-btn"
                 >
                   {saving ? (
                     <><span className="spinner spinner-sm" /> Saving…</>
-                  ) : 'Save API Key'}
+                  ) : 'Save Settings'}
                 </button>
 
                 {saveStatus === 'success' && (
                   <span style={{ color: 'var(--accent-success)', fontSize: '0.875rem', fontWeight: 600 }}>
-                    ✓ API Key Saved Successfully!
+                    ✓ Settings Saved Successfully!
                   </span>
                 )}
                 {saveStatus === 'error' && (
