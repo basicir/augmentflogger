@@ -101,37 +101,47 @@ export default function StudentCard({
       
       <button
         className="student-card-unpin"
-        onClick={() => onUnpin(student.id)}
+        onClick={(e) => { e.preventDefault(); onUnpin(student.id); }}
         aria-label={`Unpin ${fullName}`}
         title="Unpin student"
-        style={{ position: 'relative', zIndex: 10 }}
+        style={{ zIndex: 10 }}
       >
         ✕
       </button>
 
-      {student.avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={student.avatarUrl}
-          alt={`Photo of ${fullName}`}
-          className="student-avatar"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement
-            target.style.display = 'none'
-            const placeholder = target.nextElementSibling as HTMLElement
-            if (placeholder) placeholder.style.display = 'flex'
-          }}
-        />
-      ) : null}
-      <div
-        className="student-avatar-placeholder"
-        style={{ display: student.avatarUrl ? 'none' : 'flex' }}
-        aria-hidden="true"
-      >
-        {initials}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
+        {student.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={student.avatarUrl}
+            alt={`Photo of ${fullName}`}
+            className="student-avatar"
+            style={{ marginBottom: 0 }}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement
+              target.style.display = 'none'
+              const placeholder = target.nextElementSibling as HTMLElement
+              if (placeholder) placeholder.style.display = 'flex'
+            }}
+          />
+        ) : null}
+        <div
+          className="student-avatar-placeholder"
+          style={{ display: student.avatarUrl ? 'none' : 'flex', marginBottom: 0 }}
+          aria-hidden="true"
+        >
+          {initials}
+        </div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="student-name" style={{ marginBottom: student.callSign ? '2px' : '0' }}>{fullName}</div>
+          {student.callSign && (
+            <div style={{ color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 600 }}>
+              {student.callSign}
+            </div>
+          )}
+        </div>
       </div>
-
-      <div className="student-name">{fullName}</div>
 
       {/* Last Flown Parameter */}
       <div

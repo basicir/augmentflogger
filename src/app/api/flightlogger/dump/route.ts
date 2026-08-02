@@ -29,6 +29,10 @@ export async function GET(request: Request) {
             ... on Training {
               id
               name
+              status
+              comment
+              failedPerformance
+              lecture { id name }
               userCategories {
                 name
                 exercises { name grade comment }
