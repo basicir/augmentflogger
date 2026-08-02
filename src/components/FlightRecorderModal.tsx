@@ -537,31 +537,41 @@ export default function FlightRecorderModal() {
                           </h4>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             {exercises.map(ex => (
-                              <div key={ex.id} style={{ padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                                  <span style={{ fontSize: '18px', fontWeight: 600, flex: 1, lineHeight: 1.3 }}>{ex.name}</span>
+                              <div key={ex.id} style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <div style={{ display: 'flex', alignItems: 'stretch', gap: '8px', minHeight: '64px' }}>
                                   
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                    <button 
-                                      onClick={() => setExpandedComments(prev => ({ ...prev, [ex.id]: !prev[ex.id] }))}
-                                      style={{ width: '44px', height: '44px', borderRadius: 'var(--radius-md)', background: exerciseComments[ex.id] ? 'var(--primary)' : 'rgba(255,255,255,0.1)', border: 'none', color: exerciseComments[ex.id] ? 'black' : 'white', cursor: 'pointer', fontSize: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                    >
-                                      💬
-                                    </button>
+                                  {/* Left Arrow Toggle for Comments */}
+                                  <button 
+                                    onClick={() => setExpandedComments(prev => ({ ...prev, [ex.id]: !prev[ex.id] }))}
+                                    style={{ position: 'relative', width: '32px', background: 'none', border: 'none', color: exerciseComments[ex.id] ? 'var(--primary)' : 'var(--text-secondary)', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+                                  >
+                                    {expandedComments[ex.id] ? '▼' : '▶'}
+                                    {/* Indicator dot if there's a comment but drawer is closed */}
+                                    {exerciseComments[ex.id] && !expandedComments[ex.id] && (
+                                      <span style={{ position: 'absolute', top: '16px', right: '4px', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)' }} />
+                                    )}
+                                  </button>
 
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-elevated)', padding: '4px', borderRadius: 'var(--radius-full)', border: '1px solid var(--border-default)' }}>
-                                      <button 
-                                        onClick={() => handleGradeCycle(ex.id, 'down')}
-                                        style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', fontSize: '24px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                      >-</button>
-                                      <span style={{ fontWeight: 900, fontSize: '20px', width: '32px', textAlign: 'center', color: grades[ex.id] ? 'var(--primary)' : 'var(--text-secondary)' }}>
-                                        {grades[ex.id] || "-"}
-                                      </span>
-                                      <button 
-                                        onClick={() => handleGradeCycle(ex.id, 'up')}
-                                        style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', fontSize: '24px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                      >+</button>
-                                    </div>
+                                  {/* Competency Title (25% width container) */}
+                                  <div style={{ width: '25%', display: 'flex', alignItems: 'center', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '8px' }}>
+                                    <span style={{ fontSize: 'clamp(10px, 3.5vw, 15px)', fontWeight: 600, lineHeight: 1.1, wordBreak: 'break-word', color: 'var(--text-primary)' }}>
+                                      {ex.name}
+                                    </span>
+                                  </div>
+                                  
+                                  {/* Grade Buttons (Remaining space) */}
+                                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-elevated)', padding: '6px', borderRadius: 'var(--radius-full)', border: '1px solid var(--border-default)', margin: '2px 0 2px 8px' }}>
+                                    <button 
+                                      onClick={() => handleGradeCycle(ex.id, 'down')}
+                                      style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', fontSize: '28px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingBottom: '4px' }}
+                                    >-</button>
+                                    <span style={{ fontWeight: 900, fontSize: '22px', textAlign: 'center', color: grades[ex.id] ? 'var(--primary)' : 'var(--text-secondary)' }}>
+                                      {grades[ex.id] || "N/A"}
+                                    </span>
+                                    <button 
+                                      onClick={() => handleGradeCycle(ex.id, 'up')}
+                                      style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', fontSize: '28px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingBottom: '2px' }}
+                                    >+</button>
                                   </div>
                                 </div>
 
