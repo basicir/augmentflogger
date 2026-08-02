@@ -22,13 +22,21 @@ export default function FlightRecorderModal() {
 
   useEffect(() => {
     if (ongoingFlight) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAircraft(ongoingFlight.aircraft_registration || '')
+       
       setPilotFunction(ongoingFlight.pilot_function || 'DUAL')
+       
       setFlightRules(ongoingFlight.flight_rules || 'VFR')
+       
       setTimeOfDay(ongoingFlight.time_of_day || 'DAY')
+       
       setFlightType(ongoingFlight.flight_type || 'LOCAL')
+       
       setDeparture(ongoingFlight.departure_aerodrome || '')
+       
       setDestination(ongoingFlight.destination_aerodrome || '')
+       
       setDesiredTime(ongoingFlight.desired_flight_time || '')
     }
   }, [ongoingFlight])

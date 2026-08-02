@@ -110,8 +110,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: errorMsg }, { status: 400 })
     }
 
-    const rawUsers = flData.data?.users?.nodes ?? []
-    const users = rawUsers.map((u: any) => {
+    interface FlightLoggerUser {
+      id: string;
+      firstName: string;
+      lastName: string;
+      callSign: string | null;
+      avatarUrl: string | null;
+      firstFlights: { nodes: { primaryLog: { startsAt: string } | null }[] };
+      lastFlights: { nodes: { primaryLog: { startsAt: string } | null }[] };
+    }
+
+    const users = flData.data.users.nodes.map((u: FlightLoggerUser) => {
       const d1 = u.firstFlights?.nodes?.[0]?.primaryLog?.startsAt || null
       const d2 = u.lastFlights?.nodes?.[0]?.primaryLog?.startsAt || null
       

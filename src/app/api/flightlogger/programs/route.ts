@@ -91,20 +91,44 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: flData.errors[0]?.message || 'GraphQL error' }, { status: 400 })
     }
 
+    // Define types for the GraphQL response to avoid 'any'
+    interface LectureData {
+      id: string;
+      name?: string;
+    }
+    interface TrainingData {
+      status: string;
+      lecture?: LectureData;
+    }
+    interface PhaseData {
+      name: string;
+      lectures?: LectureData[];
+    }
+    interface ProgramData {
+      name: string;
+      status: string;
+      programRevision?: {
+        programPhases?: PhaseData[];
+      };
+      trainings?: {
+        nodes: TrainingData[];
+      };
+    }
+
     // Format the response just like the script
-    const programs = (flData.data?.userPrograms?.nodes || []).map((up: any) => {
+    const programs = (flData.data?.userPrograms?.nodes || []).map((up: ProgramData) => {
       const completedLectures: Record<string, string> = {};
       if (up.trainings && up.trainings.nodes) {
-        up.trainings.nodes.forEach((t: any) => {
+        up.trainings.nodes.forEach((t: TrainingData) => {
           if (t.lecture) {
             completedLectures[t.lecture.id] = t.status;
           }
         });
       }
 
-      const phases = up.programRevision?.programPhases?.map((phase: any) => ({
+      const phases = up.programRevision?.programPhases?.map((phase: PhaseData) => ({
         phaseName: phase.name,
-        tasks: phase.lectures?.map((lecture: any) => ({
+        tasks: phase.lectures?.map((lecture: LectureData) => ({
           taskId: lecture.id,
           taskName: lecture.name,
           status: completedLectures[lecture.id] || "PENDING"
