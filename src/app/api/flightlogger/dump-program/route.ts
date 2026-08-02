@@ -33,16 +33,26 @@ export async function GET(request: Request) {
                   }
                 }
               }
-              userCategories {
-                id
-                name
-                exercises {
+              trainings(first: 5) {
+                nodes {
                   id
-                  name
-                  gradedCompetencies {
+                  status
+                  lecture {
                     id
-                    coreCompetencyName
                     name
+                  }
+                  userCategories {
+                    id
+                    name
+                    exercises {
+                      id
+                      name
+                      gradedCompetencies {
+                        id
+                        coreCompetencyName
+                        name
+                      }
+                    }
                   }
                 }
               }
