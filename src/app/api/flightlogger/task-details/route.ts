@@ -8,7 +8,7 @@ const GET_TRAINING_DETAILS_QUERY = `
     trainings(
       userIds: [$studentId], 
       programIds: [$programId], 
-      first: 1000, 
+      first: 200, 
       all: true
     ) {
       nodes {

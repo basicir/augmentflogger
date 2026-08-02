@@ -63,78 +63,103 @@ export default async function FlightsPage() {
             const diffMins = Math.round(diffMs / 60000)
             const hours = Math.floor(diffMins / 60)
             const mins = diffMins % 60
-            const duration = `${hours}h ${mins}m`
+            
+            const monthShort = start.toLocaleString('en-US', { month: 'short' }).toUpperCase()
+            const day = start.getDate()
+            const year = start.getFullYear()
+            
+            const depTime = start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false})
+            const arrTime = end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false})
+            
+            const durationFormatted = `${hours}:${mins.toString().padStart(2, '0')}`
 
             return (
-              <div 
+              <Link 
+                href={`/student/${flight.student_id}`}
                 key={flight.id} 
                 style={{ 
-                  background: 'var(--bg-glass)', 
-                  border: '1px solid var(--border-default)', 
-                  borderRadius: 'var(--radius-lg)', 
-                  padding: '24px',
+                  backgroundColor: '#182A45',
+                  color: '#ffffff',
+                  borderRadius: '6px',
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px'
+                  alignItems: 'center',
+                  padding: '16px',
+                  fontFamily: 'sans-serif',
+                  textDecoration: 'none',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
-                  <div>
-                    <h3 style={{ margin: '0 0 4px 0', fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Link href={`/student/${flight.student_id}`} style={{ color: 'var(--primary)', textDecoration: 'none' }}>
-                        {flight.student_name}
-                      </Link>
-                    </h3>
-                    <div style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-                      {start.toLocaleDateString()} • {start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                    </div>
-                  </div>
-                  
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                      {duration}
-                    </div>
-                    {flight.desired_flight_time && (
-                      <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                        Target: {flight.desired_flight_time}
-                      </div>
-                    )}
-                  </div>
+                {/* Left Date Section */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '70px', paddingRight: '20px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.05em' }}>{monthShort}</div>
+                  <div style={{ fontSize: '32px', fontWeight: 800, margin: '2px 0' }}>{day}</div>
+                  <div style={{ fontSize: '13px', color: '#94A3B8' }}>{year}</div>
                 </div>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-                  {flight.aircraft_registration && (
-                    <span style={{ background: 'var(--bg-elevated)', padding: '4px 12px', borderRadius: 'var(--radius-full)', fontSize: '13px', fontWeight: 500 }}>
-                      ✈️ {flight.aircraft_registration}
-                    </span>
-                  )}
-                  {flight.departure_aerodrome && flight.destination_aerodrome && (
-                    <span style={{ background: 'var(--bg-elevated)', padding: '4px 12px', borderRadius: 'var(--radius-full)', fontSize: '13px', fontWeight: 500 }}>
-                      📍 {flight.departure_aerodrome} → {flight.destination_aerodrome}
-                    </span>
-                  )}
-                  {flight.pilot_function && (
-                    <span style={{ background: 'rgba(59, 130, 246, 0.1)', color: 'var(--primary)', padding: '4px 12px', borderRadius: 'var(--radius-full)', fontSize: '13px', fontWeight: 600 }}>
-                      {flight.pilot_function}
-                    </span>
-                  )}
-                  {flight.flight_rules && (
-                    <span style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'rgb(16, 185, 129)', padding: '4px 12px', borderRadius: 'var(--radius-full)', fontSize: '13px', fontWeight: 600 }}>
-                      {flight.flight_rules}
-                    </span>
-                  )}
-                  {flight.time_of_day && (
-                    <span style={{ background: 'rgba(245, 158, 11, 0.1)', color: 'rgb(245, 158, 11)', padding: '4px 12px', borderRadius: 'var(--radius-full)', fontSize: '13px', fontWeight: 600 }}>
-                      {flight.time_of_day}
-                    </span>
-                  )}
-                  {flight.flight_type && (
-                    <span style={{ background: 'rgba(139, 92, 246, 0.1)', color: 'rgb(139, 92, 246)', padding: '4px 12px', borderRadius: 'var(--radius-full)', fontSize: '13px', fontWeight: 600 }}>
-                      {flight.flight_type}
-                    </span>
-                  )}
+                {/* Vertical Divider */}
+                <div style={{ width: '1px', backgroundColor: '#334155', height: '70px', marginRight: '24px' }}></div>
+
+                {/* Main Content */}
+                <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'stretch' }}>
+                  
+                  {/* Departure Side */}
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '80px' }}>
+                    <div style={{ fontSize: '26px', fontWeight: 700, lineHeight: 1.2 }}>{depTime}</div>
+                    <div style={{ fontSize: '16px', fontWeight: 500 }}>{flight.departure_aerodrome || 'N/A'}</div>
+                  </div>
+
+                  {/* Center Flight Info */}
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 24px', justifyContent: 'center' }}>
+                    <div style={{ fontSize: '13px', marginBottom: '8px', color: '#E2E8F0' }}>
+                      {flight.aircraft_registration || 'Unknown'} {flight.aircraft_type ? `(${flight.aircraft_type})` : ''}
+                    </div>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '12px' }}>
+                      <div style={{ flex: 1, height: '1px', backgroundColor: '#475569' }}></div>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '-4px' }}>
+                        <span style={{ fontSize: '18px', transform: 'rotate(45deg)', display: 'inline-block' }}>✈️</span>
+                        <span style={{ fontSize: '12px', fontWeight: 700, marginTop: '2px' }}>{durationFormatted}</span>
+                      </div>
+                      <div style={{ flex: 1, height: '1px', backgroundColor: '#475569' }}></div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '6px', marginTop: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                      {flight.pilot_function && (
+                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 700 }}>
+                          {flight.pilot_function}
+                        </span>
+                      )}
+                      {flight.flight_rules && (
+                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 700 }}>
+                          {flight.flight_rules}
+                        </span>
+                      )}
+                      {flight.time_of_day && (
+                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 700 }}>
+                          {flight.time_of_day === 'Day' ? '☀️' : (flight.time_of_day === 'Night' ? '🌙' : flight.time_of_day)}
+                        </span>
+                      )}
+                      {flight.flight_type && (
+                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 700 }}>
+                          {flight.flight_type}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Arrival Side */}
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', width: '100px' }}>
+                    <div style={{ fontSize: '12px', color: '#94A3B8' }}>(UTC+00:00)</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginTop: 'auto', marginBottom: 'auto' }}>
+                       <div style={{ fontSize: '26px', fontWeight: 700, lineHeight: 1.2 }}>{arrTime}</div>
+                       <div style={{ fontSize: '16px', fontWeight: 500 }}>{flight.destination_aerodrome || 'N/A'}</div>
+                    </div>
+                    <div style={{ fontSize: '13px', color: '#E2E8F0', marginTop: 'auto' }}>
+                      {flight.organization || 'TRENER'}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </Link>
             )
           })}
         </div>

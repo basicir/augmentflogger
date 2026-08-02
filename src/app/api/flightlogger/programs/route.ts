@@ -23,7 +23,7 @@ const GET_STUDENT_PROGRAMS_QUERY = `
             }
           }
         }
-        trainings(first: 1000, all: true) {
+        trainings(first: 100, all: true) {
           nodes {
             status
             lecture {

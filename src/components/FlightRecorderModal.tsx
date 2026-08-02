@@ -211,8 +211,6 @@ export default function FlightRecorderModal() {
     if (!prog?.programId) return
 
     const fetchTaskDetails = async () => {
-      setTaskExercises([])
-      setTaskDescription('')
       setLoadingTaskDetails(true)
       try {
         const url = `/api/flightlogger/task-details?studentId=${ongoingFlight.student_id}&programId=${prog.programId}&lectureId=${selectedTask}`
