@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useFlightRecorder } from '@/components/FlightRecorderContext'
 
@@ -64,6 +64,31 @@ interface StudentDetailClientProps {
 export default function StudentDetailClient({ student, lastFlight }: StudentDetailClientProps) {
   const [activeTab, setActiveTab] = useState<'last-flight' | 'logbook' | 'statistics'>('last-flight')
   const { startFlight, ongoingFlight } = useFlightRecorder()
+
+  useEffect(() => {
+    // Automatically fetch and log the active programs and tasks for this student
+    const fetchPrograms = async () => {
+      try {
+        const res = await fetch('/api/flightlogger/programs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentId: student.id })
+        })
+        if (res.ok) {
+          const data = await res.json()
+          console.group(`%c✈️ FlightLogger Programs for ${student.firstName} ${student.lastName}`, 'color: #3b82f6; font-size: 14px; font-weight: bold;')
+          console.log(JSON.stringify(data.programs, null, 2))
+          console.groupEnd()
+        }
+      } catch (err) {
+        console.error('Failed to fetch programs:', err)
+      }
+    }
+
+    if (student.id) {
+      fetchPrograms()
+    }
+  }, [student.id, student.firstName, student.lastName])
 
   const fullName = `${student.firstName} ${student.lastName}`
   const initials = `${student.firstName[0] ?? ''}${student.lastName[0] ?? ''}`.toUpperCase()
