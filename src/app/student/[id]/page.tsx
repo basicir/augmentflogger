@@ -5,7 +5,7 @@ import StudentDetailClient from './StudentDetailClient'
 const FLIGHTLOGGER_GRAPHQL = 'https://api.flightlogger.net/graphql'
 
 const GET_STUDENT_QUERY = `
-  query GetStudentDetails($id: ID!) {
+  query GetStudentDetails($id: String!) {
     user(id: $id) {
       id
       firstName
@@ -111,8 +111,7 @@ export default async function StudentPage({ params }: { params: Promise<{ id: st
     },
     body: JSON.stringify({
       query: GET_STUDENT_QUERY,
-      // FlightLogger expects integer IDs — coerce the string param
-      variables: { id: parseInt(id, 10) || id },
+      variables: { id },
     }),
     cache: 'no-store'
   })
