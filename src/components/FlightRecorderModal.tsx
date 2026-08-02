@@ -35,7 +35,7 @@ export default function FlightRecorderModal() {
     phases: PhaseData[];
   }
 
-  const [activeTab, setActiveTab] = useState<'flight-parameters' | 'task-parameters'>('flight-parameters')
+  const [activeTab, setActiveTab] = useState<'flight-parameters' | 'task-parameters' | 'task-description'>('flight-parameters')
   const [programs, setPrograms] = useState<ProgramData[]>([])
   const [selectedProgram, setSelectedProgram] = useState('')
   const [selectedTask, setSelectedTask] = useState('')
@@ -48,6 +48,7 @@ export default function FlightRecorderModal() {
     grade?: string;
   }
   const [taskExercises, setTaskExercises] = useState<Exercise[]>([])
+  const [taskDescription, setTaskDescription] = useState('')
   const [grades, setGrades] = useState<Record<string, string>>({})
   const [exerciseComments, setExerciseComments] = useState<Record<string, string>>({})
   const [loadingTaskDetails, setLoadingTaskDetails] = useState(false)
@@ -70,6 +71,7 @@ export default function FlightRecorderModal() {
       if (ongoingFlight.selected_task && !selectedTask) setSelectedTask(ongoingFlight.selected_task)
       if (ongoingFlight.programs_cache && programs.length === 0) setPrograms(ongoingFlight.programs_cache)
       if (ongoingFlight.task_exercises_cache && taskExercises.length === 0) setTaskExercises(ongoingFlight.task_exercises_cache)
+      if (ongoingFlight.task_description_cache && !taskDescription) setTaskDescription(ongoingFlight.task_description_cache)
       if (ongoingFlight.grades && Object.keys(grades).length === 0) setGrades(ongoingFlight.grades)
       if (ongoingFlight.exercise_comments && Object.keys(exerciseComments).length === 0) setExerciseComments(ongoingFlight.exercise_comments)
       if (ongoingFlight.general_comment && !generalComment) setGeneralComment(ongoingFlight.general_comment)
@@ -187,6 +189,7 @@ export default function FlightRecorderModal() {
     // Use cache if this is the currently cached task
     if (ongoingFlight.task_exercises_cache && ongoingFlight.selected_task === selectedTask) {
       setTaskExercises(ongoingFlight.task_exercises_cache);
+      if (ongoingFlight.task_description_cache) setTaskDescription(ongoingFlight.task_description_cache);
       return;
     }
 
@@ -201,7 +204,9 @@ export default function FlightRecorderModal() {
         if (res.ok) {
           const data = await res.json()
           const exes = data.exercises || []
+          const desc = data.description || ''
           setTaskExercises(exes)
+          setTaskDescription(desc)
           
           // Pre-fill existing grades if any (though typically empty for NOT_FLOWN)
           const newGrades = { ...grades }
@@ -221,6 +226,7 @@ export default function FlightRecorderModal() {
           // Save to supabase immediately
           updateFlight({ 
             task_exercises_cache: exes, 
+            task_description_cache: desc,
             selected_task: selectedTask, 
             selected_program: selectedProgram,
             grades: hasChanges ? newGrades : undefined
@@ -294,6 +300,16 @@ export default function FlightRecorderModal() {
             }}
           >
             Task Parameters
+          </button>
+          <button
+            onClick={() => setActiveTab('task-description')}
+            style={{
+              flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'task-description' ? 'var(--primary)' : 'var(--text-secondary)',
+              borderBottom: activeTab === 'task-description' ? '2px solid var(--primary)' : '2px solid transparent',
+              fontWeight: activeTab === 'task-description' ? 600 : 500, cursor: 'pointer'
+            }}
+          >
+            Task Description
           </button>
         </div>
 
@@ -389,6 +405,18 @@ export default function FlightRecorderModal() {
             />
               </div>
             </>
+          )}
+
+          {activeTab === 'task-description' && (
+            <div style={{ padding: '16px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', color: 'white', lineHeight: '1.6' }}>
+              {loadingTaskDetails ? (
+                <p style={{ color: 'var(--text-secondary)' }}>Loading task details...</p>
+              ) : taskDescription ? (
+                <div dangerouslySetInnerHTML={{ __html: taskDescription }} />
+              ) : (
+                <p style={{ color: 'var(--text-secondary)' }}>No description available for this task. Please select a task first.</p>
+              )}
+            </div>
           )}
 
           {activeTab === 'task-parameters' && (
@@ -497,7 +525,7 @@ export default function FlightRecorderModal() {
                                 <div style={{ marginTop: '8px' }}>
                                   <input 
                                     type="text" 
-                                    placeholder="Komment ehhez a kompetenciához..." 
+                                    placeholder="Comment for this competency..." 
                                     value={exerciseComments[ex.id] || ''}
                                     onChange={e => setExerciseComments(prev => ({ ...prev, [ex.id]: e.target.value }))}
                                     onBlur={() => updateFlight({ exercise_comments: exerciseComments })}

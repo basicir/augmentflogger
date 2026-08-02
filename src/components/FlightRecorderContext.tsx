@@ -21,6 +21,7 @@ export interface OngoingFlight {
   selected_task: string | null
   programs_cache: any | null
   task_exercises_cache: any | null
+  task_description_cache: string | null
   grades: Record<string, string> | null
   exercise_comments: Record<string, string> | null
   general_comment: string | null

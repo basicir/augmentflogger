@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS public.flights (
   selected_task TEXT,
   programs_cache JSONB,
   task_exercises_cache JSONB,
+  task_description_cache TEXT,
   grades JSONB,
   exercise_comments JSONB,
   general_comment TEXT,
