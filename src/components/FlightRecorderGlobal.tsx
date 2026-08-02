@@ -151,6 +151,7 @@ export default function FlightRecorderGlobal() {
           onDragStart={handleDragStart}
           onDrag={handleDrag}
           onDragEnd={handleDragEnd}
+          onClick={() => setIsModalOpen(true)}
           whileTap={{ scale: 0.95 }}
           style={{
             touchAction: 'none',
