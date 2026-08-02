@@ -35,7 +35,7 @@ export default function FlightRecorderModal() {
     phases: PhaseData[];
   }
 
-  const [activeTab, setActiveTab] = useState<'flight-parameters' | 'task-parameters'>('flight-parameters')
+  const [activeTab, setActiveTab] = useState<'flight-parameters' | 'task-parameters' | 'task-description'>('flight-parameters')
   const [programs, setPrograms] = useState<ProgramData[]>([])
   const [selectedProgram, setSelectedProgram] = useState('')
   const [selectedTask, setSelectedTask] = useState('')
@@ -49,7 +49,9 @@ export default function FlightRecorderModal() {
   }
   const [taskExercises, setTaskExercises] = useState<Exercise[]>([])
   const [grades, setGrades] = useState<Record<string, string>>({})
+  const [exerciseComments, setExerciseComments] = useState<Record<string, string>>({})
   const [loadingTaskDetails, setLoadingTaskDetails] = useState(false)
+  const [lectureDescription, setLectureDescription] = useState('')
   const [generalComment, setGeneralComment] = useState('')
   
   const supabase = createClient()
@@ -173,6 +175,7 @@ export default function FlightRecorderModal() {
   useEffect(() => {
     if (!selectedTask || !ongoingFlight?.student_id || !selectedProgram) {
       setTaskExercises([])
+      setLectureDescription('')
       return
     }
 
@@ -187,6 +190,7 @@ export default function FlightRecorderModal() {
         if (res.ok) {
           const data = await res.json()
           setTaskExercises(data.exercises || [])
+          setLectureDescription(data.lectureDescription || '')
           
           // Pre-fill existing grades if any (though typically empty for NOT_FLOWN)
           const newGrades = { ...grades }
@@ -195,8 +199,11 @@ export default function FlightRecorderModal() {
             data.exercises.forEach((ex: any) => {
               if (ex.grade) {
                 newGrades[ex.id] = ex.grade
-                hasChanges = true
+              } else {
+                // Default to S
+                newGrades[ex.id] = "S"
               }
+              hasChanges = true
             })
           }
           if (hasChanges) setGrades(newGrades)
@@ -264,6 +271,16 @@ export default function FlightRecorderModal() {
             }}
           >
             Task Parameters
+          </button>
+          <button
+            onClick={() => setActiveTab('task-description')}
+            style={{
+              flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'task-description' ? 'var(--primary)' : 'var(--text-secondary)',
+              borderBottom: activeTab === 'task-description' ? '2px solid var(--primary)' : '2px solid transparent',
+              fontWeight: activeTab === 'task-description' ? 600 : 500, cursor: 'pointer'
+            }}
+          >
+            Task Description
           </button>
         </div>
 
@@ -423,12 +440,12 @@ export default function FlightRecorderModal() {
                         grouped[ex.categoryName].push(ex)
                       })
 
-                      const gradeScale = ["", "1", "2", "3", "4", "5", "S", "U"]
+                      const gradeScale = ["", "BS", "S-", "S", "S+", "AS"]
                       const handleGradeCycle = (exId: string, direction: 'up' | 'down') => {
                         setGrades(prev => {
                           const currentGrade = prev[exId] || ""
                           let idx = gradeScale.indexOf(currentGrade)
-                          if (idx === -1) idx = 0
+                          if (idx === -1) idx = 3 // default to "S" index
                           
                           if (direction === 'up') {
                             idx = (idx + 1) % gradeScale.length
@@ -439,6 +456,7 @@ export default function FlightRecorderModal() {
                           return { ...prev, [exId]: gradeScale[idx] }
                         })
                       }
+
 
                       return Object.entries(grouped).map(([catName, exercises]) => (
                         <div key={catName} style={{ marginBottom: '16px' }}>
@@ -455,7 +473,7 @@ export default function FlightRecorderModal() {
                                       onClick={() => handleGradeCycle(ex.id, 'down')}
                                       style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                     >-</button>
-                                    <span style={{ fontWeight: 600, width: '24px', textAlign: 'center', color: grades[ex.id] ? 'var(--primary)' : 'var(--text-secondary)' }}>
+                                    <span style={{ fontWeight: 600, width: '30px', textAlign: 'center', color: grades[ex.id] ? 'var(--primary)' : 'var(--text-secondary)' }}>
                                       {grades[ex.id] || "-"}
                                     </span>
                                     <button 
@@ -464,6 +482,13 @@ export default function FlightRecorderModal() {
                                     >+</button>
                                   </div>
                                 </div>
+                                <input 
+                                  type="text" 
+                                  value={exerciseComments[ex.id] || ""}
+                                  onChange={e => setExerciseComments(prev => ({ ...prev, [ex.id]: e.target.value }))}
+                                  placeholder="Comment..."
+                                  style={{ width: '100%', padding: '6px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'rgba(0,0,0,0.2)', color: 'white', fontSize: '13px', marginTop: '10px' }} 
+                                />
                               </div>
                             ))}
                           </div>
@@ -486,6 +511,25 @@ export default function FlightRecorderModal() {
                 </div>
               )}
             </>
+          )}
+
+          {activeTab === 'task-description' && (
+            <div style={{ flex: 1 }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 600, borderBottom: '1px solid var(--border-default)', paddingBottom: '8px', marginBottom: '16px' }}>
+                Task Description
+              </h3>
+              {lectureDescription ? (
+                <div 
+                  className="prose prose-invert max-w-none" 
+                  style={{ fontSize: '14px', lineHeight: '1.6' }}
+                  dangerouslySetInnerHTML={{ __html: lectureDescription }} 
+                />
+              ) : (
+                <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+                  {loadingTaskDetails ? "Loading description..." : "No description available for this task."}
+                </p>
+              )}
+            </div>
           )}
           
           <div style={{ display: 'flex', gap: '12px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-default)' }}>

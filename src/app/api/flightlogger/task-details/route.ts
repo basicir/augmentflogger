@@ -17,6 +17,7 @@ const GET_TRAINING_DETAILS_QUERY = `
         lecture {
           id
           name
+          description
         }
         userCategories {
           id
@@ -122,6 +123,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       trainingId: matchingTraining.id,
       lectureName: matchingTraining.lecture.name,
+      lectureDescription: matchingTraining.lecture.description,
       exercises
     })
   } catch (err: any) {
