@@ -164,12 +164,17 @@ export default function FlightRecorderModal() {
           setPrograms(progs)
           updateFlight({ programs_cache: progs })
           
-          // Auto-select last used program from localStorage
-          const savedProg = localStorage.getItem(`lastProg_${ongoingFlight.student_id}`)
-          if (savedProg && progs.some((p: ProgramData) => p.programName === savedProg)) {
-            setSelectedProgram(savedProg)
-          } else if (progs.length > 0) {
-            setSelectedProgram(progs[0].programName)
+          // Check if flight already has a program selected
+          if (ongoingFlight.selected_program && progs.some((p: ProgramData) => p.programName === ongoingFlight.selected_program)) {
+            setSelectedProgram(ongoingFlight.selected_program)
+          } else {
+            // Auto-select last used program from localStorage
+            const savedProg = localStorage.getItem(`lastProg_${ongoingFlight.student_id}`)
+            if (savedProg && progs.some((p: ProgramData) => p.programName === savedProg)) {
+              setSelectedProgram(savedProg)
+            } else if (progs.length > 0) {
+              setSelectedProgram(progs[0].programName)
+            }
           }
         }
       } catch (e) {
@@ -332,12 +337,12 @@ export default function FlightRecorderModal() {
   return (
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setIsModalOpen(false) }}>
       <div className="modal-box" style={{ maxWidth: '600px', width: '100%', maxHeight: '85vh', marginBottom: '10vh', display: 'flex', flexDirection: 'column' }}>
-        <div className="modal-header">
+        <div className="modal-header" style={{ flexShrink: 0 }}>
           <h2 className="modal-title">Flight Recorder - {ongoingFlight.student_name}</h2>
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-default)', background: 'var(--bg-elevated)', overflowX: 'auto' }}>
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-default)', background: 'var(--bg-elevated)', overflowX: 'auto', flexShrink: 0 }}>
           <button
             onClick={() => setActiveTab('flight-parameters')}
             style={{
@@ -563,6 +568,18 @@ export default function FlightRecorderModal() {
                               <div key={ex.id} style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', height: '64px' }}>
                                   
+                                  {/* Left Arrow Toggle for Comments */}
+                                  <button 
+                                    onClick={() => setExpandedComments(prev => ({ ...prev, [ex.id]: !prev[ex.id] }))}
+                                    style={{ position: 'relative', width: '32px', height: '100%', background: 'none', border: 'none', color: exerciseComments[ex.id] ? 'var(--primary)' : 'var(--text-secondary)', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, flexShrink: 0 }}
+                                  >
+                                    {expandedComments[ex.id] ? '▼' : '▶'}
+                                    {/* Indicator dot if there's a comment but drawer is closed */}
+                                    {exerciseComments[ex.id] && !expandedComments[ex.id] && (
+                                      <span style={{ position: 'absolute', top: '24px', right: '0px', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)' }} />
+                                    )}
+                                  </button>
+
                                   {/* Competency Title (30% width container) */}
                                   <div style={{ width: '30%', height: '100%', display: 'flex', alignItems: 'center', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '8px', containerType: 'inline-size' }}>
                                     <span style={{ fontSize: 'clamp(9px, 12cqw, 14px)', fontWeight: 600, lineHeight: 1.1, wordBreak: 'normal', color: 'var(--text-primary)', display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
@@ -585,6 +602,21 @@ export default function FlightRecorderModal() {
                                     >+</button>
                                   </div>
                                 </div>
+                                {expandedComments[ex.id] && (
+                                  <div style={{ marginTop: '8px', animation: 'fadeIn 0.2s ease-in-out' }}>
+                                    <textarea 
+                                      placeholder="✏️ Write a comment for this specific competency..." 
+                                      value={exerciseComments[ex.id] || ''}
+                                      onChange={e => {
+                                        e.target.style.height = 'auto';
+                                        e.target.style.height = e.target.scrollHeight + 'px';
+                                        setExerciseComments(prev => ({ ...prev, [ex.id]: e.target.value }));
+                                      }}
+                                      onBlur={() => updateFlight({ exercise_comments: exerciseComments })}
+                                      style={{ width: '100%', padding: '16px', fontSize: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'rgba(0,0,0,0.3)', color: 'white', minHeight: '80px', overflow: 'hidden', resize: 'none' }}
+                                    />
+                                  </div>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -617,34 +649,6 @@ export default function FlightRecorderModal() {
                   style={{ width: '100%', minHeight: '100px', padding: '16px', fontSize: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', overflow: 'hidden', resize: 'none' }}
                 />
               </div>
-
-              {taskExercises.length > 0 && (
-                <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: 600, borderBottom: '1px solid var(--border-default)', paddingBottom: '8px', marginBottom: '12px' }}>
-                    Specific Competency Comments
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {taskExercises.map(ex => (
-                      <div key={ex.id} style={{ padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
-                        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
-                          {ex.name}
-                        </div>
-                        <textarea 
-                          placeholder="✏️ Write a comment..." 
-                          value={exerciseComments[ex.id] || ''}
-                          onChange={e => {
-                            e.target.style.height = 'auto';
-                            e.target.style.height = e.target.scrollHeight + 'px';
-                            setExerciseComments(prev => ({ ...prev, [ex.id]: e.target.value }));
-                          }}
-                          onBlur={() => updateFlight({ exercise_comments: exerciseComments })}
-                          style={{ width: '100%', padding: '12px', fontSize: '14px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', color: 'white', minHeight: '60px', overflow: 'hidden', resize: 'none' }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
