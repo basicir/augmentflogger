@@ -36,6 +36,11 @@ const GET_STUDENT_QUERY = `
                     grade
                   }
                 }
+                extraExercises {
+                  name
+                  grade
+                  comment
+                }
               }
             }
           }
@@ -67,6 +72,11 @@ const GET_STUDENT_QUERY = `
                     coreCompetencyName
                     grade
                   }
+                }
+                extraExercises {
+                  name
+                  grade
+                  comment
                 }
               }
             }

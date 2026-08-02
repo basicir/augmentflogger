@@ -18,7 +18,8 @@ interface Exercise {
 
 interface UserCategory {
   name: string | null
-  exercises: Exercise[]
+  exercises?: Exercise[]
+  extraExercises?: Exercise[]
 }
 
 interface Instructor {
@@ -232,50 +233,68 @@ export default function StudentDetailClient({ student, lastFlight }: StudentDeta
                     {training.userCategories.map((cat, i) => (
                       <div key={i} style={{ marginBottom: '16px' }}>
                         {cat.name && <h4 style={{ margin: '0 0 12px 0', color: 'var(--text-secondary)', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{cat.name}</h4>}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                          {cat.exercises.map((ex, j) => (
-                            <div key={j} style={{ 
-                              background: 'var(--bg-glass)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: '16px',
-                              display: 'flex', flexDirection: 'column', gap: '12px'
-                            }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-                                <div style={{ fontWeight: 600, fontSize: '16px' }}>{ex.name}</div>
-                                {ex.grade !== null && (
-                                  <div style={{ 
-                                    background: 'var(--gradient-primary)', color: 'white', padding: '4px 12px', borderRadius: 'var(--radius-full)',
-                                    fontWeight: 700, fontSize: '14px', minWidth: '32px', textAlign: 'center'
-                                  }}>
-                                    {ex.grade}
+                        
+                        {/* Exercises */}
+                        {cat.exercises && cat.exercises.length > 0 && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {cat.exercises.map((ex, j) => (
+                              <div key={j} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-default)', padding: '12px', borderRadius: 'var(--radius-md)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                                  <div style={{ fontWeight: 500, fontSize: '14px', color: 'var(--text-primary)' }}>{ex.name}</div>
+                                  {ex.grade !== null && <div style={{ fontWeight: 700, color: 'var(--primary)', background: 'rgba(59, 130, 246, 0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '13px' }}>{ex.grade}</div>}
+                                </div>
+                                
+                                {ex.comment && (
+                                  <div
+                                    style={{ color: 'var(--text-secondary)', fontSize: '13px', background: 'rgba(0,0,0,0.2)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', marginBottom: '8px' }}
+                                    dangerouslySetInnerHTML={{ __html: ex.comment }}
+                                  />
+                                )}
+
+                                {ex.gradedCompetencies && ex.gradedCompetencies.length > 0 && (
+                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
+                                    {ex.gradedCompetencies.map((comp, k) => (
+                                      <div key={k} style={{ display: 'flex', flexDirection: 'column', gap: '4px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-default)', padding: '6px 10px', borderRadius: 'var(--radius-sm)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                          <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{comp.coreCompetencyName}</span>
+                                          {comp.grade !== null && <span style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '13px' }}>{comp.grade}</span>}
+                                        </div>
+                                        {comp.comment && (
+                                          <div
+                                            style={{ color: 'var(--text-muted)', fontSize: '12px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '4px', marginTop: '2px' }}
+                                            dangerouslySetInnerHTML={{ __html: comp.comment }}
+                                          />
+                                        )}
+                                      </div>
+                                    ))}
                                   </div>
                                 )}
                               </div>
-                              {ex.comment && (
-                                <div
-                                  style={{ color: 'var(--text-secondary)', fontSize: '14px', background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: 'var(--radius-sm)' }}
-                                  dangerouslySetInnerHTML={{ __html: ex.comment }}
-                                />
-                              )}
-                              {ex.gradedCompetencies && ex.gradedCompetencies.length > 0 && (
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
-                                  {ex.gradedCompetencies.map((comp, k) => (
-                                    <div key={k} style={{ display: 'flex', flexDirection: 'column', gap: '4px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-default)', padding: '6px 10px', borderRadius: 'var(--radius-sm)' }}>
-                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                                        <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{comp.coreCompetencyName}</span>
-                                        {comp.grade !== null && <span style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '13px' }}>{comp.grade}</span>}
-                                      </div>
-                                      {comp.comment && (
-                                        <div
-                                          style={{ color: 'var(--text-muted)', fontSize: '12px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '4px', marginTop: '2px' }}
-                                          dangerouslySetInnerHTML={{ __html: comp.comment }}
-                                        />
-                                      )}
-                                    </div>
-                                  ))}
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Extra Exercises */}
+                        {cat.extraExercises && cat.extraExercises.length > 0 && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+                            <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Extra Exercises</div>
+                            {cat.extraExercises.map((ex, j) => (
+                              <div key={j} style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed var(--border-default)', padding: '12px', borderRadius: 'var(--radius-md)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: ex.comment ? '8px' : '0' }}>
+                                  <div style={{ fontWeight: 500, fontSize: '14px', color: 'var(--text-primary)' }}>{ex.name}</div>
+                                  {ex.grade !== null && <div style={{ fontWeight: 700, color: 'var(--primary)', background: 'rgba(59, 130, 246, 0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '13px' }}>{ex.grade}</div>}
                                 </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
+                                
+                                {ex.comment && (
+                                  <div
+                                    style={{ color: 'var(--text-secondary)', fontSize: '13px', background: 'rgba(0,0,0,0.2)', padding: '8px 12px', borderRadius: 'var(--radius-sm)' }}
+                                    dangerouslySetInnerHTML={{ __html: ex.comment }}
+                                  />
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
