@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 export interface Flight {
   id: string
@@ -33,6 +35,12 @@ export default function FlightList({ flights, utcOffsetHours }: { flights: Fligh
   const [activeTab, setActiveTab] = useState<'flight-parameters' | 'task-parameters' | 'comments'>('flight-parameters')
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({})
 
+  const [isEditing, setIsEditing] = useState(false)
+  const [editData, setEditData] = useState<Partial<Flight>>({})
+  const [isSaving, setIsSaving] = useState(false)
+  const router = useRouter()
+  const supabase = createClient()
+
   // Group flights by date
   const groupedFlights: Record<string, Flight[]> = {}
   flights.forEach(flight => {
@@ -53,9 +61,51 @@ export default function FlightList({ flights, utcOffsetHours }: { flights: Fligh
     e.preventDefault()
     setSelectedFlight(flight)
     setActiveTab('flight-parameters')
+    setIsEditing(false)
   }
 
   const formatTime = (d: Date) => `${d.getUTCHours().toString().padStart(2, '0')}:${d.getUTCMinutes().toString().padStart(2, '0')}`
+  const formatDate = (d: Date) => `${d.getUTCDate().toString().padStart(2, '0')}.${(d.getUTCMonth()+1).toString().padStart(2, '0')}.${d.getUTCFullYear()}`
+
+  // For edit mode <input type="time"> (HH:MM) and <input type="date"> (YYYY-MM-DD)
+  const extractTime = (isoString?: string | null) => {
+    if (!isoString) return ''
+    const d = new Date(new Date(isoString).getTime() + utcOffsetHours * 3600000)
+    return `${d.getUTCHours().toString().padStart(2, '0')}:${d.getUTCMinutes().toString().padStart(2, '0')}`
+  }
+  const extractDate = (isoString?: string | null) => {
+    if (!isoString) return ''
+    const d = new Date(new Date(isoString).getTime() + utcOffsetHours * 3600000)
+    return `${d.getUTCFullYear()}-${(d.getUTCMonth()+1).toString().padStart(2, '0')}-${d.getUTCDate().toString().padStart(2, '0')}`
+  }
+
+  const handleSave = async () => {
+    if (!selectedFlight || !editData) return
+    setIsSaving(true)
+    
+    try {
+      const { error } = await supabase.from('flights').update(editData).eq('id', selectedFlight.id)
+      if (error) throw error
+      
+      // Update local state directly so UI updates without needing full reload immediately
+      Object.assign(selectedFlight, editData)
+      setIsEditing(false)
+      router.refresh()
+    } catch (e) {
+      console.error("Failed to save flight", e)
+      alert("Failed to save flight.")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const setEditDateTime = (field: 'start_time' | 'end_time', dateStr: string, timeStr: string) => {
+    if (!dateStr || !timeStr) return
+    const [y, m, d] = dateStr.split('-').map(Number)
+    const [hh, mm] = timeStr.split(':').map(Number)
+    const utcMs = Date.UTC(y, m-1, d, hh, mm) - (utcOffsetHours * 3600000)
+    setEditData({ ...editData, [field]: new Date(utcMs).toISOString() })
+  }
 
   return (
     <>
@@ -239,45 +289,213 @@ export default function FlightList({ flights, utcOffsetHours }: { flights: Fligh
             <div style={{ padding: '16px', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {activeTab === 'flight-parameters' && (
                 <>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    <div style={{ padding: '12px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Aircraft</div>
-                      <div style={{ fontWeight: 600 }}>{selectedFlight.aircraft_registration || 'N/A'}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <h3 style={{ fontSize: '13px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0, fontWeight: 700 }}>CALL SIGN</h3>
+                    {!isEditing ? (
+                      <button onClick={() => { setIsEditing(true); setEditData(selectedFlight) }} style={{ padding: '6px 12px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>
+                        ✏️ Edit Parameters
+                      </button>
+                    ) : (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button onClick={() => setIsEditing(false)} style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>
+                          Cancel
+                        </button>
+                        <button onClick={handleSave} disabled={isSaving} style={{ padding: '6px 12px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>
+                          {isSaving ? 'Saving...' : '💾 Save'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', background: 'var(--bg-elevated)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
+                    <span>✈️ 🔧 🟢</span>
+                    {isEditing ? (
+                      <input 
+                        value={editData.aircraft_registration || ''} 
+                        onChange={e => setEditData({...editData, aircraft_registration: e.target.value.toUpperCase()})}
+                        style={{ background: 'transparent', border: 'none', color: 'white', fontWeight: 600, fontSize: '16px', outline: 'none', width: '100px' }}
+                      />
+                    ) : (
+                      <span style={{ fontWeight: 600, fontSize: '16px' }}>{selectedFlight.aircraft_registration || 'N/A'}</span>
+                    )}
+                    <span style={{ marginLeft: 'auto', color: 'var(--text-secondary)' }}>🔗</span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginTop: '8px' }}>
+                    <div style={{ padding: '16px 4px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', textAlign: 'center', fontWeight: 'bold' }}>
+                      {isEditing ? (
+                        <select 
+                          value={editData.pilot_function || ''} 
+                          onChange={e => setEditData({...editData, pilot_function: e.target.value})}
+                          style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', outline: 'none', textAlign: 'center', fontWeight: 'bold' }}
+                        >
+                          <option value="DUAL">DUAL</option>
+                          <option value="SPIC">SPIC</option>
+                          <option value="SOLO">SOLO</option>
+                          <option value="PIC">PIC</option>
+                        </select>
+                      ) : (
+                        selectedFlight.pilot_function || 'N/A'
+                      )}
                     </div>
-                    <div style={{ padding: '12px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Pilot Function</div>
-                      <div style={{ fontWeight: 600 }}>{selectedFlight.pilot_function || 'N/A'}</div>
+                    <div style={{ padding: '16px 4px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', textAlign: 'center', fontWeight: 'bold' }}>
+                      {isEditing ? (
+                        <select 
+                          value={editData.flight_rules || ''} 
+                          onChange={e => setEditData({...editData, flight_rules: e.target.value})}
+                          style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', outline: 'none', textAlign: 'center', fontWeight: 'bold' }}
+                        >
+                          <option value="VFR">VFR</option>
+                          <option value="IFR">IFR</option>
+                        </select>
+                      ) : (
+                        selectedFlight.flight_rules || 'N/A'
+                      )}
                     </div>
-                    <div style={{ padding: '12px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Flight Rules</div>
-                      <div style={{ fontWeight: 600 }}>{selectedFlight.flight_rules || 'N/A'}</div>
+                    <div style={{ padding: '16px 4px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', textAlign: 'center', fontWeight: 'bold' }}>
+                      {isEditing ? (
+                        <select 
+                          value={editData.time_of_day || ''} 
+                          onChange={e => setEditData({...editData, time_of_day: e.target.value})}
+                          style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', outline: 'none', textAlign: 'center', fontWeight: 'bold' }}
+                        >
+                          <option value="DAY">DAY</option>
+                          <option value="NIGHT">NIGHT</option>
+                        </select>
+                      ) : (
+                        selectedFlight.time_of_day || 'N/A'
+                      )}
                     </div>
-                    <div style={{ padding: '12px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Time of Day</div>
-                      <div style={{ fontWeight: 600 }}>{selectedFlight.time_of_day || 'N/A'}</div>
-                    </div>
-                    <div style={{ padding: '12px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Flight Type</div>
-                      <div style={{ fontWeight: 600 }}>{selectedFlight.flight_type || 'N/A'}</div>
-                    </div>
-                    <div style={{ padding: '12px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Desired Time</div>
-                      <div style={{ fontWeight: 600 }}>{selectedFlight.desired_flight_time || 'N/A'}</div>
+                    <div style={{ padding: '16px 4px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', textAlign: 'center', fontWeight: 'bold' }}>
+                      {isEditing ? (
+                        <select 
+                          value={editData.flight_type || ''} 
+                          onChange={e => setEditData({...editData, flight_type: e.target.value})}
+                          style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', outline: 'none', textAlign: 'center', fontWeight: 'bold' }}
+                        >
+                          <option value="LOCAL">LOCAL</option>
+                          <option value="X-COUNTRY">X-COUNTRY</option>
+                        </select>
+                      ) : (
+                        selectedFlight.flight_type || 'N/A'
+                      )}
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    <div style={{ padding: '12px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Departure</div>
-                      <div style={{ fontWeight: 600 }}>{selectedFlight.departure_aerodrome || 'N/A'}</div>
+
+                  <div style={{ marginTop: '8px', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+                    <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '10px', textAlign: 'center', fontWeight: 800, borderBottom: '1px solid var(--border-default)', color: 'var(--text-primary)' }}>
+                      OFF BLOCK
                     </div>
-                    <div style={{ padding: '12px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Destination</div>
-                      <div style={{ fontWeight: 600 }}>{selectedFlight.destination_aerodrome || 'N/A'}</div>
+                    <div style={{ display: 'flex', borderBottom: '1px solid var(--border-default)', background: 'var(--bg-elevated)' }}>
+                      <div style={{ flex: 1, padding: '12px', textAlign: 'center', borderRight: '1px solid var(--border-default)' }}>
+                        {isEditing ? (
+                          <input 
+                            type="time" 
+                            value={extractTime(editData.start_time)} 
+                            onChange={e => setEditDateTime('start_time', extractDate(editData.start_time), e.target.value)} 
+                            style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', fontSize: '16px', textAlign: 'center' }}
+                          />
+                        ) : (
+                          <span style={{ fontSize: '16px' }}>{formatTime(new Date(new Date(selectedFlight.start_time).getTime() + utcOffsetHours * 3600000))}</span>
+                        )}
+                      </div>
+                      <div style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '48px', color: 'var(--text-secondary)' }}>🕒</div>
+                    </div>
+                    <div style={{ display: 'flex', borderBottom: '1px solid var(--border-default)', background: 'var(--bg-elevated)' }}>
+                      <div style={{ flex: 1, padding: '12px', textAlign: 'center', borderRight: '1px solid var(--border-default)' }}>
+                        {isEditing ? (
+                          <input 
+                            type="date" 
+                            value={extractDate(editData.start_time)} 
+                            onChange={e => setEditDateTime('start_time', e.target.value, extractTime(editData.start_time))} 
+                            style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', fontSize: '16px', textAlign: 'center', colorScheme: 'dark' }}
+                          />
+                        ) : (
+                          <span style={{ fontSize: '16px' }}>{formatDate(new Date(new Date(selectedFlight.start_time).getTime() + utcOffsetHours * 3600000))}</span>
+                        )}
+                      </div>
+                      <div style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '48px', color: 'var(--text-secondary)' }}>📅</div>
+                    </div>
+
+                    <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '10px', textAlign: 'center', fontWeight: 800, borderBottom: '1px solid var(--border-default)', color: 'var(--text-primary)' }}>
+                      ON BLOCK
+                    </div>
+                    <div style={{ display: 'flex', borderBottom: '1px solid var(--border-default)', background: 'var(--bg-elevated)' }}>
+                      <div style={{ flex: 1, padding: '12px', textAlign: 'center', borderRight: '1px solid var(--border-default)' }}>
+                        {isEditing ? (
+                          <input 
+                            type="time" 
+                            value={extractTime(editData.end_time)} 
+                            onChange={e => setEditDateTime('end_time', extractDate(editData.end_time), e.target.value)} 
+                            style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', fontSize: '16px', textAlign: 'center' }}
+                          />
+                        ) : (
+                          <span style={{ fontSize: '16px' }}>{formatTime(new Date(new Date(selectedFlight.end_time).getTime() + utcOffsetHours * 3600000))}</span>
+                        )}
+                      </div>
+                      <div style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '48px', color: 'var(--text-secondary)' }}>🕒</div>
+                    </div>
+                    <div style={{ display: 'flex', borderBottom: '1px solid var(--border-default)', background: 'var(--bg-elevated)' }}>
+                      <div style={{ flex: 1, padding: '12px', textAlign: 'center', borderRight: '1px solid var(--border-default)' }}>
+                        {isEditing ? (
+                          <input 
+                            type="date" 
+                            value={extractDate(editData.end_time)} 
+                            onChange={e => setEditDateTime('end_time', e.target.value, extractTime(editData.end_time))} 
+                            style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', fontSize: '16px', textAlign: 'center', colorScheme: 'dark' }}
+                          />
+                        ) : (
+                          <span style={{ fontSize: '16px' }}>{formatDate(new Date(new Date(selectedFlight.end_time).getTime() + utcOffsetHours * 3600000))}</span>
+                        )}
+                      </div>
+                      <div style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '48px', color: 'var(--text-secondary)' }}>📅</div>
+                    </div>
+
+                    <div style={{ background: 'rgba(16, 185, 129, 0.2)', padding: '16px', textAlign: 'center', fontWeight: 900, fontSize: '20px', color: 'var(--text-primary)' }}>
+                      {(() => {
+                        const start = new Date(isEditing ? (editData.start_time || selectedFlight.start_time) : selectedFlight.start_time)
+                        const end = new Date(isEditing ? (editData.end_time || selectedFlight.end_time) : selectedFlight.end_time)
+                        const diffMins = Math.round((end.getTime() - start.getTime()) / 60000)
+                        if (isNaN(diffMins) || diffMins < 0) return '0:00'
+                        return `${Math.floor(diffMins / 60)}:${(diffMins % 60).toString().padStart(2, '0')}`
+                      })()}
                     </div>
                   </div>
-                  <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center' }}>
-                    <Link href={`/student/${selectedFlight.student_id}`} style={{ padding: '10px 20px', background: 'var(--primary)', color: 'white', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontWeight: 600 }}>
-                      View Student Profile
+
+                  <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '120px', fontWeight: 700, fontSize: '11px', color: 'var(--text-secondary)' }}>DEPARTURE</div>
+                      <div style={{ flex: 1, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', padding: '12px' }}>
+                        {isEditing ? (
+                          <input 
+                            value={editData.departure_aerodrome || ''} 
+                            onChange={e => setEditData({...editData, departure_aerodrome: e.target.value.toUpperCase()})}
+                            style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%', fontWeight: 'bold' }}
+                          />
+                        ) : (
+                          <span style={{ fontWeight: 'bold' }}>{selectedFlight.departure_aerodrome || 'N/A'}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '120px', fontWeight: 700, fontSize: '11px', color: 'var(--text-secondary)' }}>ARRIVAL</div>
+                      <div style={{ flex: 1, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', padding: '12px' }}>
+                        {isEditing ? (
+                          <input 
+                            value={editData.destination_aerodrome || ''} 
+                            onChange={e => setEditData({...editData, destination_aerodrome: e.target.value.toUpperCase()})}
+                            style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%', fontWeight: 'bold' }}
+                          />
+                        ) : (
+                          <span style={{ fontWeight: 'bold' }}>{selectedFlight.destination_aerodrome || 'N/A'}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center' }}>
+                    <Link href={`/student/${selectedFlight.student_id}`} style={{ padding: '10px 20px', background: 'var(--bg-elevated)', color: 'white', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', textDecoration: 'none', fontWeight: 600, fontSize: '14px' }}>
+                      👤 View Student Profile
                     </Link>
                   </div>
                 </>
