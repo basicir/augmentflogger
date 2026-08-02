@@ -49,6 +49,15 @@ export default function Navbar({ username }: NavbarProps) {
         </Link>
 
         <Link
+          href="/dashboard/logbook"
+          className={`navbar-link ${pathname === '/dashboard/logbook' ? 'active' : ''}`}
+          id="nav-logbook"
+        >
+          <span>📖</span>
+          <span className="nav-link-text">Logbook</span>
+        </Link>
+
+        <Link
           href="/settings"
           className={`navbar-link ${pathname === '/settings' ? 'active' : ''}`}
           id="nav-settings"
