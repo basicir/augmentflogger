@@ -76,7 +76,9 @@ const GET_STUDENT_QUERY = `
   }
 `
 
-export default async function StudentPage({ params }: { params: { id: string } }) {
+export default async function StudentPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -109,7 +111,7 @@ export default async function StudentPage({ params }: { params: { id: string } }
     },
     body: JSON.stringify({
       query: GET_STUDENT_QUERY,
-      variables: { id: params.id },
+      variables: { id },
     }),
     cache: 'no-store'
   })
