@@ -5,7 +5,7 @@ const FLIGHTLOGGER_GRAPHQL = 'https://api.flightlogger.net/graphql'
 
 const GET_STUDENT_PROGRAMS_QUERY = `
   query GetStudentPrograms($studentId: Id!) {
-    userPrograms(userIds: [$studentId], status: [ACTIVE]) {
+    userPrograms(userIds: [$studentId], status: [ACTIVE], first: 5) {
       nodes {
         name
         status
@@ -19,7 +19,7 @@ const GET_STUDENT_PROGRAMS_QUERY = `
             }
           }
         }
-        trainings(first: 200, all: true) {
+        trainings(first: 100, all: true) {
           nodes {
             status
             lecture {
