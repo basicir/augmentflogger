@@ -90,57 +90,57 @@ export default async function FlightsPage() {
                 }}
               >
                 {/* Left Date Section */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '70px', paddingRight: '20px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.05em' }}>{monthShort}</div>
-                  <div style={{ fontSize: '32px', fontWeight: 800, margin: '2px 0' }}>{day}</div>
-                  <div style={{ fontSize: '13px', color: '#94A3B8' }}>{year}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '60px', paddingRight: '16px' }}>
+                  <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.05em' }}>{monthShort}</div>
+                  <div style={{ fontSize: '20px', fontWeight: 800, margin: '2px 0' }}>{day}</div>
+                  <div style={{ fontSize: '10px', color: '#94A3B8' }}>{year}</div>
                 </div>
 
                 {/* Vertical Divider */}
-                <div style={{ width: '1px', backgroundColor: '#334155', height: '70px', marginRight: '24px' }}></div>
+                <div style={{ width: '1px', backgroundColor: '#334155', height: '50px', marginRight: '16px' }}></div>
 
                 {/* Main Content */}
                 <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'stretch' }}>
                   
                   {/* Departure Side */}
-                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '80px' }}>
-                    <div style={{ fontSize: '26px', fontWeight: 700, lineHeight: 1.2 }}>{depTime}</div>
-                    <div style={{ fontSize: '16px', fontWeight: 500 }}>{flight.departure_aerodrome || 'N/A'}</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '60px' }}>
+                    <div style={{ fontSize: '18px', fontWeight: 700, lineHeight: 1.2 }}>{depTime}</div>
+                    <div style={{ fontSize: '12px', fontWeight: 500 }}>{flight.departure_aerodrome || 'N/A'}</div>
                   </div>
 
                   {/* Center Flight Info */}
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 24px', justifyContent: 'center' }}>
-                    <div style={{ fontSize: '13px', marginBottom: '8px', color: '#E2E8F0' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 16px', justifyContent: 'center' }}>
+                    <div style={{ fontSize: '11px', marginBottom: '6px', color: '#E2E8F0', textAlign: 'center' }}>
                       {flight.aircraft_registration || 'Unknown'} {flight.aircraft_type ? `(${flight.aircraft_type})` : ''}
                     </div>
                     
-                    <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '8px' }}>
                       <div style={{ flex: 1, height: '1px', backgroundColor: '#475569' }}></div>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '-4px' }}>
-                        <span style={{ fontSize: '18px', transform: 'rotate(45deg)', display: 'inline-block' }}>✈️</span>
-                        <span style={{ fontSize: '12px', fontWeight: 700, marginTop: '2px' }}>{durationFormatted}</span>
+                        <span style={{ fontSize: '14px', transform: 'rotate(45deg)', display: 'inline-block' }}>✈️</span>
+                        <span style={{ fontSize: '10px', fontWeight: 700, marginTop: '2px' }}>{durationFormatted}</span>
                       </div>
                       <div style={{ flex: 1, height: '1px', backgroundColor: '#475569' }}></div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '6px', marginTop: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', gap: '4px', marginTop: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
                       {flight.pilot_function && (
-                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 700 }}>
+                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
                           {flight.pilot_function}
                         </span>
                       )}
                       {flight.flight_rules && (
-                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 700 }}>
+                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
                           {flight.flight_rules}
                         </span>
                       )}
                       {flight.time_of_day && (
-                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 700 }}>
+                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
                           {flight.time_of_day === 'Day' ? '☀️' : (flight.time_of_day === 'Night' ? '🌙' : flight.time_of_day)}
                         </span>
                       )}
                       {flight.flight_type && (
-                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 700 }}>
+                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
                           {flight.flight_type}
                         </span>
                       )}
@@ -148,13 +148,13 @@ export default async function FlightsPage() {
                   </div>
 
                   {/* Arrival Side */}
-                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', width: '100px' }}>
-                    <div style={{ fontSize: '12px', color: '#94A3B8' }}>(UTC+00:00)</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', width: '80px' }}>
+                    <div style={{ fontSize: '10px', color: '#94A3B8' }}>(UTC+00:00)</div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginTop: 'auto', marginBottom: 'auto' }}>
-                       <div style={{ fontSize: '26px', fontWeight: 700, lineHeight: 1.2 }}>{arrTime}</div>
-                       <div style={{ fontSize: '16px', fontWeight: 500 }}>{flight.destination_aerodrome || 'N/A'}</div>
+                       <div style={{ fontSize: '18px', fontWeight: 700, lineHeight: 1.2 }}>{arrTime}</div>
+                       <div style={{ fontSize: '12px', fontWeight: 500 }}>{flight.destination_aerodrome || 'N/A'}</div>
                     </div>
-                    <div style={{ fontSize: '13px', color: '#E2E8F0', marginTop: 'auto' }}>
+                    <div style={{ fontSize: '10px', color: '#E2E8F0', marginTop: 'auto' }}>
                       {flight.organization || 'TRENER'}
                     </div>
                   </div>
