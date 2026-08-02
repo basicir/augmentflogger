@@ -15,26 +15,28 @@ const GET_STUDENT_QUERY = `
       firstFlights: flights(first: 1, all: true) {
         nodes {
           id
-          startsAt
-          departureAirport { name code }
-          arrivalAirport { name code }
-          activityRegistration {
-            __typename
-            ... on Training {
-              id
-              name
-              status
-              comment
-              instructor { firstName lastName }
-              userCategories {
+          primaryLog {
+            startsAt
+            departureAirport { name code }
+            arrivalAirport { name code }
+            activityRegistration {
+              __typename
+              ... on Training {
+                id
                 name
-                exercises {
+                status
+                comment
+                instructor { firstName lastName }
+                userCategories {
                   name
-                  grade
-                  comment
-                  gradedCompetencies {
-                    coreCompetencyName
+                  exercises {
+                    name
                     grade
+                    comment
+                    gradedCompetencies {
+                      coreCompetencyName
+                      grade
+                    }
                   }
                 }
               }
@@ -45,26 +47,28 @@ const GET_STUDENT_QUERY = `
       lastFlights: flights(last: 1, all: true) {
         nodes {
           id
-          startsAt
-          departureAirport { name code }
-          arrivalAirport { name code }
-          activityRegistration {
-            __typename
-            ... on Training {
-              id
-              name
-              status
-              comment
-              instructor { firstName lastName }
-              userCategories {
+          primaryLog {
+            startsAt
+            departureAirport { name code }
+            arrivalAirport { name code }
+            activityRegistration {
+              __typename
+              ... on Training {
+                id
                 name
-                exercises {
+                status
+                comment
+                instructor { firstName lastName }
+                userCategories {
                   name
-                  grade
-                  comment
-                  gradedCompetencies {
-                    coreCompetencyName
+                  exercises {
+                    name
                     grade
+                    comment
+                    gradedCompetencies {
+                      coreCompetencyName
+                      grade
+                    }
                   }
                 }
               }
@@ -148,10 +152,31 @@ export default async function StudentPage({ params }: { params: Promise<{ id: st
   }
 
   const u = flData.data.user
-  
-  const f1 = u.firstFlights?.nodes?.[0]
-  const f2 = u.lastFlights?.nodes?.[0]
-  
+
+  // Flatten primaryLog fields into the shape StudentDetailClient expects
+  const toFlightData = (node: {
+    id: string
+    primaryLog?: {
+      startsAt?: string
+      departureAirport?: { name: string; code: string | null } | null
+      arrivalAirport?: { name: string; code: string | null } | null
+      activityRegistration?: unknown
+    } | null
+  } | null) => {
+    if (!node || !node.primaryLog) return null
+    const log = node.primaryLog
+    return {
+      id: node.id,
+      startsAt: log.startsAt ?? '',
+      departureAirport: log.departureAirport ?? null,
+      arrivalAirport: log.arrivalAirport ?? null,
+      activityRegistration: (log.activityRegistration as { __typename: string } | null) ?? null,
+    }
+  }
+
+  const f1 = toFlightData(u.firstFlights?.nodes?.[0] ?? null)
+  const f2 = toFlightData(u.lastFlights?.nodes?.[0] ?? null)
+
   let lastFlight = null
   if (f1 && f2) {
     lastFlight = new Date(f1.startsAt) > new Date(f2.startsAt) ? f1 : f2
