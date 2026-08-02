@@ -63,6 +63,9 @@ export async function POST(request: Request) {
       )
     }
 
+    // Handle legacy integer IDs by converting them to GraphQL Global IDs (Base64 encoded)
+    const formattedStudentId = /^\d+$/.test(studentId) ? btoa(`User:${studentId}`) : studentId;
+
     const flResponse = await fetch(FLIGHTLOGGER_GRAPHQL, {
       method: 'POST',
       headers: {
@@ -71,7 +74,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         query: GET_STUDENT_PROGRAMS_QUERY,
-        variables: { studentId }
+        variables: { studentId: formattedStudentId }
       })
     })
 

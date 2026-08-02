@@ -64,6 +64,11 @@ interface StudentDetailClientProps {
 export default function StudentDetailClient({ student, lastFlight }: StudentDetailClientProps) {
   const [activeTab, setActiveTab] = useState<'last-flight' | 'logbook' | 'statistics'>('last-flight')
   const { startFlight, ongoingFlight } = useFlightRecorder()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     // Automatically fetch and log the active programs and tasks for this student
@@ -79,9 +84,12 @@ export default function StudentDetailClient({ student, lastFlight }: StudentDeta
           console.group(`%c✈️ FlightLogger Programs for ${student.firstName} ${student.lastName}`, 'color: #3b82f6; font-size: 14px; font-weight: bold;')
           console.log(JSON.stringify(data.programs, null, 2))
           console.groupEnd()
+        } else {
+          const errData = await res.json()
+          console.error('Failed to fetch programs, server returned:', errData)
         }
       } catch (err) {
-        console.error('Failed to fetch programs:', err)
+        console.error('Failed to fetch programs network error:', err)
       }
     }
 
@@ -226,7 +234,7 @@ export default function StudentDetailClient({ student, lastFlight }: StudentDeta
               }}>
                 <div>
                   <div style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '4px' }}>Date</div>
-                  <div style={{ fontWeight: 500 }}>{new Date(lastFlight.startsAt).toLocaleString()}</div>
+                  <div style={{ fontWeight: 500 }}>{mounted ? new Date(lastFlight.startsAt).toLocaleString() : ''}</div>
                 </div>
                 {training?.name && (
                   <div>
