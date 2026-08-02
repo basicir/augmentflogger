@@ -6,6 +6,7 @@ import Link from 'next/link'
 interface GradedCompetency {
   coreCompetencyName: string | null
   grade: number | null
+  comment?: string | null
 }
 
 interface Exercise {
@@ -257,12 +258,17 @@ export default function StudentDetailClient({ student, lastFlight }: StudentDeta
                               {ex.gradedCompetencies && ex.gradedCompetencies.length > 0 && (
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
                                   {ex.gradedCompetencies.map((comp, k) => (
-                                    <div key={k} style={{ 
-                                      display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', 
-                                      background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-default)', padding: '4px 8px', borderRadius: 'var(--radius-sm)'
-                                    }}>
-                                      <span style={{ color: 'var(--text-secondary)' }}>{comp.coreCompetencyName}</span>
-                                      <span style={{ fontWeight: 700, color: 'var(--primary)' }}>{comp.grade}</span>
+                                    <div key={k} style={{ display: 'flex', flexDirection: 'column', gap: '4px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-default)', padding: '6px 10px', borderRadius: 'var(--radius-sm)' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                        <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{comp.coreCompetencyName}</span>
+                                        {comp.grade !== null && <span style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '13px' }}>{comp.grade}</span>}
+                                      </div>
+                                      {comp.comment && (
+                                        <div
+                                          style={{ color: 'var(--text-muted)', fontSize: '12px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '4px', marginTop: '2px' }}
+                                          dangerouslySetInnerHTML={{ __html: comp.comment }}
+                                        />
+                                      )}
                                     </div>
                                   ))}
                                 </div>
