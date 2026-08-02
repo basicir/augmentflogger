@@ -14,44 +14,38 @@ export async function GET(request: Request) {
 
   const query = `
     query {
-      users(first: 10) {
+      userPrograms(first: 3, status: [ACTIVE]) {
         nodes {
-          id
-          callSign
-          userPrograms(first: 1, status: [ACTIVE]) {
-            nodes {
+          name
+          programRevision {
+            id
+            name
+            programPhases {
+              id
               name
-              programRevision {
+              lectures {
                 id
                 name
-                programPhases {
+              }
+            }
+          }
+          trainings(first: 5) {
+            nodes {
+              id
+              status
+              lecture {
+                id
+                name
+              }
+              userCategories {
+                id
+                name
+                exercises {
                   id
                   name
-                  lectures {
+                  gradedCompetencies {
                     id
-                    name
-                  }
-                }
-              }
-              trainings(first: 5) {
-                nodes {
-                  id
-                  status
-                  lecture {
-                    id
-                    name
-                  }
-                  userCategories {
-                    id
-                    name
-                    exercises {
-                      id
-                      name
-                      gradedCompetencies {
-                        id
-                        coreCompetencyName
-                      }
-                    }
+                    coreCompetencyName
                   }
                 }
               }
