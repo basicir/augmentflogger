@@ -251,36 +251,56 @@ export default function FlightRecorderModal() {
 
   if (!isModalOpen || !ongoingFlight) return null
 
-  const cyclePilotFunction = () => {
-    const opts = ['Not Specified', 'DUAL', 'SPIC', 'SOLO'];
-    const idx = opts.indexOf(pilotFunction);
+  const pilotFunctionOpts = ['Not Specified', 'DUAL', 'SPIC', 'SOLO'];
+  const flightRulesOpts = ['Not Specified', 'VFR', 'IFR'];
+  const timeOfDayOpts = ['Not Specified', 'DAY', 'NIGHT'];
+  const flightTypeOpts = ['Not Specified', 'LOCAL', 'X-COUNTRY'];
+
+  const getNextOpt = (opts: string[], current: string) => {
+    const idx = opts.indexOf(current);
     const next = opts[(idx + 1) % opts.length];
+    return next === 'Not Specified' ? 'N/S' : next;
+  }
+
+  const cyclePilotFunction = () => {
+    const next = pilotFunctionOpts[(pilotFunctionOpts.indexOf(pilotFunction) + 1) % pilotFunctionOpts.length];
     setPilotFunction(next);
     updateFlight({ pilot_function: next });
   };
 
   const cycleFlightRules = () => {
-    const opts = ['Not Specified', 'VFR', 'IFR'];
-    const idx = opts.indexOf(flightRules);
-    const next = opts[(idx + 1) % opts.length];
+    const next = flightRulesOpts[(flightRulesOpts.indexOf(flightRules) + 1) % flightRulesOpts.length];
     setFlightRules(next);
     updateFlight({ flight_rules: next });
   };
 
   const cycleTimeOfDay = () => {
-    const opts = ['Not Specified', 'DAY', 'NIGHT'];
-    const idx = opts.indexOf(timeOfDay);
-    const next = opts[(idx + 1) % opts.length];
+    const next = timeOfDayOpts[(timeOfDayOpts.indexOf(timeOfDay) + 1) % timeOfDayOpts.length];
     setTimeOfDay(next);
     updateFlight({ time_of_day: next });
   };
 
   const cycleFlightType = () => {
-    const opts = ['Not Specified', 'LOCAL', 'X-COUNTRY'];
-    const idx = opts.indexOf(flightType);
-    const next = opts[(idx + 1) % opts.length];
+    const next = flightTypeOpts[(flightTypeOpts.indexOf(flightType) + 1) % flightTypeOpts.length];
     setFlightType(next);
     updateFlight({ flight_type: next });
+  };
+
+  const adjustTime = (minutesToAdd: number) => {
+    let [hStr, mStr] = desiredTime.split(':');
+    let h = parseInt(hStr || '01', 10);
+    let m = parseInt(mStr || '00', 10);
+    
+    let totalMinutes = h * 60 + m + minutesToAdd;
+    if (totalMinutes < 0) totalMinutes = 0;
+    if (totalMinutes > 23 * 60 + 55) totalMinutes = 23 * 60 + 55;
+    
+    let newH = Math.floor(totalMinutes / 60);
+    let newM = totalMinutes % 60;
+    
+    const newTime = `${newH.toString().padStart(2, '0')}:${newM.toString().padStart(2, '0')}`;
+    setDesiredTime(newTime);
+    updateFlight({ desired_flight_time: newTime });
   };
 
   const handleAerodromeBlur = async (field: 'departure_aerodrome' | 'destination_aerodrome', value: string) => {
@@ -352,20 +372,32 @@ export default function FlightRecorderModal() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Pilot Function</label>
-              <button onClick={cyclePilotFunction} style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left' }}>{pilotFunction}</button>
+              <button onClick={cyclePilotFunction} style={{ position: 'relative', width: '100%', padding: '20px 10px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left', fontWeight: 'bold' }}>
+                <span style={{ fontSize: '10px', color: 'var(--text-secondary)', position: 'absolute', top: '4px', left: '10px', fontWeight: 'normal' }}>PILOT FUNCTION</span>
+                <span>{pilotFunction === 'Not Specified' ? 'N/S' : pilotFunction}</span>
+                <span style={{ position: 'absolute', top: '4px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>Next: {getNextOpt(pilotFunctionOpts, pilotFunction)}</span>
+              </button>
             </div>
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Flight Rules</label>
-              <button onClick={cycleFlightRules} style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left' }}>{flightRules}</button>
+              <button onClick={cycleFlightRules} style={{ position: 'relative', width: '100%', padding: '20px 10px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left', fontWeight: 'bold' }}>
+                <span style={{ fontSize: '10px', color: 'var(--text-secondary)', position: 'absolute', top: '4px', left: '10px', fontWeight: 'normal' }}>FLIGHT RULES</span>
+                <span>{flightRules === 'Not Specified' ? 'N/S' : flightRules}</span>
+                <span style={{ position: 'absolute', top: '4px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>Next: {getNextOpt(flightRulesOpts, flightRules)}</span>
+              </button>
             </div>
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Time of Day</label>
-              <button onClick={cycleTimeOfDay} style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left' }}>{timeOfDay}</button>
+              <button onClick={cycleTimeOfDay} style={{ position: 'relative', width: '100%', padding: '20px 10px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left', fontWeight: 'bold' }}>
+                <span style={{ fontSize: '10px', color: 'var(--text-secondary)', position: 'absolute', top: '4px', left: '10px', fontWeight: 'normal' }}>TIME OF DAY</span>
+                <span>{timeOfDay === 'Not Specified' ? 'N/S' : timeOfDay}</span>
+                <span style={{ position: 'absolute', top: '4px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>Next: {getNextOpt(timeOfDayOpts, timeOfDay)}</span>
+              </button>
             </div>
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Flight Type</label>
-              <button onClick={cycleFlightType} style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left' }}>{flightType}</button>
+              <button onClick={cycleFlightType} style={{ position: 'relative', width: '100%', padding: '20px 10px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left', fontWeight: 'bold' }}>
+                <span style={{ fontSize: '10px', color: 'var(--text-secondary)', position: 'absolute', top: '4px', left: '10px', fontWeight: 'normal' }}>FLIGHT TYPE</span>
+                <span>{flightType === 'Not Specified' ? 'N/S' : flightType}</span>
+                <span style={{ position: 'absolute', top: '4px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>Next: {getNextOpt(flightTypeOpts, flightType)}</span>
+              </button>
             </div>
           </div>
 
@@ -400,37 +432,31 @@ export default function FlightRecorderModal() {
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Desired Flight Time (HH:MM)</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <select 
-                value={desiredTime.split(':')[0] || '01'}
-                onChange={e => {
-                  const newTime = `${e.target.value}:${desiredTime.split(':')[1] || '00'}`;
-                  setDesiredTime(newTime);
-                  updateFlight({ desired_flight_time: newTime });
-                }}
-                style={{ flex: 1, padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', textAlign: 'center', appearance: 'none' }}
-              >
-                {Array.from({ length: 10 }, (_, i) => i.toString().padStart(2, '0')).map(h => (
-                  <option key={h} value={h}>{h} h</option>
-                ))}
-              </select>
-              <span style={{ display: 'flex', alignItems: 'center', fontWeight: 'bold' }}>:</span>
-              <select 
-                value={desiredTime.split(':')[1] || '00'}
-                onChange={e => {
-                  const newTime = `${desiredTime.split(':')[0] || '01'}:${e.target.value}`;
-                  setDesiredTime(newTime);
-                  updateFlight({ desired_flight_time: newTime });
-                }}
-                style={{ flex: 1, padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', textAlign: 'center', appearance: 'none' }}
-              >
-                {Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0')).map(m => (
-                  <option key={m} value={m}>{m} m</option>
-                ))}
-              </select>
-            </div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Desired Flight Time</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', justifyContent: 'center', background: 'var(--bg-elevated)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+                <button onClick={() => adjustTime(60)} style={{ width: '60px', padding: '8px', background: 'var(--primary)', color: 'black', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+1h</button>
+                <span style={{ fontSize: '28px', fontWeight: 'bold' }}>{desiredTime.split(':')[0] || '01'}</span>
+                <button onClick={() => adjustTime(-60)} style={{ width: '60px', padding: '8px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>-1h</button>
               </div>
+              
+              <span style={{ fontSize: '28px', fontWeight: 'bold' }}>:</span>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  <button onClick={() => adjustTime(10)} style={{ width: '50px', padding: '8px', background: 'var(--primary)', color: 'black', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+10m</button>
+                  <button onClick={() => adjustTime(5)} style={{ width: '40px', padding: '8px', background: 'var(--primary)', color: 'black', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+5m</button>
+                </div>
+                <span style={{ fontSize: '28px', fontWeight: 'bold' }}>{desiredTime.split(':')[1] || '00'}</span>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  <button onClick={() => adjustTime(-10)} style={{ width: '50px', padding: '8px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>-10m</button>
+                  <button onClick={() => adjustTime(-5)} style={{ width: '40px', padding: '8px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>-5m</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
             </>
           )}
 
