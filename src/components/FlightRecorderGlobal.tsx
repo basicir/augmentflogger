@@ -2,14 +2,14 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useFlightRecorder } from './FlightRecorderContext'
-import { sendNotification, requestNotificationPermission } from '@/lib/notifications'
 import { motion, PanInfo } from 'framer-motion'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
 
 export default function FlightRecorderGlobal() {
-  const { ongoingFlight, setIsModalOpen, stopFlight } = useFlightRecorder()
+  const { ongoingFlight, setIsModalOpen, stopFlight, userId } = useFlightRecorder()
   const [elapsed, setElapsed] = useState('00:00:00')
   const [isWarning, setIsWarning] = useState(false)
-  const notificationSentRef = useRef(false)
+  const { isSupported, permission, subscribeToPush } = usePushNotifications()
   
   const [isDragging, setIsDragging] = useState(false)
   const [showTrash, setShowTrash] = useState(false)
@@ -46,16 +46,17 @@ export default function FlightRecorderGlobal() {
   }
 
   useEffect(() => {
-    // Request notification permission if we haven't already
+    // Request notification permission and subscribe to background web push
     const initNotifications = async () => {
-      if (typeof window !== 'undefined' && 'Notification' in window) {
-        if (Notification.permission === 'default') {
-          await requestNotificationPermission();
-        }
+      if (userId && isSupported && permission === 'default') {
+        await subscribeToPush(userId)
+      } else if (userId && isSupported && permission === 'granted') {
+        // Even if granted, ensure subscription is active and synced to our DB
+        await subscribeToPush(userId)
       }
-    };
-    initNotifications();
-  }, [])
+    }
+    initNotifications()
+  }, [userId, isSupported, permission, subscribeToPush])
 
   useEffect(() => {
     if (!ongoingFlight?.start_time) return
@@ -88,17 +89,10 @@ export default function FlightRecorderGlobal() {
         const timeRemaining = desiredMs - diff
         const warningThreshold = 10 * 60 * 1000 // 10 minutes
         
-        if (timeRemaining <= warningThreshold) {
+        if (timeRemaining <= warningThreshold && timeRemaining > 0) {
           setIsWarning(true)
-          if (!notificationSentRef.current && timeRemaining > 0) {
-            sendNotification('Flight Recorder', {
-              body: `Warning! Less than 10 minutes remaining of the planned flight time! (${ongoingFlight.desired_flight_time})`
-            });
-            notificationSentRef.current = true;
-          }
         } else {
           setIsWarning(false)
-          notificationSentRef.current = false;
         }
       }
     }

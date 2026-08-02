@@ -101,3 +101,43 @@ CREATE POLICY "Users can delete own flights"
 -- CREATE OR REPLACE TRIGGER on_auth_user_created
 --   AFTER INSERT ON auth.users
 --   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- 8. Web Push Notifications Support
+CREATE TABLE IF NOT EXISTS public.push_subscriptions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  endpoint TEXT NOT NULL,
+  p256dh TEXT NOT NULL,
+  auth TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own push subscriptions"
+  ON public.push_subscriptions
+  FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- 9. Add push_notified_at to flights
+ALTER TABLE public.flights ADD COLUMN IF NOT EXISTS push_notified_at TIMESTAMPTZ;
+
+-- 10. Enable pg_cron and pg_net (these require superuser)
+-- IMPORTANT: Run these manually in the Supabase SQL Editor if they are not enabled yet.
+-- CREATE EXTENSION IF NOT EXISTS pg_cron;
+-- CREATE EXTENSION IF NOT EXISTS pg_net;
+
+-- 11. Schedule the cron job to call the edge function every minute
+-- IMPORTANT: Run this manually in the Supabase SQL Editor, replacing YOUR_PROJECT_REF and SERVICE_ROLE_KEY.
+-- SELECT cron.schedule(
+--   'invoke-flight-push-worker',
+--   '* * * * *',
+--   $$
+--   SELECT net.http_post(
+--       url:='https://YOUR_PROJECT_REF.supabase.co/functions/v1/flight-push-worker',
+--       headers:='{"Authorization": "Bearer SERVICE_ROLE_KEY"}'::jsonb,
+--       body:='{}'::jsonb
+--   );
+--   $$
+-- );

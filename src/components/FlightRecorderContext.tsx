@@ -37,6 +37,7 @@ interface FlightRecorderContextType {
   updateFlight: (updates: Partial<OngoingFlight>) => Promise<void>
   setIsModalOpen: (open: boolean) => void
   loading: boolean
+  userId: string | null
 }
 
 const FlightRecorderContext = createContext<FlightRecorderContextType | undefined>(undefined)
@@ -45,6 +46,7 @@ export function FlightRecorderProvider({ children }: { children: React.ReactNode
   const [ongoingFlight, setOngoingFlight] = useState<OngoingFlight | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [userId, setUserId] = useState<string | null>(null)
   const supabase = createClient()
   const router = useRouter()
 
@@ -55,6 +57,7 @@ export function FlightRecorderProvider({ children }: { children: React.ReactNode
         setLoading(false)
         return
       }
+      setUserId(user.id)
 
       const { data, error } = await supabase
         .from('flights')
@@ -158,6 +161,7 @@ export function FlightRecorderProvider({ children }: { children: React.ReactNode
         updateFlight,
         setIsModalOpen,
         loading,
+        userId,
       }}
     >
       {children}
