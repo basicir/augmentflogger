@@ -50,7 +50,6 @@ export async function GET(request: Request) {
                       gradedCompetencies {
                         id
                         coreCompetencyName
-                        name
                       }
                     }
                   }
