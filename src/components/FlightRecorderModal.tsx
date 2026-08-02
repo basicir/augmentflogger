@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useFlightRecorder } from './FlightRecorderContext'
 import { createClient } from '@/lib/supabase/client'
 
@@ -18,6 +18,11 @@ export default function FlightRecorderModal() {
   const [recentAerodromes, setRecentAerodromes] = useState<string[]>([])
   const [availableAircraft, setAvailableAircraft] = useState<string[]>([])
   
+  // Rewind Start Time State
+  const [isRewindActive, setIsRewindActive] = useState(false)
+  const [rewindMinutes, setRewindMinutes] = useState(0)
+  const rewindRef = useRef<HTMLDivElement>(null)
+
   // Task Parameters state
   interface TaskData {
     taskId: string;
@@ -322,6 +327,21 @@ export default function FlightRecorderModal() {
     updateFlight({ desired_flight_time: newTime });
   };
 
+  const adjustStartTime = (delta: number) => {
+    let newRewind = rewindMinutes + delta;
+    if (newRewind > 0) newRewind = 0; // Cap at 0
+    const actualDelta = newRewind - rewindMinutes;
+    if (actualDelta === 0) return;
+
+    setRewindMinutes(newRewind);
+
+    if (ongoingFlight && ongoingFlight.start_time) {
+      const currentStartTime = new Date(ongoingFlight.start_time);
+      const newTime = new Date(currentStartTime.getTime() + actualDelta * 60000);
+      updateFlight({ start_time: newTime.toISOString() });
+    }
+  };
+
   const handleAerodromeBlur = async (field: 'departure_aerodrome' | 'destination_aerodrome', value: string) => {
     updateFlight({ [field]: value });
     if (value && !recentAerodromes.includes(value)) {
@@ -477,6 +497,44 @@ export default function FlightRecorderModal() {
               </div>
 
             </div>
+          </div>
+
+          {/* Rewind Start Time Container */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '4px' }}>
+            {!isRewindActive ? (
+              <button 
+                onClick={() => { setIsRewindActive(true); setTimeout(() => rewindRef.current?.focus(), 0); }}
+                style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', color: 'var(--text-secondary)', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                ⏱️ Rewind Start Time
+              </button>
+            ) : (
+              <div 
+                ref={rewindRef}
+                tabIndex={-1}
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget)) {
+                    setIsRewindActive(false);
+                    setRewindMinutes(0);
+                  }
+                }}
+                style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-elevated)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ef4444', outline: 'none' }}
+              >
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  <button onClick={() => adjustStartTime(-10)} style={{ padding: '6px 10px', background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 'bold' }}>-10</button>
+                  <button onClick={() => adjustStartTime(-5)} style={{ padding: '6px 10px', background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 'bold' }}>-5</button>
+                  <button onClick={() => adjustStartTime(-1)} style={{ padding: '6px 10px', background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 'bold' }}>-1</button>
+                </div>
+                <span style={{ color: '#ef4444', fontSize: '20px', fontWeight: '900', minWidth: '40px', textAlign: 'center' }}>
+                  {rewindMinutes < 0 ? rewindMinutes : 0}
+                </span>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  <button onClick={() => adjustStartTime(1)} disabled={rewindMinutes >= 0} style={{ padding: '6px 10px', background: rewindMinutes >= 0 ? 'rgba(255,255,255,0.05)' : 'rgba(239,68,68,0.1)', color: rewindMinutes >= 0 ? 'var(--text-secondary)' : '#ef4444', border: rewindMinutes >= 0 ? '1px solid transparent' : '1px solid rgba(239,68,68,0.2)', borderRadius: 'var(--radius-sm)', cursor: rewindMinutes >= 0 ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}>+1</button>
+                  <button onClick={() => adjustStartTime(5)} disabled={rewindMinutes >= 0} style={{ padding: '6px 10px', background: rewindMinutes >= 0 ? 'rgba(255,255,255,0.05)' : 'rgba(239,68,68,0.1)', color: rewindMinutes >= 0 ? 'var(--text-secondary)' : '#ef4444', border: rewindMinutes >= 0 ? '1px solid transparent' : '1px solid rgba(239,68,68,0.2)', borderRadius: 'var(--radius-sm)', cursor: rewindMinutes >= 0 ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}>+5</button>
+                  <button onClick={() => adjustStartTime(10)} disabled={rewindMinutes >= 0} style={{ padding: '6px 10px', background: rewindMinutes >= 0 ? 'rgba(255,255,255,0.05)' : 'rgba(239,68,68,0.1)', color: rewindMinutes >= 0 ? 'var(--text-secondary)' : '#ef4444', border: rewindMinutes >= 0 ? '1px solid transparent' : '1px solid rgba(239,68,68,0.2)', borderRadius: 'var(--radius-sm)', cursor: rewindMinutes >= 0 ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}>+10</button>
+                </div>
+              </div>
+            )}
           </div>
             </>
           )}
