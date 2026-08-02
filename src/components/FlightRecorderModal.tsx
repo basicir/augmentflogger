@@ -49,6 +49,7 @@ export default function FlightRecorderModal() {
   }
   const [taskExercises, setTaskExercises] = useState<Exercise[]>([])
   const [grades, setGrades] = useState<Record<string, string>>({})
+  const [exerciseComments, setExerciseComments] = useState<Record<string, string>>({})
   const [loadingTaskDetails, setLoadingTaskDetails] = useState(false)
   const [generalComment, setGeneralComment] = useState('')
   
@@ -56,22 +57,22 @@ export default function FlightRecorderModal() {
 
   useEffect(() => {
     if (ongoingFlight) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAircraft(ongoingFlight.aircraft_registration || '')
-       
       setPilotFunction(ongoingFlight.pilot_function || 'DUAL')
-       
       setFlightRules(ongoingFlight.flight_rules || 'VFR')
-       
       setTimeOfDay(ongoingFlight.time_of_day || 'DAY')
-       
       setFlightType(ongoingFlight.flight_type || 'LOCAL')
-       
       setDeparture(ongoingFlight.departure_aerodrome || '')
-       
       setDestination(ongoingFlight.destination_aerodrome || '')
-       
       setDesiredTime(ongoingFlight.desired_flight_time || '')
+      
+      if (ongoingFlight.selected_program && !selectedProgram) setSelectedProgram(ongoingFlight.selected_program)
+      if (ongoingFlight.selected_task && !selectedTask) setSelectedTask(ongoingFlight.selected_task)
+      if (ongoingFlight.programs_cache && programs.length === 0) setPrograms(ongoingFlight.programs_cache)
+      if (ongoingFlight.task_exercises_cache && taskExercises.length === 0) setTaskExercises(ongoingFlight.task_exercises_cache)
+      if (ongoingFlight.grades && Object.keys(grades).length === 0) setGrades(ongoingFlight.grades)
+      if (ongoingFlight.exercise_comments && Object.keys(exerciseComments).length === 0) setExerciseComments(ongoingFlight.exercise_comments)
+      if (ongoingFlight.general_comment && !generalComment) setGeneralComment(ongoingFlight.general_comment)
     }
   }, [ongoingFlight])
 
@@ -134,6 +135,8 @@ export default function FlightRecorderModal() {
   useEffect(() => {
     const fetchPrograms = async () => {
       if (!ongoingFlight?.student_id) return
+      if (ongoingFlight.programs_cache) return // Use cache
+      
       setLoadingPrograms(true)
       try {
         const res = await fetch('/api/flightlogger/programs', {
@@ -143,14 +146,16 @@ export default function FlightRecorderModal() {
         })
         if (res.ok) {
           const data = await res.json()
-          setPrograms(data.programs || [])
+          const progs = data.programs || []
+          setPrograms(progs)
+          updateFlight({ programs_cache: progs })
           
           // Auto-select last used program from localStorage
           const savedProg = localStorage.getItem(`lastProg_${ongoingFlight.student_id}`)
-          if (savedProg && data.programs?.some((p: ProgramData) => p.programName === savedProg)) {
+          if (savedProg && progs.some((p: ProgramData) => p.programName === savedProg)) {
             setSelectedProgram(savedProg)
-          } else if (data.programs?.length > 0) {
-            setSelectedProgram(data.programs[0].programName)
+          } else if (progs.length > 0) {
+            setSelectedProgram(progs[0].programName)
           }
         }
       } catch (e) {
@@ -160,7 +165,7 @@ export default function FlightRecorderModal() {
       }
     }
     if (isModalOpen) fetchPrograms()
-  }, [isModalOpen, ongoingFlight?.student_id])
+  }, [isModalOpen, ongoingFlight?.student_id, ongoingFlight?.programs_cache])
 
   // Save selected program to localStorage when it changes
   useEffect(() => {
@@ -176,6 +181,11 @@ export default function FlightRecorderModal() {
       return
     }
 
+    // Use cache if this is the currently cached task
+    if (ongoingFlight.task_exercises_cache && ongoingFlight.selected_task === selectedTask) {
+      return;
+    }
+
     const prog = programs.find(p => p.programName === selectedProgram)
     if (!prog?.programId) return
 
@@ -186,7 +196,8 @@ export default function FlightRecorderModal() {
         const res = await fetch(url)
         if (res.ok) {
           const data = await res.json()
-          setTaskExercises(data.exercises || [])
+          const exes = data.exercises || []
+          setTaskExercises(exes)
           
           // Pre-fill existing grades if any (though typically empty for NOT_FLOWN)
           const newGrades = { ...grades }
@@ -202,6 +213,14 @@ export default function FlightRecorderModal() {
             })
           }
           if (hasChanges) setGrades(newGrades)
+          
+          // Save to supabase immediately
+          updateFlight({ 
+            task_exercises_cache: exes, 
+            selected_task: selectedTask, 
+            selected_program: selectedProgram,
+            grades: hasChanges ? newGrades : undefined
+          })
         }
       } catch (e) {
         console.error('Error fetching task details', e)
@@ -210,7 +229,7 @@ export default function FlightRecorderModal() {
       }
     }
     fetchTaskDetails()
-  }, [selectedTask, ongoingFlight?.student_id, selectedProgram, programs])
+  }, [selectedTask, ongoingFlight?.student_id, selectedProgram, programs, ongoingFlight?.task_exercises_cache, ongoingFlight?.selected_task])
 
   if (!isModalOpen || !ongoingFlight) return null
 
@@ -224,6 +243,11 @@ export default function FlightRecorderModal() {
       departure_aerodrome: departure,
       destination_aerodrome: destination,
       desired_flight_time: desiredTime,
+      selected_program: selectedProgram,
+      selected_task: selectedTask,
+      grades,
+      exercise_comments: exerciseComments,
+      general_comment: generalComment,
     })
 
     // Optionally save new aerodromes to profile
@@ -465,6 +489,15 @@ export default function FlightRecorderModal() {
                                       style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                     >+</button>
                                   </div>
+                                </div>
+                                <div style={{ marginTop: '8px' }}>
+                                  <input 
+                                    type="text" 
+                                    placeholder="Komment ehhez a kompetenciához..." 
+                                    value={exerciseComments[ex.id] || ''}
+                                    onChange={e => setExerciseComments(prev => ({ ...prev, [ex.id]: e.target.value }))}
+                                    style={{ width: '100%', padding: '8px', fontSize: '13px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'rgba(0,0,0,0.2)', color: 'white' }}
+                                  />
                                 </div>
                               </div>
                             ))}

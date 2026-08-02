@@ -47,6 +47,13 @@ CREATE TABLE IF NOT EXISTS public.flights (
   departure_aerodrome TEXT,
   destination_aerodrome TEXT,
   desired_flight_time TEXT,
+  selected_program TEXT,
+  selected_task TEXT,
+  programs_cache JSONB,
+  task_exercises_cache JSONB,
+  grades JSONB,
+  exercise_comments JSONB,
+  general_comment TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
