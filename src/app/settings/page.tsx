@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Navbar from '@/components/Navbar'
+import { sendNotification, requestNotificationPermission } from '@/lib/notifications'
 
 export default function SettingsPage() {
   const [user, setUser] = useState<{ id: string; username: string } | null>(null)
@@ -291,10 +292,8 @@ export default function SettingsPage() {
                   className="btn btn-primary"
                   style={{ width: 'auto' }}
                   onClick={async () => {
-                    if (typeof window !== 'undefined' && 'Notification' in window) {
-                      const p = await Notification.requestPermission();
-                      setNotificationPermission(p);
-                    }
+                    const p = await requestNotificationPermission();
+                    setNotificationPermission(p);
                   }}
                 >
                   Enable Notifications
@@ -306,8 +305,8 @@ export default function SettingsPage() {
                 className="btn btn-secondary"
                 style={{ width: 'auto' }}
                 onClick={() => {
-                  if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-                    new Notification('AugmentFlogger', {
+                  if (notificationPermission === 'granted') {
+                    sendNotification('AugmentFlogger', {
                       body: 'Ez egy teszt értesítés!'
                     });
                   } else {

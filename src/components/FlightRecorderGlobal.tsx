@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useFlightRecorder } from './FlightRecorderContext'
+import { sendNotification, requestNotificationPermission } from '@/lib/notifications'
 
 export default function FlightRecorderGlobal() {
   const { ongoingFlight, setIsModalOpen } = useFlightRecorder()
@@ -11,11 +12,14 @@ export default function FlightRecorderGlobal() {
 
   useEffect(() => {
     // Request notification permission if we haven't already
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      if (Notification.permission === 'default') {
-        Notification.requestPermission();
+    const initNotifications = async () => {
+      if (typeof window !== 'undefined' && 'Notification' in window) {
+        if (Notification.permission === 'default') {
+          await requestNotificationPermission();
+        }
       }
-    }
+    };
+    initNotifications();
   }, [])
 
   useEffect(() => {
@@ -52,12 +56,10 @@ export default function FlightRecorderGlobal() {
         if (timeRemaining <= warningThreshold) {
           setIsWarning(true)
           if (!notificationSent && timeRemaining > 0) { // Don't send if already way past
-            if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-              new Notification('Flight Recorder', {
-                body: `Figyelem! 10 percen belül lejár a tervezett repülési idő! (${ongoingFlight.desired_flight_time})`
-              });
-              setNotificationSent(true)
-            }
+            sendNotification('Flight Recorder', {
+              body: `Figyelem! 10 percen belül lejár a tervezett repülési idő! (${ongoingFlight.desired_flight_time})`
+            });
+            setNotificationSent(true)
           }
         } else {
           setIsWarning(false)
