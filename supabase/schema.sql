@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   username TEXT UNIQUE NOT NULL,
   fl_api_key TEXT,
   pinned_students JSONB DEFAULT '[]'::jsonb,
+  recent_aerodromes JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
@@ -29,6 +30,53 @@ CREATE POLICY "Users can insert own profile"
   ON public.profiles
   FOR INSERT
   WITH CHECK (auth.uid() = id);
+
+-- 4. Create flights table
+CREATE TABLE IF NOT EXISTS public.flights (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  instructor_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  student_id TEXT NOT NULL,
+  student_name TEXT,
+  start_time TIMESTAMPTZ NOT NULL,
+  end_time TIMESTAMPTZ,
+  aircraft_registration TEXT,
+  pilot_function TEXT,
+  flight_rules TEXT,
+  time_of_day TEXT,
+  flight_type TEXT,
+  departure_aerodrome TEXT,
+  destination_aerodrome TEXT,
+  desired_flight_time TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- 5. Prevent multiple ongoing flights per instructor
+CREATE UNIQUE INDEX unique_ongoing_flight ON public.flights (instructor_id) WHERE end_time IS NULL;
+
+-- 6. Enable RLS on flights
+ALTER TABLE public.flights ENABLE ROW LEVEL SECURITY;
+
+-- 7. RLS Policies for flights
+CREATE POLICY "Users can read own flights"
+  ON public.flights
+  FOR SELECT
+  USING (auth.uid() = instructor_id);
+
+CREATE POLICY "Users can insert own flights"
+  ON public.flights
+  FOR INSERT
+  WITH CHECK (auth.uid() = instructor_id);
+
+CREATE POLICY "Users can update own flights"
+  ON public.flights
+  FOR UPDATE
+  USING (auth.uid() = instructor_id)
+  WITH CHECK (auth.uid() = instructor_id);
+
+CREATE POLICY "Users can delete own flights"
+  ON public.flights
+  FOR DELETE
+  USING (auth.uid() = instructor_id);
 
 -- 4. Optional: auto-create profile on user signup (alternative to client-side creation)
 -- You can enable this trigger if you want a server-side fallback

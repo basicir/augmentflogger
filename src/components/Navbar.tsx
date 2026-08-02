@@ -40,6 +40,15 @@ export default function Navbar({ username }: NavbarProps) {
         </Link>
 
         <Link
+          href="/dashboard/flights"
+          className={`navbar-link ${pathname === '/dashboard/flights' ? 'active' : ''}`}
+          id="nav-flights"
+        >
+          <span>✈️</span>
+          <span className="nav-link-text">My Flights</span>
+        </Link>
+
+        <Link
           href="/settings"
           className={`navbar-link ${pathname === '/settings' ? 'active' : ''}`}
           id="nav-settings"

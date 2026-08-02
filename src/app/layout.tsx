@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { FlightRecorderProvider } from '@/components/FlightRecorderContext'
+import FlightRecorderGlobal from '@/components/FlightRecorderGlobal'
+import FlightRecorderModal from '@/components/FlightRecorderModal'
 
 export const metadata: Metadata = {
   title: 'AugmentFlogger — Flight Instructor Dashboard',
@@ -19,7 +22,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="antialiased">
-        {children}
+        <FlightRecorderProvider>
+          {children}
+          <FlightRecorderGlobal />
+          <FlightRecorderModal />
+        </FlightRecorderProvider>
       </body>
     </html>
   )

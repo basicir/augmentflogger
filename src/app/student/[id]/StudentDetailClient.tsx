@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useFlightRecorder } from '@/components/FlightRecorderContext'
 
 interface GradedCompetency {
   coreCompetencyName: string | null
@@ -62,6 +63,7 @@ interface StudentDetailClientProps {
 
 export default function StudentDetailClient({ student, lastFlight }: StudentDetailClientProps) {
   const [activeTab, setActiveTab] = useState<'last-flight' | 'logbook' | 'statistics'>('last-flight')
+  const { startFlight, ongoingFlight } = useFlightRecorder()
 
   const fullName = `${student.firstName} ${student.lastName}`
   const initials = `${student.firstName[0] ?? ''}${student.lastName[0] ?? ''}`.toUpperCase()
@@ -124,6 +126,30 @@ export default function StudentDetailClient({ student, lastFlight }: StudentDeta
               <span>✦</span> {student.callSign}
             </div>
           )}
+        </div>
+
+        <div style={{ marginLeft: 'auto' }}>
+          <button
+            onClick={() => startFlight(student.id, fullName)}
+            disabled={!!ongoingFlight}
+            style={{
+              background: ongoingFlight ? 'var(--bg-glass)' : 'var(--primary)',
+              color: ongoingFlight ? 'var(--text-disabled)' : 'white',
+              border: ongoingFlight ? '1px solid var(--border-default)' : 'none',
+              padding: '12px 24px',
+              borderRadius: 'var(--radius-full)',
+              fontWeight: 600,
+              cursor: ongoingFlight ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s',
+              opacity: ongoingFlight ? 0.6 : 1
+            }}
+          >
+            <span style={{ fontSize: '18px' }}>⏱</span> 
+            {ongoingFlight ? 'Flight in progress' : 'Start Flight'}
+          </button>
         </div>
       </header>
 
@@ -308,7 +334,7 @@ export default function StudentDetailClient({ student, lastFlight }: StudentDeta
             }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>✈️</div>
               <h3>No flights recorded</h3>
-              <p>This student hasn't logged any flights yet.</p>
+              <p>This student hasn&apos;t logged any flights yet.</p>
             </div>
           )}
         </section>
