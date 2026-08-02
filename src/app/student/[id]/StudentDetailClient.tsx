@@ -175,6 +175,12 @@ export default function StudentDetailClient({ student, lastFlight }: StudentDeta
                   <div style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '4px' }}>Date</div>
                   <div style={{ fontWeight: 500 }}>{new Date(lastFlight.startsAt).toLocaleString()}</div>
                 </div>
+                {training?.name && (
+                  <div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '4px' }}>Task</div>
+                    <div style={{ fontWeight: 500 }}>{training.name}</div>
+                  </div>
+                )}
                 {lastFlight.departureAirport && lastFlight.arrivalAirport && (
                   <div>
                     <div style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '4px' }}>Route</div>
@@ -210,9 +216,10 @@ export default function StudentDetailClient({ student, lastFlight }: StudentDeta
                   <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ color: 'var(--primary)' }}>💬</span> General Comment
                   </h3>
-                  <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-                    {training.comment}
-                  </p>
+                  <div
+                    style={{ lineHeight: 1.6, color: 'var(--text-secondary)' }}
+                    dangerouslySetInnerHTML={{ __html: training.comment }}
+                  />
                 </div>
               )}
 
@@ -242,9 +249,10 @@ export default function StudentDetailClient({ student, lastFlight }: StudentDeta
                                 )}
                               </div>
                               {ex.comment && (
-                                <div style={{ color: 'var(--text-secondary)', fontSize: '14px', background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
-                                  {ex.comment}
-                                </div>
+                                <div
+                                  style={{ color: 'var(--text-secondary)', fontSize: '14px', background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: 'var(--radius-sm)' }}
+                                  dangerouslySetInnerHTML={{ __html: ex.comment }}
+                                />
                               )}
                               {ex.gradedCompetencies && ex.gradedCompetencies.length > 0 && (
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
