@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import StudentDetailClient from './StudentDetailClient'
 
@@ -111,7 +111,8 @@ export default async function StudentPage({ params }: { params: Promise<{ id: st
     },
     body: JSON.stringify({
       query: GET_STUDENT_QUERY,
-      variables: { id },
+      // FlightLogger expects integer IDs — coerce the string param
+      variables: { id: parseInt(id, 10) || id },
     }),
     cache: 'no-store'
   })
@@ -126,10 +127,25 @@ export default async function StudentPage({ params }: { params: Promise<{ id: st
   }
 
   const flData = await flResponse.json()
-  
-  if (flData.errors || !flData.data?.user) {
-    console.error('GraphQL Error:', flData.errors)
-    notFound()
+
+  // GraphQL may return partial errors alongside valid data (valid per spec).
+  // Only bail out if there is genuinely no user object.
+  if (!flData.data?.user) {
+    console.error('GraphQL Error (no user data):', flData.errors)
+    return (
+      <div style={{ padding: '48px', textAlign: 'center' }}>
+        <h2>Student not found</h2>
+        <p>This student could not be loaded from FlightLogger.</p>
+        {flData.errors?.[0]?.message && (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{flData.errors[0].message}</p>
+        )}
+      </div>
+    )
+  }
+
+  if (flData.errors) {
+    // Partial errors — log but continue with whatever data we have
+    console.warn('GraphQL partial errors:', flData.errors)
   }
 
   const u = flData.data.user
