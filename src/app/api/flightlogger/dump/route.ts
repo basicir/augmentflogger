@@ -16,7 +16,7 @@ export async function GET(request: Request) {
 
   if (!apiKey) return NextResponse.json({ error: 'No API key found in db' }, { status: 400 })
 
-  const query = `query DebugStudent($studentId: ID!) {
+  const query = `query DebugStudent($studentId: String!) {
     user(id: $studentId) {
       id
       firstName
