@@ -17,7 +17,6 @@ const GET_TRAINING_DETAILS_QUERY = `
         lecture {
           id
           name
-          description
         }
         userCategories {
           id
