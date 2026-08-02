@@ -25,13 +25,15 @@ export interface OngoingFlight {
   grades: Record<string, string> | null
   exercise_comments: Record<string, string> | null
   general_comment: string | null
+  touch_and_goes?: number | null
+  landings?: number | null
 }
 
 interface FlightRecorderContextType {
   ongoingFlight: OngoingFlight | null
   isModalOpen: boolean
   startFlight: (studentId: string, studentName: string) => Promise<void>
-  stopFlight: () => Promise<void>
+  stopFlight: (touchAndGoes?: number) => Promise<void>
   updateFlight: (updates: Partial<OngoingFlight>) => Promise<void>
   setIsModalOpen: (open: boolean) => void
   loading: boolean
@@ -103,12 +105,18 @@ export function FlightRecorderProvider({ children }: { children: React.ReactNode
     }
   }
 
-  const stopFlight = async () => {
+  const stopFlight = async (touchAndGoes?: number) => {
     if (!ongoingFlight) return
+
+    const updates: any = { end_time: new Date().toISOString() }
+    if (touchAndGoes !== undefined) {
+      updates.touch_and_goes = touchAndGoes
+      updates.landings = touchAndGoes + 1
+    }
 
     const { error } = await supabase
       .from('flights')
-      .update({ end_time: new Date().toISOString() })
+      .update(updates)
       .eq('id', ongoingFlight.id)
 
     if (error) {

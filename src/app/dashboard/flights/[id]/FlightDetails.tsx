@@ -302,6 +302,26 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '150px', fontWeight: 700, fontSize: '13px', color: 'var(--text-secondary)' }}>TOUCH & GOES</div>
+                <div style={{ flex: 1, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', padding: '16px' }}>
+                  {isEditing ? (
+                    <input 
+                      type="number"
+                      min="0"
+                      value={editData.touch_and_goes ?? flight.touch_and_goes ?? 0} 
+                      onChange={e => {
+                        const val = parseInt(e.target.value, 10);
+                        const tng = isNaN(val) ? 0 : Math.max(0, val);
+                        setEditData({...editData, touch_and_goes: tng, landings: tng + 1});
+                      }}
+                      style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%', fontWeight: 'bold', fontSize: '16px' }}
+                    />
+                  ) : (
+                    <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{flight.touch_and_goes ?? 0}</span>
+                  )}
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{ width: '150px', fontWeight: 700, fontSize: '13px', color: 'var(--text-secondary)' }}>ARRIVAL</div>
                 <div style={{ flex: 1, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', padding: '16px' }}>
                   {isEditing ? (

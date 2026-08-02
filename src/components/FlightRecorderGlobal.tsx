@@ -13,6 +13,8 @@ export default function FlightRecorderGlobal() {
   
   const [isDragging, setIsDragging] = useState(false)
   const [showTrash, setShowTrash] = useState(false)
+  const [showEndPrompt, setShowEndPrompt] = useState(false)
+  const [touchAndGoes, setTouchAndGoes] = useState('0')
 
   const handleDragStart = () => {
     setIsDragging(true)
@@ -31,9 +33,7 @@ export default function FlightRecorderGlobal() {
     setIsDragging(false)
     
     if (info.point.x < 150) {
-      if (window.confirm('Are you sure you want to stop this flight recording?')) {
-        stopFlight()
-      }
+      setShowEndPrompt(true)
       setShowTrash(false)
     } else {
       setShowTrash(false)
@@ -178,6 +178,43 @@ export default function FlightRecorderGlobal() {
           </div>
         </motion.button>
       </div>
+
+      {showEndPrompt && (
+        <div className="modal-overlay" style={{ zIndex: 60 }} onClick={(e) => { if (e.target === e.currentTarget) setShowEndPrompt(false) }}>
+          <div className="modal-box" style={{ maxWidth: '400px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', margin: 0 }}>End Flight</h2>
+            <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Enter the number of touch and goes for this flight.</p>
+            
+            <input 
+              type="number" 
+              min="0"
+              value={touchAndGoes}
+              onChange={(e) => setTouchAndGoes(e.target.value)}
+              style={{ padding: '12px', fontSize: '18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', width: '100%' }}
+              autoFocus
+            />
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+              <button 
+                onClick={() => setShowEndPrompt(false)}
+                style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600 }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  const num = parseInt(touchAndGoes, 10)
+                  stopFlight(isNaN(num) ? 0 : Math.max(0, num))
+                  setShowEndPrompt(false)
+                }}
+                style={{ flex: 1, padding: '12px', background: '#ef4444', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600 }}
+              >
+                Stop Flight
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

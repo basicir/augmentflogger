@@ -28,6 +28,8 @@ export interface Flight {
   grades: Record<string, string> | null
   exercise_comments: Record<string, string> | null
   general_comment: string | null
+  touch_and_goes?: number | null
+  landings?: number | null
 }
 
 export default function FlightList({ flights, utcOffsetHours }: { flights: Flight[], utcOffsetHours: number }) {
