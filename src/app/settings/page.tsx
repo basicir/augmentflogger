@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Navbar from '@/components/Navbar'
 import { sendNotification, requestNotificationPermission } from '@/lib/notifications'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
 
 export default function SettingsPage() {
   const [user, setUser] = useState<{ id: string; username: string } | null>(null)
@@ -18,7 +19,10 @@ export default function SettingsPage() {
   const [saveError, setSaveError] = useState('')
   const [testStatus, setTestStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [testMessage, setTestMessage] = useState('')
+  const { subscribeToPush, permission, isSupported } = usePushNotifications()
   const [notificationPermission, setNotificationPermission] = useState<string>('default')
+  const [testPushStatus, setTestPushStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [testPushMsg, setTestPushMsg] = useState('')
 
   const supabase = createClient()
 
@@ -335,19 +339,61 @@ export default function SettingsPage() {
                 type="button"
                 className="btn btn-secondary"
                 style={{ width: 'auto' }}
-                onClick={() => {
-                  if (notificationPermission === 'granted') {
-                    sendNotification('AugmentFlogger', {
-                      body: 'This is a test notification!'
-                    });
-                  } else {
+                disabled={testPushStatus === 'loading'}
+                onClick={async () => {
+                  if (notificationPermission !== 'granted') {
                     alert('Please enable notifications first!');
+                    return;
+                  }
+                  
+                  if (!user) return;
+                  
+                  setTestPushStatus('loading')
+                  setTestPushMsg('')
+
+                  try {
+                    // Make sure we have a fresh subscription in the database before testing
+                    await subscribeToPush(user.id)
+
+                    // Call the Edge Function to send a real Web Push to this user
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/flight-push-worker`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
+                      },
+                      body: JSON.stringify({ test_user_id: user.id })
+                    })
+                    
+                    const data = await res.json()
+                    
+                    if (res.ok && data.success) {
+                      setTestPushStatus('success')
+                      setTestPushMsg('Push sent via Supabase!')
+                    } else {
+                      setTestPushStatus('error')
+                      setTestPushMsg(data.error || 'Failed to send push.')
+                    }
+                  } catch (e) {
+                    setTestPushStatus('error')
+                    setTestPushMsg('Network error.')
                   }
                 }}
               >
-                Test Notification
+                {testPushStatus === 'loading' ? <span className="spinner spinner-sm" /> : 'Test Web Push'}
               </button>
             </div>
+            
+            {testPushStatus === 'success' && (
+              <div className="alert alert-success" style={{ marginTop: 12 }}>
+                <span>✓</span> {testPushMsg}
+              </div>
+            )}
+            {testPushStatus === 'error' && (
+              <div className="alert alert-error" style={{ marginTop: 12 }}>
+                <span>⚠</span> {testPushMsg}
+              </div>
+            )}
           </div>
 
           {/* Danger Zone */}
