@@ -1391,7 +1391,7 @@ body {
 
   /* Modal adjustments for mobile */
   .modal-overlay {
-    padding: 16px 12px;
+    padding: 16px 12px 12vh 12px;
   }
 
   .modal-box {

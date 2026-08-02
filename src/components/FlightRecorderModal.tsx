@@ -247,8 +247,21 @@ export default function FlightRecorderModal() {
         setLoadingTaskDetails(false)
       }
     }
-    fetchTaskDetails()
+    if (ongoingFlight?.student_id) {
+      fetchTaskDetails()
+    }
   }, [selectedTask, ongoingFlight?.student_id, selectedProgram, programs, ongoingFlight?.task_exercises_cache, ongoingFlight?.selected_task])
+
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isModalOpen])
 
   if (!isModalOpen || !ongoingFlight) return null
 
@@ -538,23 +551,23 @@ export default function FlightRecorderModal() {
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             {exercises.map(ex => (
                               <div key={ex.id} style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <div style={{ display: 'flex', alignItems: 'stretch', gap: '8px', minHeight: '64px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', height: '64px' }}>
                                   
                                   {/* Left Arrow Toggle for Comments */}
                                   <button 
                                     onClick={() => setExpandedComments(prev => ({ ...prev, [ex.id]: !prev[ex.id] }))}
-                                    style={{ position: 'relative', width: '32px', background: 'none', border: 'none', color: exerciseComments[ex.id] ? 'var(--primary)' : 'var(--text-secondary)', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+                                    style={{ position: 'relative', width: '32px', height: '100%', background: 'none', border: 'none', color: exerciseComments[ex.id] ? 'var(--primary)' : 'var(--text-secondary)', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
                                   >
                                     {expandedComments[ex.id] ? '▼' : '▶'}
                                     {/* Indicator dot if there's a comment but drawer is closed */}
                                     {exerciseComments[ex.id] && !expandedComments[ex.id] && (
-                                      <span style={{ position: 'absolute', top: '16px', right: '4px', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)' }} />
+                                      <span style={{ position: 'absolute', top: '24px', right: '0px', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)' }} />
                                     )}
                                   </button>
 
                                   {/* Competency Title (25% width container) */}
-                                  <div style={{ width: '25%', display: 'flex', alignItems: 'center', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '8px' }}>
-                                    <span style={{ fontSize: 'clamp(10px, 3.5vw, 15px)', fontWeight: 600, lineHeight: 1.1, wordBreak: 'break-word', color: 'var(--text-primary)' }}>
+                                  <div style={{ width: '25%', height: '100%', display: 'flex', alignItems: 'center', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '8px', containerType: 'inline-size' }}>
+                                    <span style={{ fontSize: 'clamp(9px, 12cqw, 14px)', fontWeight: 600, lineHeight: 1.1, wordBreak: 'normal', color: 'var(--text-primary)', display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                       {ex.name}
                                     </span>
                                   </div>
