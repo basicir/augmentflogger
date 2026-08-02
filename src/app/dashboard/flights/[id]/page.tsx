@@ -8,7 +8,8 @@ export const metadata = {
   title: 'Flight Details - AugmentFlogger',
 }
 
-export default async function FlightDetailsPage({ params }: { params: { id: string } }) {
+export default async function FlightDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -29,7 +30,7 @@ export default async function FlightDetailsPage({ params }: { params: { id: stri
   const { data: flight, error } = await supabase
     .from('flights')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (error || !flight) {

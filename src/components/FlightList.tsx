@@ -63,10 +63,10 @@ export default function FlightList({ flights, utcOffsetHours }: { flights: Fligh
 
           return (
             <div key={dateKey}>
-              <h2 style={{ fontSize: '18px', fontWeight: 600, color: isToday ? '#10b981' : 'var(--text-secondary)', marginBottom: '16px', borderBottom: '1px solid var(--border-default)', paddingBottom: '8px' }}>
+              <h2 style={{ fontSize: '16px', fontWeight: 600, color: isToday ? '#10b981' : 'var(--text-secondary)', marginBottom: '12px', borderBottom: '1px solid var(--border-default)', paddingBottom: '6px' }}>
                 {isToday ? 'Today' : headerDateStr}
               </h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {groupedFlights[dateKey].map((flight) => {
                   const start = new Date(flight.start_time)
                   const end = new Date(flight.end_time)
@@ -105,7 +105,7 @@ export default function FlightList({ flights, utcOffsetHours }: { flights: Fligh
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'stretch',
-                        padding: '16px',
+                        padding: '12px',
                         fontFamily: 'sans-serif',
                         textDecoration: 'none',
                         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
@@ -116,23 +116,23 @@ export default function FlightList({ flights, utcOffsetHours }: { flights: Fligh
                     >
                       {/* Top Row */}
                       <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '60px', paddingRight: '16px' }}>
-                          <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.05em' }}>{monthShort}</div>
-                          <div style={{ fontSize: '20px', fontWeight: 800, margin: '2px 0' }}>{day}</div>
-                          <div style={{ fontSize: '10px', color: isToday ? '#a7f3d0' : '#94A3B8' }}>{year}</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '50px', paddingRight: '12px' }}>
+                          <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.05em' }}>{monthShort}</div>
+                          <div style={{ fontSize: '18px', fontWeight: 800, margin: '2px 0' }}>{day}</div>
+                          <div style={{ fontSize: '9px', color: isToday ? '#a7f3d0' : '#94A3B8' }}>{year}</div>
                         </div>
 
-                        <div style={{ width: '1px', backgroundColor: isToday ? 'rgba(255,255,255,0.2)' : '#334155', height: '50px', marginRight: '16px' }}></div>
+                        <div style={{ width: '1px', backgroundColor: isToday ? 'rgba(255,255,255,0.2)' : '#334155', height: '40px', marginRight: '12px' }}></div>
 
                         <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'stretch' }}>
                           
-                          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '60px' }}>
-                            <div style={{ fontSize: '18px', fontWeight: 700, lineHeight: 1.2 }}>{depTime}</div>
-                            <div style={{ fontSize: '12px', fontWeight: 500 }}>{flight.departure_aerodrome || 'N/A'}</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '50px' }}>
+                            <div style={{ fontSize: '16px', fontWeight: 700, lineHeight: 1.2 }}>{depTime}</div>
+                            <div style={{ fontSize: '11px', fontWeight: 500 }}>{flight.departure_aerodrome || 'N/A'}</div>
                           </div>
 
-                          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 16px', justifyContent: 'center' }}>
-                            <div style={{ fontSize: '11px', marginBottom: '6px', color: isToday ? '#d1fae5' : '#E2E8F0', textAlign: 'center' }}>
+                          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 12px', justifyContent: 'center' }}>
+                            <div style={{ fontSize: '10px', marginBottom: '4px', color: isToday ? '#d1fae5' : '#E2E8F0', textAlign: 'center' }}>
                               {flight.aircraft_registration || 'Unknown'} {flight.aircraft_type ? `(${flight.aircraft_type})` : ''}
                             </div>
                             
@@ -146,32 +146,32 @@ export default function FlightList({ flights, utcOffsetHours }: { flights: Fligh
                             </div>
                           </div>
 
-                          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', width: '60px' }}>
-                            <div style={{ fontSize: '18px', fontWeight: 700, lineHeight: 1.2 }}>{arrTime}</div>
-                            <div style={{ fontSize: '12px', fontWeight: 500 }}>{flight.destination_aerodrome || 'N/A'}</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', width: '50px' }}>
+                            <div style={{ fontSize: '16px', fontWeight: 700, lineHeight: 1.2 }}>{arrTime}</div>
+                            <div style={{ fontSize: '11px', fontWeight: 500 }}>{flight.destination_aerodrome || 'N/A'}</div>
                           </div>
                         </div>
                       </div>
 
                       {/* Bottom Row - Badges */}
-                      <div style={{ display: 'flex', gap: '4px', marginTop: '12px', flexWrap: 'wrap', justifyContent: 'center', width: '100%' }}>
+                      <div style={{ display: 'flex', gap: '4px', marginTop: '10px', flexWrap: 'wrap', justifyContent: 'center', width: '100%' }}>
                         {flight.pilot_function && (
-                          <span style={{ backgroundColor: isToday ? 'rgba(255,255,255,0.2)' : '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
+                          <span style={{ backgroundColor: isToday ? 'rgba(255,255,255,0.2)' : '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '8px', fontWeight: 700 }}>
                             {flight.pilot_function}
                           </span>
                         )}
                         {flight.flight_rules && (
-                          <span style={{ backgroundColor: isToday ? 'rgba(255,255,255,0.2)' : '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
+                          <span style={{ backgroundColor: isToday ? 'rgba(255,255,255,0.2)' : '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '8px', fontWeight: 700 }}>
                             {flight.flight_rules}
                           </span>
                         )}
                         {flight.time_of_day && (
-                          <span style={{ backgroundColor: isToday ? 'rgba(255,255,255,0.2)' : '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
+                          <span style={{ backgroundColor: isToday ? 'rgba(255,255,255,0.2)' : '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '8px', fontWeight: 700 }}>
                             {flight.time_of_day === 'Day' ? '☀️' : (flight.time_of_day === 'Night' ? '🌙' : flight.time_of_day)}
                           </span>
                         )}
                         {flight.flight_type && (
-                          <span style={{ backgroundColor: isToday ? 'rgba(255,255,255,0.2)' : '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
+                          <span style={{ backgroundColor: isToday ? 'rgba(255,255,255,0.2)' : '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '8px', fontWeight: 700 }}>
                             {flight.flight_type}
                           </span>
                         )}
