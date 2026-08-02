@@ -119,10 +119,13 @@ export default function FlightList({ flights, utcOffsetHours }: { flights: Fligh
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '50px', paddingRight: '12px' }}>
                           <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.05em' }}>{monthShort}</div>
                           <div style={{ fontSize: '18px', fontWeight: 800, margin: '2px 0' }}>{day}</div>
-                          <div style={{ fontSize: '9px', color: isToday ? '#a7f3d0' : '#94A3B8' }}>{year}</div>
+                          <div style={{ fontSize: '9px', color: isToday ? '#a7f3d0' : '#94A3B8', marginBottom: '4px' }}>{year}</div>
+                          <div style={{ fontSize: '9px', fontWeight: 800, color: 'var(--text-primary)', textAlign: 'center', textTransform: 'uppercase' }}>
+                            {flight.student_name}
+                          </div>
                         </div>
 
-                        <div style={{ width: '1px', backgroundColor: isToday ? 'rgba(255,255,255,0.2)' : '#334155', height: '40px', marginRight: '12px' }}></div>
+                        <div style={{ width: '1px', backgroundColor: isToday ? 'rgba(255,255,255,0.2)' : '#334155', height: '60px', marginRight: '12px' }}></div>
 
                         <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'stretch' }}>
                           
