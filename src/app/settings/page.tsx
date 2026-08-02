@@ -15,8 +15,15 @@ export default function SettingsPage() {
   const [saveError, setSaveError] = useState('')
   const [testStatus, setTestStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [testMessage, setTestMessage] = useState('')
+  const [notificationPermission, setNotificationPermission] = useState<string>('default')
 
   const supabase = createClient()
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setNotificationPermission(Notification.permission)
+    }
+  }, [])
 
   useEffect(() => {
     const loadData = async () => {
@@ -258,6 +265,59 @@ export default function SettingsPage() {
                 )}
               </div>
             </form>
+          </div>
+
+          {/* Push Notifications */}
+          <div className="settings-section">
+            <div className="settings-section-title">
+              <span className="settings-section-title-icon">🔔</span>
+              Push Notifications
+              {notificationPermission === 'granted' ? (
+                <span className="badge badge-success">✓ Enabled</span>
+              ) : notificationPermission === 'denied' ? (
+                <span className="badge badge-danger">✕ Denied</span>
+              ) : (
+                <span className="badge badge-warning">⚠ Not Set</span>
+              )}
+            </div>
+            <p className="settings-section-desc">
+              Enable push notifications to receive alerts when your planned flight time is almost up.
+            </p>
+
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              {notificationPermission !== 'granted' && (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={{ width: 'auto' }}
+                  onClick={async () => {
+                    if (typeof window !== 'undefined' && 'Notification' in window) {
+                      const p = await Notification.requestPermission();
+                      setNotificationPermission(p);
+                    }
+                  }}
+                >
+                  Enable Notifications
+                </button>
+              )}
+              
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ width: 'auto' }}
+                onClick={() => {
+                  if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+                    new Notification('AugmentFlogger', {
+                      body: 'Ez egy teszt értesítés!'
+                    });
+                  } else {
+                    alert('Kérlek engedélyezd előbb az értesítéseket!');
+                  }
+                }}
+              >
+                Teszt Értesítés
+              </button>
+            </div>
           </div>
 
           {/* Danger Zone */}
