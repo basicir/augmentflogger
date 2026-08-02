@@ -80,12 +80,7 @@ export default function StudentDetailClient({ student, lastFlight }: StudentDeta
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ studentId: student.id })
         })
-        if (res.ok) {
-          const data = await res.json()
-          console.group(`%c✈️ FlightLogger Programs for ${student.firstName} ${student.lastName}`, 'color: #3b82f6; font-size: 14px; font-weight: bold;')
-          console.log(JSON.stringify(data.programs, null, 2))
-          console.groupEnd()
-        } else {
+        if (!res.ok) {
           const errData = await res.json()
           console.error('Failed to fetch programs, server returned:', errData)
         }

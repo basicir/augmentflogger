@@ -129,8 +129,8 @@ export async function POST(request: Request) {
           taskId: lecture.id,
           taskName: lecture.name,
           status: completedLectures[lecture.id] || "PENDING"
-        })) || []
-      })) || [];
+        })).reverse() || []
+      })).reverse() || [];
 
       return {
         programName: up.name,
