@@ -34,7 +34,6 @@ const GET_STUDENT_QUERY = `
                   gradedCompetencies {
                     coreCompetencyName
                     grade
-                    comment
                   }
                 }
               }
@@ -67,7 +66,6 @@ const GET_STUDENT_QUERY = `
                   gradedCompetencies {
                     coreCompetencyName
                     grade
-                    comment
                   }
                 }
               }
