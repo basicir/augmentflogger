@@ -82,13 +82,16 @@ export default async function FlightsPage() {
                   color: '#ffffff',
                   borderRadius: '6px',
                   display: 'flex',
-                  alignItems: 'center',
+                  flexDirection: 'column',
+                  alignItems: 'stretch',
                   padding: '16px',
                   fontFamily: 'sans-serif',
                   textDecoration: 'none',
                   boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                 }}
               >
+                {/* Top Row */}
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%' }}>
                 {/* Left Date Section */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '60px', paddingRight: '16px' }}>
                   <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.05em' }}>{monthShort}</div>
@@ -122,29 +125,6 @@ export default async function FlightsPage() {
                       </div>
                       <div style={{ flex: 1, height: '1px', backgroundColor: '#475569' }}></div>
                     </div>
-
-                    <div style={{ display: 'flex', gap: '4px', marginTop: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                      {flight.pilot_function && (
-                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
-                          {flight.pilot_function}
-                        </span>
-                      )}
-                      {flight.flight_rules && (
-                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
-                          {flight.flight_rules}
-                        </span>
-                      )}
-                      {flight.time_of_day && (
-                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
-                          {flight.time_of_day === 'Day' ? '☀️' : (flight.time_of_day === 'Night' ? '🌙' : flight.time_of_day)}
-                        </span>
-                      )}
-                      {flight.flight_type && (
-                        <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
-                          {flight.flight_type}
-                        </span>
-                      )}
-                    </div>
                   </div>
 
                   {/* Arrival Side */}
@@ -154,10 +134,31 @@ export default async function FlightsPage() {
                        <div style={{ fontSize: '18px', fontWeight: 700, lineHeight: 1.2 }}>{arrTime}</div>
                        <div style={{ fontSize: '12px', fontWeight: 500 }}>{flight.destination_aerodrome || 'N/A'}</div>
                     </div>
-                    <div style={{ fontSize: '10px', color: '#E2E8F0', marginTop: 'auto' }}>
-                      {flight.organization || 'TRENER'}
-                    </div>
                   </div>
+                </div>
+
+                {/* Bottom Row - Badges */}
+                <div style={{ display: 'flex', gap: '4px', marginTop: '12px', flexWrap: 'wrap', justifyContent: 'center', width: '100%' }}>
+                  {flight.pilot_function && (
+                    <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
+                      {flight.pilot_function}
+                    </span>
+                  )}
+                  {flight.flight_rules && (
+                    <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
+                      {flight.flight_rules}
+                    </span>
+                  )}
+                  {flight.time_of_day && (
+                    <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
+                      {flight.time_of_day === 'Day' ? '☀️' : (flight.time_of_day === 'Night' ? '🌙' : flight.time_of_day)}
+                    </span>
+                  )}
+                  {flight.flight_type && (
+                    <span style={{ backgroundColor: '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: 700 }}>
+                      {flight.flight_type}
+                    </span>
+                  )}
                 </div>
               </Link>
             )
