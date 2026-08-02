@@ -47,6 +47,7 @@ export default function FlightList({ flights, utcOffsetHours }: { flights: Fligh
 
   const sortedDates = Object.keys(groupedFlights).sort((a, b) => b.localeCompare(a))
 
+  const formatTime = (d: Date) => `${d.getUTCHours().toString().padStart(2, '0')}:${d.getUTCMinutes().toString().padStart(2, '0')}`
   const formatDate = (d: Date) => `${d.getUTCDate().toString().padStart(2, '0')}.${(d.getUTCMonth()+1).toString().padStart(2, '0')}.${d.getUTCFullYear()}`
 
   return (
