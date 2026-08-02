@@ -14,27 +14,20 @@ export async function GET(request: Request) {
 
   const query = `
     query {
-      users(first: 20) {
+      trainings(first: 20, all: true) {
         nodes {
-          userPrograms(first: 5, status: [ACTIVE]) {
-            nodes {
-              trainings(first: 5) {
-                nodes {
-                  id
-                  lecture { id name }
-                  userCategories {
-                    id
-                    name
-                    exercises {
-                      id
-                      name
-                      gradedCompetencies {
-                        id
-                        coreCompetencyName
-                      }
-                    }
-                  }
-                }
+          id
+          status
+          lecture { id name }
+          userCategories {
+            id
+            name
+            exercises {
+              id
+              name
+              gradedCompetencies {
+                id
+                coreCompetencyName
               }
             }
           }
@@ -54,24 +47,14 @@ export async function GET(request: Request) {
   
   // Find a training that actually has userCategories
   let exampleTraining = null;
-  if (rawData.data?.users?.nodes) {
-    for (const u of rawData.data.users.nodes) {
-      if (u.userPrograms?.nodes) {
-        for (const p of u.userPrograms.nodes) {
-          if (p.trainings?.nodes) {
-            for (const t of p.trainings.nodes) {
-              if (t.userCategories && t.userCategories.length > 0) {
-                exampleTraining = t;
-                break;
-              }
-            }
-          }
-          if (exampleTraining) break;
-        }
+  if (rawData.data?.trainings?.nodes) {
+    for (const t of rawData.data.trainings.nodes) {
+      if (t.userCategories && t.userCategories.length > 0) {
+        exampleTraining = t;
+        break;
       }
-      if (exampleTraining) break;
     }
   }
 
-  return NextResponse.json({ foundTraining: exampleTraining || 'No training with categories found in the first 20 users.', rawData })
+  return NextResponse.json({ foundTraining: exampleTraining || 'No training with categories found in the first 20 trainings.', rawData })
 }
