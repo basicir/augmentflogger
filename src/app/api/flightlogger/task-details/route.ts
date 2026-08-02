@@ -7,7 +7,8 @@ const GET_TRAINING_DETAILS_QUERY = `
   query GetTrainingDetails($studentId: Id!, $programId: Id!) {
     trainings(
       userIds: [$studentId], 
-      first: 1000, 
+      programIds: [$programId], 
+      first: 200, 
       all: true
     ) {
       nodes {
@@ -95,14 +96,10 @@ export async function GET(request: Request) {
     const matchingTraining = trainings.find((t: any) => t.lecture?.id === lectureId)
 
     if (!matchingTraining) {
-      // For tasks that haven't been scheduled or flown yet, FlightLogger's public API
-      // does not expose a Training object, which means we cannot fetch the grading categories.
-      // Return a 200 with empty exercises so the UI can still load flight parameters.
-      return NextResponse.json({
-        trainingId: null,
-        lectureName: "Unknown Task",
-        exercises: []
-      })
+      return NextResponse.json(
+        { error: 'Training not found for this lecture' },
+        { status: 404 }
+      )
     }
 
     // Extract all exercises flatly
@@ -125,7 +122,6 @@ export async function GET(request: Request) {
     return NextResponse.json({
       trainingId: matchingTraining.id,
       lectureName: matchingTraining.lecture.name,
-      lectureDescription: matchingTraining.lecture.description,
       exercises
     })
   } catch (err: any) {
