@@ -4,6 +4,14 @@ import { createClient } from '@/lib/supabase/server'
 const FLIGHTLOGGER_GRAPHQL = 'https://api.flightlogger.net/graphql'
 
 export async function GET(request: Request) {
+  return handleIntrospect(request, false)
+}
+
+export async function POST(request: Request) {
+  return handleIntrospect(request, true)
+}
+
+async function handleIntrospect(request: Request, isPost: boolean) {
   const { searchParams } = new URL(request.url)
   const queryKey = searchParams.get('key')
 
@@ -18,7 +26,7 @@ export async function GET(request: Request) {
 
   if (!apiKey) return NextResponse.json({ error: 'No API key' }, { status: 400 })
 
-  const query = `{
+  let query = `{
     userCategory: __type(name: "UserCategory") {
       name
       fields { name type { name kind ofType { name kind } } }
@@ -40,6 +48,15 @@ export async function GET(request: Request) {
       fields(includeDeprecated: false) { name type { name kind ofType { name kind } } }
     }
   }`
+
+  if (isPost) {
+    try {
+      const body = await request.json()
+      if (body.query) query = body.query
+    } catch (e) {
+      // ignore
+    }
+  }
 
   const res = await fetch(FLIGHTLOGGER_GRAPHQL, {
     method: 'POST',
