@@ -350,16 +350,15 @@ export default function FlightRecorderModal() {
           {activeTab === 'flight-parameters' && (
             <>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Aircraft Registration</label>
             <select 
               value={aircraft} 
               onChange={e => {
                 setAircraft(e.target.value);
                 updateFlight({ aircraft_registration: e.target.value });
               }}
-              style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}
+              style={{ width: '100%', padding: '16px', fontSize: '18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', fontWeight: 'bold' }}
             >
-              <option value="">Select Aircraft</option>
+              <option value="">✈️ Select Aircraft</option>
               {availableAircraft.length === 0 ? (
                 <option disabled>Loading...</option>
               ) : (
@@ -372,54 +371,52 @@ export default function FlightRecorderModal() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div>
-              <button onClick={cyclePilotFunction} style={{ position: 'relative', width: '100%', padding: '16px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left', fontWeight: 'bold' }}>
+              <button onClick={cyclePilotFunction} style={{ position: 'relative', width: '100%', padding: '24px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'center', fontWeight: '900', fontSize: '20px' }}>
                 <span>{pilotFunction === 'Not Specified' ? 'N/S' : pilotFunction}</span>
-                <span style={{ position: 'absolute', top: '4px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(pilotFunctionOpts, pilotFunction)}</span>
+                <span style={{ position: 'absolute', top: '6px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(pilotFunctionOpts, pilotFunction)}</span>
               </button>
             </div>
             <div>
-              <button onClick={cycleFlightRules} style={{ position: 'relative', width: '100%', padding: '16px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left', fontWeight: 'bold' }}>
+              <button onClick={cycleFlightRules} style={{ position: 'relative', width: '100%', padding: '24px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'center', fontWeight: '900', fontSize: '20px' }}>
                 <span>{flightRules === 'Not Specified' ? 'N/S' : flightRules}</span>
-                <span style={{ position: 'absolute', top: '4px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(flightRulesOpts, flightRules)}</span>
+                <span style={{ position: 'absolute', top: '6px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(flightRulesOpts, flightRules)}</span>
               </button>
             </div>
             <div>
-              <button onClick={cycleTimeOfDay} style={{ position: 'relative', width: '100%', padding: '16px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left', fontWeight: 'bold' }}>
+              <button onClick={cycleTimeOfDay} style={{ position: 'relative', width: '100%', padding: '24px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'center', fontWeight: '900', fontSize: '20px' }}>
                 <span>{timeOfDay === 'Not Specified' ? 'N/S' : timeOfDay}</span>
-                <span style={{ position: 'absolute', top: '4px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(timeOfDayOpts, timeOfDay)}</span>
+                <span style={{ position: 'absolute', top: '6px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(timeOfDayOpts, timeOfDay)}</span>
               </button>
             </div>
             <div>
-              <button onClick={cycleFlightType} style={{ position: 'relative', width: '100%', padding: '16px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left', fontWeight: 'bold' }}>
+              <button onClick={cycleFlightType} style={{ position: 'relative', width: '100%', padding: '24px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'center', fontWeight: '900', fontSize: '20px' }}>
                 <span>{flightType === 'Not Specified' ? 'N/S' : flightType}</span>
-                <span style={{ position: 'absolute', top: '4px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(flightTypeOpts, flightType)}</span>
+                <span style={{ position: 'absolute', top: '6px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{getNextOpt(flightTypeOpts, flightType)}</span>
               </button>
             </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Departure Aerodrome</label>
               <input 
                 type="text" 
                 list="recent-aero" 
                 value={departure} 
                 onChange={e => setDeparture(e.target.value.toUpperCase())}
                 onBlur={e => handleAerodromeBlur('departure_aerodrome', e.target.value.toUpperCase())}
-                placeholder="e.g. LHBP"
-                style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}
+                placeholder="🛫 Departure (e.g. LHBP)"
+                style={{ width: '100%', padding: '16px', fontSize: '18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', fontWeight: 'bold', textAlign: 'center' }}
               />
             </div>
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Destination Aerodrome</label>
               <input 
                 type="text" 
                 list="recent-aero" 
                 value={destination} 
                 onChange={e => setDestination(e.target.value.toUpperCase())}
                 onBlur={e => handleAerodromeBlur('destination_aerodrome', e.target.value.toUpperCase())}
-                placeholder="e.g. LHSM"
-                style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}
+                placeholder="🛬 Destination (e.g. LHSM)"
+                style={{ width: '100%', padding: '16px', fontSize: '18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', fontWeight: 'bold', textAlign: 'center' }}
               />
             </div>
             <datalist id="recent-aero">
@@ -428,26 +425,25 @@ export default function FlightRecorderModal() {
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Desired Flight Time</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', justifyContent: 'center', background: 'var(--bg-elevated)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', justifyContent: 'center', background: 'var(--bg-elevated)', padding: '24px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
-                <button onClick={() => adjustTime(60)} style={{ width: '60px', padding: '8px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+1h</button>
-                <span style={{ fontSize: '28px', fontWeight: 'bold' }}>{desiredTime.split(':')[0] || '01'}</span>
-                <button onClick={() => adjustTime(-60)} style={{ width: '60px', padding: '8px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>-1h</button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+                <button onClick={() => adjustTime(60)} style={{ width: '80px', padding: '12px', fontSize: '18px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+1h</button>
+                <span style={{ fontSize: '36px', fontWeight: '900' }}>{desiredTime.split(':')[0] || '01'}</span>
+                <button onClick={() => adjustTime(-60)} style={{ width: '80px', padding: '12px', fontSize: '18px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>-1h</button>
               </div>
               
-              <span style={{ fontSize: '28px', fontWeight: 'bold' }}>:</span>
+              <span style={{ fontSize: '36px', fontWeight: '900' }}>:</span>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
-                <div style={{ display: 'flex', gap: '4px' }}>
-                  <button onClick={() => adjustTime(5)} style={{ width: '40px', padding: '8px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+5m</button>
-                  <button onClick={() => adjustTime(10)} style={{ width: '50px', padding: '8px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+10m</button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={() => adjustTime(5)} style={{ width: '60px', padding: '12px', fontSize: '16px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+5m</button>
+                  <button onClick={() => adjustTime(10)} style={{ width: '60px', padding: '12px', fontSize: '16px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+10m</button>
                 </div>
-                <span style={{ fontSize: '28px', fontWeight: 'bold' }}>{desiredTime.split(':')[1] || '00'}</span>
-                <div style={{ display: 'flex', gap: '4px' }}>
-                  <button onClick={() => adjustTime(-5)} style={{ width: '40px', padding: '8px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>-5m</button>
-                  <button onClick={() => adjustTime(-10)} style={{ width: '50px', padding: '8px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>-10m</button>
+                <span style={{ fontSize: '36px', fontWeight: '900' }}>{desiredTime.split(':')[1] || '00'}</span>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={() => adjustTime(-5)} style={{ width: '60px', padding: '12px', fontSize: '16px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>-5m</button>
+                  <button onClick={() => adjustTime(-10)} style={{ width: '60px', padding: '12px', fontSize: '16px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>-10m</button>
                 </div>
               </div>
 
@@ -459,13 +455,12 @@ export default function FlightRecorderModal() {
           {activeTab === 'task-parameters' && (
             <>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Program</label>
                 <select 
                   value={selectedProgram} 
                   onChange={e => setSelectedProgram(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}
+                  style={{ width: '100%', padding: '16px', fontSize: '18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', fontWeight: 'bold' }}
                 >
-                  <option value="">Select Program</option>
+                  <option value="">📁 Select Program</option>
                   {loadingPrograms ? (
                     <option disabled>Loading...</option>
                   ) : (
@@ -477,13 +472,12 @@ export default function FlightRecorderModal() {
               </div>
 
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Task</label>
                 <select 
                   value={selectedTask} 
                   onChange={e => setSelectedTask(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}
+                  style={{ width: '100%', padding: '16px', fontSize: '18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', fontWeight: 'bold' }}
                 >
-                  <option value="">Select Task</option>
+                  <option value="">📝 Select Task</option>
                   {programs.find(p => p.programName === selectedProgram)?.phases?.map((phase: PhaseData, pIdx: number) => (
                     <optgroup key={pIdx} label={phase.phaseName}>
                       {phase.tasks.map((task: TaskData) => (

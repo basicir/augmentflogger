@@ -162,22 +162,24 @@ export default function StudentDetailClient({ student, lastFlight }: StudentDeta
             onClick={() => startFlight(student.id, fullName)}
             disabled={!!ongoingFlight}
             style={{
-              background: ongoingFlight ? 'var(--bg-glass)' : 'var(--primary)',
+              background: ongoingFlight ? 'var(--bg-glass)' : 'var(--gradient-primary)',
               color: ongoingFlight ? 'var(--text-disabled)' : 'white',
               border: ongoingFlight ? '1px solid var(--border-default)' : 'none',
-              padding: '12px 24px',
+              padding: '16px 32px',
               borderRadius: 'var(--radius-full)',
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: ongoingFlight ? 'not-allowed' : 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              justifyContent: 'center',
+              gap: '12px',
               transition: 'all 0.2s',
-              opacity: ongoingFlight ? 0.6 : 1
+              opacity: ongoingFlight ? 0.6 : 1,
+              boxShadow: ongoingFlight ? 'none' : '0 8px 24px -4px rgba(59, 130, 246, 0.5)',
             }}
           >
-            <span style={{ fontSize: '18px' }}>⏱</span> 
-            {ongoingFlight ? 'Flight in progress' : 'Start Flight'}
+            <span style={{ fontSize: '24px' }}>⏱</span> 
+            <span style={{ fontSize: '20px' }}>{ongoingFlight ? 'Flight in progress' : 'Start Flight'}</span>
           </button>
         </div>
       </header>
