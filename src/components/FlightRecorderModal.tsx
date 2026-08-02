@@ -331,7 +331,7 @@ export default function FlightRecorderModal() {
 
   return (
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setIsModalOpen(false) }}>
-      <div className="modal-box" style={{ maxWidth: '600px', width: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+      <div className="modal-box" style={{ maxWidth: '600px', width: '100%', maxHeight: '85vh', marginBottom: '10vh', display: 'flex', flexDirection: 'column' }}>
         <div className="modal-header">
           <h2 className="modal-title">Flight Recorder - {ongoingFlight.student_name}</h2>
         </div>
@@ -593,9 +593,13 @@ export default function FlightRecorderModal() {
                                     <textarea 
                                       placeholder="✏️ Write a comment for this specific competency..." 
                                       value={exerciseComments[ex.id] || ''}
-                                      onChange={e => setExerciseComments(prev => ({ ...prev, [ex.id]: e.target.value }))}
+                                      onChange={e => {
+                                        e.target.style.height = 'auto';
+                                        e.target.style.height = e.target.scrollHeight + 'px';
+                                        setExerciseComments(prev => ({ ...prev, [ex.id]: e.target.value }));
+                                      }}
                                       onBlur={() => updateFlight({ exercise_comments: exerciseComments })}
-                                      style={{ width: '100%', padding: '16px', fontSize: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'rgba(0,0,0,0.3)', color: 'white', minHeight: '80px', resize: 'vertical' }}
+                                      style={{ width: '100%', padding: '16px', fontSize: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'rgba(0,0,0,0.3)', color: 'white', minHeight: '80px', overflow: 'hidden', resize: 'none' }}
                                     />
                                   </div>
                                 )}
@@ -612,25 +616,20 @@ export default function FlightRecorderModal() {
                   <div style={{ marginTop: '24px' }}>
                     <textarea 
                       value={generalComment}
-                      onChange={e => setGeneralComment(e.target.value)}
+                      onChange={e => {
+                        e.target.style.height = 'auto';
+                        e.target.style.height = e.target.scrollHeight + 'px';
+                        setGeneralComment(e.target.value);
+                      }}
                       onBlur={() => updateFlight({ general_comment: generalComment })}
                       placeholder="📝 General comment for this task..."
-                      style={{ width: '100%', height: '120px', padding: '16px', fontSize: '18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', resize: 'vertical' }}
+                      style={{ width: '100%', minHeight: '120px', padding: '16px', fontSize: '18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', overflow: 'hidden', resize: 'none' }}
                     />
                   </div>
                 </div>
               )}
             </>
           )}
-          
-          <div style={{ display: 'flex', gap: '12px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-default)' }}>
-            <button 
-              onClick={stopFlight}
-              style={{ flex: 1, padding: '24px', fontSize: '20px', background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '2px solid rgba(239, 68, 68, 0.4)', borderRadius: 'var(--radius-md)', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase' }}
-            >
-              🛑 Stop Flight
-            </button>
-          </div>
         </div>
       </div>
     </div>
