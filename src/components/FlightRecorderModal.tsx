@@ -252,7 +252,7 @@ export default function FlightRecorderModal() {
   if (!isModalOpen || !ongoingFlight) return null
 
   const cyclePilotFunction = () => {
-    const opts = ['Not Specified', 'DUAL', 'PIC', 'SPIC', 'PICUS'];
+    const opts = ['Not Specified', 'DUAL', 'SPIC', 'SOLO'];
     const idx = opts.indexOf(pilotFunction);
     const next = opts[(idx + 1) % opts.length];
     setPilotFunction(next);
@@ -260,7 +260,7 @@ export default function FlightRecorderModal() {
   };
 
   const cycleFlightRules = () => {
-    const opts = ['Not Specified', 'VFR', 'IFR', 'SVFR'];
+    const opts = ['Not Specified', 'VFR', 'IFR'];
     const idx = opts.indexOf(flightRules);
     const next = opts[(idx + 1) % opts.length];
     setFlightRules(next);
@@ -276,7 +276,7 @@ export default function FlightRecorderModal() {
   };
 
   const cycleFlightType = () => {
-    const opts = ['Not Specified', 'LOCAL', 'CROSS_COUNTRY'];
+    const opts = ['Not Specified', 'LOCAL', 'X-COUNTRY'];
     const idx = opts.indexOf(flightType);
     const next = opts[(idx + 1) % opts.length];
     setFlightType(next);
@@ -350,7 +350,7 @@ export default function FlightRecorderModal() {
             </select>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Pilot Function</label>
               <button onClick={cyclePilotFunction} style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', cursor: 'pointer', textAlign: 'left' }}>{pilotFunction}</button>
@@ -369,7 +369,7 @@ export default function FlightRecorderModal() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Departure Aerodrome</label>
               <input 
@@ -401,14 +401,35 @@ export default function FlightRecorderModal() {
 
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Desired Flight Time (HH:MM)</label>
-            <input 
-              type="text" 
-              value={desiredTime} 
-              onChange={e => setDesiredTime(e.target.value)}
-              onBlur={e => updateFlight({ desired_flight_time: e.target.value })}
-              placeholder="01:30"
-              style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}
-            />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <select 
+                value={desiredTime.split(':')[0] || '01'}
+                onChange={e => {
+                  const newTime = `${e.target.value}:${desiredTime.split(':')[1] || '00'}`;
+                  setDesiredTime(newTime);
+                  updateFlight({ desired_flight_time: newTime });
+                }}
+                style={{ flex: 1, padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', textAlign: 'center', appearance: 'none' }}
+              >
+                {Array.from({ length: 10 }, (_, i) => i.toString().padStart(2, '0')).map(h => (
+                  <option key={h} value={h}>{h} h</option>
+                ))}
+              </select>
+              <span style={{ display: 'flex', alignItems: 'center', fontWeight: 'bold' }}>:</span>
+              <select 
+                value={desiredTime.split(':')[1] || '00'}
+                onChange={e => {
+                  const newTime = `${desiredTime.split(':')[0] || '01'}:${e.target.value}`;
+                  setDesiredTime(newTime);
+                  updateFlight({ desired_flight_time: newTime });
+                }}
+                style={{ flex: 1, padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', textAlign: 'center', appearance: 'none' }}
+              >
+                {Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0')).map(m => (
+                  <option key={m} value={m}>{m} m</option>
+                ))}
+              </select>
+            </div>
               </div>
             </>
           )}
