@@ -15,64 +15,64 @@ const GET_STUDENT_QUERY = `
       firstFlights: flights(first: 1, all: true) {
         nodes {
           id
-          primaryLog {
-            startsAt
-            departureAirport { name code }
-            arrivalAirport { name code }
-            activityRegistration {
-              __typename
-              ... on Training {
-                id
+          departureAirport { name code }
+          arrivalAirport { name code }
+          activityRegistration {
+            __typename
+            ... on Training {
+              id
+              name
+              status
+              comment
+              instructor { firstName lastName }
+              userCategories {
                 name
-                status
-                comment
-                instructor { firstName lastName }
-                userCategories {
+                exercises {
                   name
-                  exercises {
-                    name
+                  grade
+                  comment
+                  gradedCompetencies {
+                    coreCompetencyName
                     grade
-                    comment
-                    gradedCompetencies {
-                      coreCompetencyName
-                      grade
-                    }
                   }
                 }
               }
             }
+          }
+          primaryLog {
+            startsAt
           }
         }
       }
       lastFlights: flights(last: 1, all: true) {
         nodes {
           id
-          primaryLog {
-            startsAt
-            departureAirport { name code }
-            arrivalAirport { name code }
-            activityRegistration {
-              __typename
-              ... on Training {
-                id
+          departureAirport { name code }
+          arrivalAirport { name code }
+          activityRegistration {
+            __typename
+            ... on Training {
+              id
+              name
+              status
+              comment
+              instructor { firstName lastName }
+              userCategories {
                 name
-                status
-                comment
-                instructor { firstName lastName }
-                userCategories {
+                exercises {
                   name
-                  exercises {
-                    name
+                  grade
+                  comment
+                  gradedCompetencies {
+                    coreCompetencyName
                     grade
-                    comment
-                    gradedCompetencies {
-                      coreCompetencyName
-                      grade
-                    }
                   }
                 }
               }
             }
+          }
+          primaryLog {
+            startsAt
           }
         }
       }
@@ -131,7 +131,6 @@ export default async function StudentPage({ params }: { params: Promise<{ id: st
 
   const flData = await flResponse.json()
 
-  // GraphQL may return partial errors alongside valid data (valid per spec).
   // Only bail out if there is genuinely no user object.
   if (!flData.data?.user) {
     console.error('GraphQL Error (no user data):', flData.errors)
@@ -147,30 +146,28 @@ export default async function StudentPage({ params }: { params: Promise<{ id: st
   }
 
   if (flData.errors) {
-    // Partial errors — log but continue with whatever data we have
     console.warn('GraphQL partial errors:', flData.errors)
   }
 
   const u = flData.data.user
 
-  // Flatten primaryLog fields into the shape StudentDetailClient expects
+  // Flatten into the FlightData shape StudentDetailClient expects.
+  // departureAirport/arrivalAirport/activityRegistration are on Flight directly;
+  // startsAt is on Flight.primaryLog (FlightLog type).
   const toFlightData = (node: {
     id: string
-    primaryLog?: {
-      startsAt?: string
-      departureAirport?: { name: string; code: string | null } | null
-      arrivalAirport?: { name: string; code: string | null } | null
-      activityRegistration?: unknown
-    } | null
+    departureAirport?: { name: string; code: string | null } | null
+    arrivalAirport?: { name: string; code: string | null } | null
+    activityRegistration?: unknown
+    primaryLog?: { startsAt?: string } | null
   } | null) => {
-    if (!node || !node.primaryLog) return null
-    const log = node.primaryLog
+    if (!node) return null
     return {
       id: node.id,
-      startsAt: log.startsAt ?? '',
-      departureAirport: log.departureAirport ?? null,
-      arrivalAirport: log.arrivalAirport ?? null,
-      activityRegistration: (log.activityRegistration as { __typename: string } | null) ?? null,
+      startsAt: node.primaryLog?.startsAt ?? '',
+      departureAirport: node.departureAirport ?? null,
+      arrivalAirport: node.arrivalAirport ?? null,
+      activityRegistration: (node.activityRegistration as { __typename: string } | null) ?? null,
     }
   }
 
