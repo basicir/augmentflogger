@@ -23,6 +23,15 @@ export default function FlightRecorderModal() {
   const [rewindMinutes, setRewindMinutes] = useState(0)
   const rewindRef = useRef<HTMLDivElement>(null)
 
+  useEffect(() => {
+    if (ongoingFlight?.id) {
+      const stored = localStorage.getItem(`rewind_minutes_${ongoingFlight.id}`)
+      if (stored) {
+        setRewindMinutes(parseInt(stored, 10))
+      }
+    }
+  }, [ongoingFlight?.id])
+
   // Task Parameters state
   interface TaskData {
     taskId: string;
@@ -334,6 +343,9 @@ export default function FlightRecorderModal() {
     if (actualDelta === 0) return;
 
     setRewindMinutes(newRewind);
+    if (ongoingFlight?.id) {
+      localStorage.setItem(`rewind_minutes_${ongoingFlight.id}`, newRewind.toString());
+    }
 
     if (ongoingFlight && ongoingFlight.start_time) {
       const currentStartTime = new Date(ongoingFlight.start_time);
@@ -515,7 +527,7 @@ export default function FlightRecorderModal() {
                 onBlur={(e) => {
                   if (!e.currentTarget.contains(e.relatedTarget)) {
                     setIsRewindActive(false);
-                    setRewindMinutes(0);
+                    // intentionally not resetting rewindMinutes so it remembers the value
                   }
                 }}
                 style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-elevated)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ef4444', outline: 'none' }}
