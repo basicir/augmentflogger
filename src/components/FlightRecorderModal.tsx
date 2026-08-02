@@ -28,6 +28,8 @@ export default function FlightRecorderModal() {
       const stored = localStorage.getItem(`rewind_minutes_${ongoingFlight.id}`)
       if (stored) {
         setRewindMinutes(parseInt(stored, 10))
+      } else {
+        setRewindMinutes(0)
       }
     }
   }, [ongoingFlight?.id])
