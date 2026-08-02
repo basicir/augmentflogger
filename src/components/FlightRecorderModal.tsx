@@ -135,7 +135,10 @@ export default function FlightRecorderModal() {
   useEffect(() => {
     const fetchPrograms = async () => {
       if (!ongoingFlight?.student_id) return
-      if (ongoingFlight.programs_cache) return // Use cache
+      if (ongoingFlight.programs_cache) {
+        setPrograms(ongoingFlight.programs_cache)
+        return // Use cache
+      }
       
       setLoadingPrograms(true)
       try {
@@ -183,6 +186,7 @@ export default function FlightRecorderModal() {
 
     // Use cache if this is the currently cached task
     if (ongoingFlight.task_exercises_cache && ongoingFlight.selected_task === selectedTask) {
+      setTaskExercises(ongoingFlight.task_exercises_cache);
       return;
     }
 
@@ -451,19 +455,19 @@ export default function FlightRecorderModal() {
 
                       const gradeScale = ["", "BS", "S-", "S", "S+", "AS"]
                       const handleGradeCycle = (exId: string, direction: 'up' | 'down') => {
-                        setGrades(prev => {
-                          const currentGrade = prev[exId] || ""
-                          let idx = gradeScale.indexOf(currentGrade)
-                          if (idx === -1) idx = 0
-                          
-                          if (direction === 'up') {
-                            idx = (idx + 1) % gradeScale.length
-                          } else {
-                            idx = (idx - 1 + gradeScale.length) % gradeScale.length
-                          }
-                          
-                          return { ...prev, [exId]: gradeScale[idx] }
-                        })
+                        const currentGrade = grades[exId] || ""
+                        let idx = gradeScale.indexOf(currentGrade)
+                        if (idx === -1) idx = 0
+                        
+                        if (direction === 'up') {
+                          idx = (idx + 1) % gradeScale.length
+                        } else {
+                          idx = (idx - 1 + gradeScale.length) % gradeScale.length
+                        }
+                        
+                        const newGrades = { ...grades, [exId]: gradeScale[idx] }
+                        setGrades(newGrades)
+                        updateFlight({ grades: newGrades })
                       }
 
                       return Object.entries(grouped).map(([catName, exercises]) => (
@@ -496,6 +500,7 @@ export default function FlightRecorderModal() {
                                     placeholder="Komment ehhez a kompetenciához..." 
                                     value={exerciseComments[ex.id] || ''}
                                     onChange={e => setExerciseComments(prev => ({ ...prev, [ex.id]: e.target.value }))}
+                                    onBlur={() => updateFlight({ exercise_comments: exerciseComments })}
                                     style={{ width: '100%', padding: '8px', fontSize: '13px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'rgba(0,0,0,0.2)', color: 'white' }}
                                   />
                                 </div>
@@ -514,6 +519,7 @@ export default function FlightRecorderModal() {
                     <textarea 
                       value={generalComment}
                       onChange={e => setGeneralComment(e.target.value)}
+                      onBlur={() => updateFlight({ general_comment: generalComment })}
                       placeholder="Write a general comment for this task..."
                       style={{ width: '100%', height: '100px', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', resize: 'vertical' }}
                     />
