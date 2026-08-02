@@ -392,11 +392,11 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                                       style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', fontWeight: 900, fontSize: '18px', width: '100%', textAlign: 'center', appearance: 'none', cursor: 'pointer' }}
                                     >
                                       <option value="">-</option>
-                                      <option value="1">1</option>
-                                      <option value="2">2</option>
-                                      <option value="3">3</option>
-                                      <option value="4">4</option>
-                                      <option value="5">5</option>
+                                      <option value="BS">BS</option>
+                                      <option value="S-">S-</option>
+                                      <option value="S">S</option>
+                                      <option value="S+">S+</option>
+                                      <option value="AS">AS</option>
                                     </select>
                                   ) : (
                                     <span style={{ fontWeight: 900, fontSize: '18px', color: currentGrade ? 'var(--primary)' : 'var(--text-secondary)' }}>
