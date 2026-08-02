@@ -47,6 +47,29 @@ export default function FlightRecorderModal() {
   }, [isModalOpen, supabase])
 
   useEffect(() => {
+    const fetchAirports = async () => {
+      try {
+        const res = await fetch('/api/flightlogger/airports')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.airports) {
+            // Merge with current recentAerodromes to avoid duplicates
+            setRecentAerodromes(prev => {
+              const combined = new Set([...prev, ...data.airports])
+              return Array.from(combined).sort()
+            })
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch past airports from FlightLogger', e)
+      }
+    }
+    if (isModalOpen) {
+      fetchAirports()
+    }
+  }, [isModalOpen])
+
+  useEffect(() => {
     const fetchAircrafts = async () => {
       try {
         const res = await fetch('/api/flightlogger/aircrafts')
