@@ -18,29 +18,6 @@ export default function FlightRecorderModal() {
   const [recentAerodromes, setRecentAerodromes] = useState<string[]>([])
   const [availableAircraft, setAvailableAircraft] = useState<string[]>([])
   
-  // Task Parameters state
-  interface TaskData {
-    taskId: string;
-    taskName: string;
-    status: string;
-  }
-  interface PhaseData {
-    phaseName: string;
-    tasks: TaskData[];
-  }
-  interface ProgramData {
-    programName: string;
-    status: string;
-    phases: PhaseData[];
-  }
-
-  const [activeTab, setActiveTab] = useState<'flight-parameters' | 'task-parameters'>('flight-parameters')
-  const [programs, setPrograms] = useState<ProgramData[]>([])
-  const [selectedProgram, setSelectedProgram] = useState('')
-  const [selectedTask, setSelectedTask] = useState('')
-  const [loadingPrograms, setLoadingPrograms] = useState(false)
-  const [generalComment, setGeneralComment] = useState('')
-  
   const supabase = createClient()
 
   useEffect(() => {
@@ -119,45 +96,6 @@ export default function FlightRecorderModal() {
     }
   }, [isModalOpen, availableAircraft.length])
 
-  // Fetch active programs when modal opens
-  useEffect(() => {
-    const fetchPrograms = async () => {
-      if (!ongoingFlight?.student_id) return
-      setLoadingPrograms(true)
-      try {
-        const res = await fetch('/api/flightlogger/programs', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ studentId: ongoingFlight.student_id })
-        })
-        if (res.ok) {
-          const data = await res.json()
-          setPrograms(data.programs || [])
-          
-          // Auto-select last used program from localStorage
-          const savedProg = localStorage.getItem(`lastProg_${ongoingFlight.student_id}`)
-          if (savedProg && data.programs?.some((p: ProgramData) => p.programName === savedProg)) {
-            setSelectedProgram(savedProg)
-          } else if (data.programs?.length > 0) {
-            setSelectedProgram(data.programs[0].programName)
-          }
-        }
-      } catch (e) {
-        console.error('Error fetching programs', e)
-      } finally {
-        setLoadingPrograms(false)
-      }
-    }
-    if (isModalOpen) fetchPrograms()
-  }, [isModalOpen, ongoingFlight?.student_id])
-
-  // Save selected program to localStorage when it changes
-  useEffect(() => {
-    if (selectedProgram && ongoingFlight?.student_id) {
-      localStorage.setItem(`lastProg_${ongoingFlight.student_id}`, selectedProgram)
-    }
-  }, [selectedProgram, ongoingFlight?.student_id])
-
   if (!isModalOpen || !ongoingFlight) return null
 
   const handleSave = async () => {
@@ -185,41 +123,15 @@ export default function FlightRecorderModal() {
 
   return (
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setIsModalOpen(false) }}>
-      <div className="modal-box" style={{ maxWidth: '600px', width: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+      <div className="modal-box" style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
         <div className="modal-header">
           <h2 className="modal-title">Flight Recorder - {ongoingFlight.student_name}</h2>
           <button className="modal-close" onClick={() => setIsModalOpen(false)}>✕</button>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-default)', background: 'var(--bg-elevated)' }}>
-          <button
-            onClick={() => setActiveTab('flight-parameters')}
-            style={{
-              flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'flight-parameters' ? 'var(--primary)' : 'var(--text-secondary)',
-              borderBottom: activeTab === 'flight-parameters' ? '2px solid var(--primary)' : '2px solid transparent',
-              fontWeight: activeTab === 'flight-parameters' ? 600 : 500, cursor: 'pointer'
-            }}
-          >
-            Flight Parameters
-          </button>
-          <button
-            onClick={() => setActiveTab('task-parameters')}
-            style={{
-              flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'task-parameters' ? 'var(--primary)' : 'var(--text-secondary)',
-              borderBottom: activeTab === 'task-parameters' ? '2px solid var(--primary)' : '2px solid transparent',
-              fontWeight: activeTab === 'task-parameters' ? 600 : 500, cursor: 'pointer'
-            }}
-          >
-            Task Parameters
-          </button>
-        </div>
-
-        <div style={{ padding: '24px', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {activeTab === 'flight-parameters' && (
-            <>
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Aircraft Registration</label>
+        <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Aircraft Registration</label>
             <select 
               value={aircraft} 
               onChange={e => setAircraft(e.target.value)}
@@ -305,92 +217,9 @@ export default function FlightRecorderModal() {
               placeholder="01:30"
               style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}
             />
-              </div>
-            </>
-          )}
-
-          {activeTab === 'task-parameters' && (
-            <>
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Program</label>
-                <select 
-                  value={selectedProgram} 
-                  onChange={e => setSelectedProgram(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}
-                >
-                  <option value="">Select Program</option>
-                  {loadingPrograms ? (
-                    <option disabled>Loading...</option>
-                  ) : (
-                    programs.map((p, idx) => (
-                      <option key={idx} value={p.programName}>{p.programName}</option>
-                    ))
-                  )}
-                </select>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Task</label>
-                <select 
-                  value={selectedTask} 
-                  onChange={e => setSelectedTask(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}
-                >
-                  <option value="">Select Task</option>
-                  {programs.find(p => p.programName === selectedProgram)?.phases?.map((phase: PhaseData, pIdx: number) => (
-                    <optgroup key={pIdx} label={phase.phaseName}>
-                      {phase.tasks.map((task: TaskData) => (
-                        <option 
-                          key={task.taskId} 
-                          value={task.taskId} 
-                          style={{ color: task.status === 'PENDING' ? '#10b981' : '#ef4444' }} // green if pending, red if completed
-                        >
-                          {task.status === 'PENDING' ? '🟢' : '🔴'} {task.taskName}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
-              </div>
-
-              {/* Grading Scaffold */}
-              {selectedTask && (
-                <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 600, borderBottom: '1px solid var(--border-default)', paddingBottom: '8px' }}>
-                    Grading (Scaffold)
-                  </h3>
-                  
-                  <div style={{ padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', border: '1px dashed var(--border-default)' }}>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '16px' }}>
-                      Competency grading UI will be placed here once the API research is complete.
-                    </p>
-                    
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <span>Example Competency</span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <button style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'white', cursor: 'pointer' }}>-</button>
-                        <span style={{ fontWeight: 600, width: '20px', textAlign: 'center' }}>S</span>
-                        <button style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'white', cursor: 'pointer' }}>+</button>
-                      </div>
-                    </div>
-                    <input type="text" placeholder="Comment for this competency..." style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', fontSize: '14px' }} />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>General Comment</label>
-                    <textarea 
-                      value={generalComment}
-                      onChange={e => setGeneralComment(e.target.value)}
-                      placeholder="Write a general comment for this task..."
-                      style={{ width: '100%', height: '100px', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', resize: 'vertical' }}
-                    />
-                  </div>
-                </div>
-              )}
-            </>
-          )}
+          </div>
           
-          <div style={{ display: 'flex', gap: '12px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-default)' }}>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
             <button 
               onClick={handleSave}
               style={{ flex: 1, padding: '12px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: 'pointer' }}
