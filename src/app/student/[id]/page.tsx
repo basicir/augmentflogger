@@ -34,6 +34,7 @@ const GET_STUDENT_QUERY = `
                   gradedCompetencies {
                     coreCompetencyName
                     grade
+                    comment
                   }
                 }
               }
@@ -66,6 +67,7 @@ const GET_STUDENT_QUERY = `
                   gradedCompetencies {
                     coreCompetencyName
                     grade
+                    comment
                   }
                 }
               }
@@ -179,6 +181,13 @@ export default async function StudentPage({ params }: { params: Promise<{ id: st
     lastFlight = new Date(f1.startsAt) > new Date(f2.startsAt) ? f1 : f2
   } else {
     lastFlight = f1 || f2 || null
+  }
+
+  // Debug: log the raw training structure to the server console
+  if (lastFlight?.activityRegistration) {
+    console.log('[StudentPage] raw activityRegistration:', JSON.stringify(lastFlight.activityRegistration, null, 2))
+  } else {
+    console.log('[StudentPage] no activityRegistration on last flight')
   }
 
   const studentData = {

@@ -11,11 +11,8 @@ export async function GET(request: Request) {
 
   if (!apiKey) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
     const { data: profile } = await supabase
-      .from('profiles').select('fl_api_key').eq('id', user.id).single()
+      .from('profiles').select('fl_api_key').not('fl_api_key', 'is', null).limit(1).single()
     apiKey = profile?.fl_api_key ?? null
   }
 
@@ -31,6 +28,10 @@ export async function GET(request: Request) {
       fields { name type { name kind ofType { name kind } } }
     }
     gradedCompetency: __type(name: "GradedCompetency") {
+      name
+      fields { name type { name kind ofType { name kind } } }
+    }
+    training: __type(name: "Training") {
       name
       fields { name type { name kind ofType { name kind } } }
     }
