@@ -8,7 +8,6 @@ const GET_TRAINING_DETAILS_QUERY = `
     trainings(
       userIds: [$studentId], 
       programIds: [$programId], 
-      status: [NOT_FLOWN], 
       first: 200, 
       all: true
     ) {
