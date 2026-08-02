@@ -104,7 +104,7 @@ export default function StudentDetailClient({ student, lastFlight }: StudentDeta
   return (
     <div className="student-detail-container" style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
       {/* Header */}
-      <header style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '32px' }}>
+      <header className="student-header">
         <Link href="/" className="back-btn" style={{ 
           background: 'var(--bg-glass)', 
           border: '1px solid var(--border-default)', 
@@ -157,7 +157,7 @@ export default function StudentDetailClient({ student, lastFlight }: StudentDeta
           )}
         </div>
 
-        <div style={{ marginLeft: 'auto' }}>
+        <div className="student-header-actions">
           <button
             onClick={() => startFlight(student.id, fullName)}
             disabled={!!ongoingFlight}
