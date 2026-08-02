@@ -136,6 +136,7 @@ export default async function FlightsPage() {
                     </div>
                   </div>
                 </div>
+                </div>
 
                 {/* Bottom Row - Badges */}
                 <div style={{ display: 'flex', gap: '4px', marginTop: '12px', flexWrap: 'wrap', justifyContent: 'center', width: '100%' }}>
