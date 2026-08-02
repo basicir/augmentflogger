@@ -4,10 +4,6 @@ import { useState, useEffect } from 'react'
 import { useFlightRecorder } from './FlightRecorderContext'
 import { createClient } from '@/lib/supabase/client'
 
-// Example placeholder for fetching from DB or FlightLogger if available
-// In a real implementation this might be an API call to your backend
-const DEFAULT_AIRCRAFT = ['HA-LIX', 'HA-YDH', 'HA-TUZ', 'OE-XRA']
-
 export default function FlightRecorderModal() {
   const { ongoingFlight, isModalOpen, setIsModalOpen, updateFlight, stopFlight } = useFlightRecorder()
   
@@ -20,6 +16,7 @@ export default function FlightRecorderModal() {
   const [destination, setDestination] = useState('')
   const [desiredTime, setDesiredTime] = useState('')
   const [recentAerodromes, setRecentAerodromes] = useState<string[]>([])
+  const [availableAircraft, setAvailableAircraft] = useState<string[]>([])
   
   const supabase = createClient()
 
@@ -48,6 +45,25 @@ export default function FlightRecorderModal() {
     }
     if (isModalOpen) fetchProfile()
   }, [isModalOpen, supabase])
+
+  useEffect(() => {
+    const fetchAircrafts = async () => {
+      try {
+        const res = await fetch('/api/flightlogger/aircrafts')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.aircrafts) {
+            setAvailableAircraft(data.aircrafts)
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch aircrafts', e)
+      }
+    }
+    if (isModalOpen && availableAircraft.length === 0) {
+      fetchAircrafts()
+    }
+  }, [isModalOpen, availableAircraft.length])
 
   if (!isModalOpen || !ongoingFlight) return null
 
@@ -91,9 +107,13 @@ export default function FlightRecorderModal() {
               style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white' }}
             >
               <option value="">Select Aircraft</option>
-              {DEFAULT_AIRCRAFT.map(ac => (
-                <option key={ac} value={ac}>{ac}</option>
-              ))}
+              {availableAircraft.length === 0 ? (
+                <option disabled>Loading...</option>
+              ) : (
+                availableAircraft.map(ac => (
+                  <option key={ac} value={ac}>{ac}</option>
+                ))
+              )}
             </select>
           </div>
 
