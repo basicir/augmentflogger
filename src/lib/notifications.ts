@@ -33,7 +33,7 @@ export async function sendNotification(title: string, options?: NotificationOpti
 export async function requestNotificationPermission() {
   if (typeof window === 'undefined') return 'default';
   if (!('Notification' in window)) {
-    alert('A böngésződ nem támogatja az értesítéseket. (iPhone-on add hozzá a főképernyőhöz az alkalmazást!)');
+    alert('Your browser does not support notifications. (On iPhone, you must Add to Home Screen first!)');
     return 'denied';
   }
   
@@ -42,7 +42,7 @@ export async function requestNotificationPermission() {
     if (perm === 'denied') {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       if (isIOS) {
-        alert('iPhone-on az értesítések csak akkor működnek, ha hozzáadod az alkalmazást a Főképernyőhöz (Add to Home Screen) és onnan nyitod meg!');
+        alert('On iPhone, push notifications only work if you add the app to your Home Screen (Add to Home Screen) and launch it from there!');
       }
     }
     return perm;

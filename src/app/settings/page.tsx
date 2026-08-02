@@ -307,14 +307,14 @@ export default function SettingsPage() {
                 onClick={() => {
                   if (notificationPermission === 'granted') {
                     sendNotification('AugmentFlogger', {
-                      body: 'Ez egy teszt értesítés!'
+                      body: 'This is a test notification!'
                     });
                   } else {
-                    alert('Kérlek engedélyezd előbb az értesítéseket!');
+                    alert('Please enable notifications first!');
                   }
                 }}
               >
-                Teszt Értesítés
+                Test Notification
               </button>
             </div>
           </div>

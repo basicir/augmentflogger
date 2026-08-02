@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   title: 'AugmentFlogger — Flight Instructor Dashboard',
   description: 'The premium augmentation tool for flight instructors using FlightLogger. Search, monitor, and track students seamlessly.',
   keywords: 'flight instructor, FlightLogger, aviation, student tracking, callsign',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'AugmentFlogger',
+  },
 }
 
 export default function RootLayout({
