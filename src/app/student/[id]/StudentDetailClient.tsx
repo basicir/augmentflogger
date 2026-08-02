@@ -37,7 +37,6 @@ interface Training {
 
 interface Airport {
   name: string
-  code: string | null
 }
 
 interface FlightData {
@@ -180,9 +179,9 @@ export default function StudentDetailClient({ student, lastFlight }: StudentDeta
                   <div>
                     <div style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '4px' }}>Route</div>
                     <div style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {lastFlight.departureAirport.code || lastFlight.departureAirport.name}
+                      {lastFlight.departureAirport.name}
                       <span style={{ color: 'var(--primary)' }}>✈</span>
-                      {lastFlight.arrivalAirport.code || lastFlight.arrivalAirport.name}
+                      {lastFlight.arrivalAirport.name}
                     </div>
                   </div>
                 )}

@@ -15,8 +15,8 @@ const GET_STUDENT_QUERY = `
       firstFlights: flights(first: 1, all: true) {
         nodes {
           id
-          departureAirport { name code }
-          arrivalAirport { name code }
+          departureAirport { name }
+          arrivalAirport { name }
           activityRegistration {
             __typename
             ... on Training {
@@ -47,8 +47,8 @@ const GET_STUDENT_QUERY = `
       lastFlights: flights(last: 1, all: true) {
         nodes {
           id
-          departureAirport { name code }
-          arrivalAirport { name code }
+          departureAirport { name }
+          arrivalAirport { name }
           activityRegistration {
             __typename
             ... on Training {
@@ -156,8 +156,8 @@ export default async function StudentPage({ params }: { params: Promise<{ id: st
   // startsAt is on Flight.primaryLog (FlightLog type).
   const toFlightData = (node: {
     id: string
-    departureAirport?: { name: string; code: string | null } | null
-    arrivalAirport?: { name: string; code: string | null } | null
+    departureAirport?: { name: string } | null
+    arrivalAirport?: { name: string } | null
     activityRegistration?: unknown
     primaryLog?: { startsAt?: string } | null
   } | null) => {

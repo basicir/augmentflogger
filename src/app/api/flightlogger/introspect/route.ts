@@ -22,13 +22,21 @@ export async function GET(request: Request) {
   if (!apiKey) return NextResponse.json({ error: 'No API key' }, { status: 400 })
 
   const query = `{
-    airport: __type(name: "Airport") {
+    userCategory: __type(name: "UserCategory") {
       name
       fields { name type { name kind ofType { name kind } } }
     }
-    training: __type(name: "Training") {
+    exercise: __type(name: "Exercise") {
       name
       fields { name type { name kind ofType { name kind } } }
+    }
+    gradedCompetency: __type(name: "GradedCompetency") {
+      name
+      fields { name type { name kind ofType { name kind } } }
+    }
+    user: __type(name: "User") {
+      name
+      fields(includeDeprecated: false) { name type { name kind ofType { name kind } } }
     }
   }`
 
