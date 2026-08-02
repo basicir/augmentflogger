@@ -53,13 +53,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: tenantSetting, error: tsError } = await supabase
-      .from('tenant_settings')
-      .select('api_key')
-      .eq('user_id', user.id)
+    const { data: profile, error: tsError } = await supabase
+      .from('profiles')
+      .select('fl_api_key')
+      .eq('id', user.id)
       .single()
 
-    const apiKey = tenantSetting?.api_key
+    const apiKey = profile?.fl_api_key
 
     if (tsError || !apiKey) {
       return NextResponse.json(
