@@ -82,8 +82,9 @@ export default function LogbookTable({
               const offBlock = formatTime(startLocal)
               const onBlock = formatTime(endLocal)
               const flightTime = calculateFlightTime(flight.start_time, flight.end_time)
-              const studentFirstName = flight.student_name.split(' ')[0] || flight.student_name
-              const crew = `${instructorUsername} - ${studentFirstName}`
+              const nameParts = flight.student_name.trim().split(' ')
+              const studentLastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : flight.student_name
+              const crew = `${instructorUsername} - ${studentLastName}`
               // @ts-ignore - landings might be added later
               const ldgs = flight.landings !== undefined && flight.landings !== null ? flight.landings : ''
 

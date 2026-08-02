@@ -115,9 +115,32 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
             {activeTab === 'flight-parameters' ? 'CALL SIGN' : (activeTab === 'task-parameters' ? 'GRADING DETAILS' : 'COMMENTS')}
           </h3>
           {!isEditing ? (
-            <button onClick={() => { setIsEditing(true); setEditData(flight) }} style={{ padding: '8px 16px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
-              ✏️ Edit
-            </button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button 
+                onClick={async () => {
+                  if (window.confirm('Are you sure you want to delete this flight? This action cannot be undone.')) {
+                    setIsSaving(true);
+                    try {
+                      const { error } = await supabase.from('flights').delete().eq('id', flight.id);
+                      if (error) throw error;
+                      router.push('/dashboard/flights');
+                      router.refresh();
+                    } catch (e) {
+                      console.error("Failed to delete flight", e);
+                      alert("Failed to delete flight.");
+                      setIsSaving(false);
+                    }
+                  }
+                }} 
+                disabled={isSaving}
+                style={{ padding: '8px 16px', background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}
+              >
+                🗑️ Delete
+              </button>
+              <button onClick={() => { setIsEditing(true); setEditData(flight) }} style={{ padding: '8px 16px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
+                ✏️ Edit
+              </button>
+            </div>
           ) : (
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setIsEditing(false)} style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
