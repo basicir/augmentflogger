@@ -57,7 +57,8 @@ export function usePushNotifications() {
       }
 
       const registration = await navigator.serviceWorker.ready
-      const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      // Public VAPID key is safe to expose in client code
+      const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'BLEaIPwW7SPWv6HD1u4FeRg-vitfowYGmxBtKplgqj5AXnyESQn_PlFF9VFN-wgNca_0YK5iDSXx5nDQVMkAvx4'
       
       if (!vapidPublicKey) {
         throw new Error('VAPID public key not found in env')
