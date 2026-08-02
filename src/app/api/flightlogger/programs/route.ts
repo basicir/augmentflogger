@@ -7,8 +7,12 @@ const GET_STUDENT_PROGRAMS_QUERY = `
   query GetStudentPrograms($studentId: Id!) {
     userPrograms(userIds: [$studentId], status: [ACTIVE], first: 5, all: true) {
       nodes {
+        id
         name
         status
+        program {
+          id
+        }
         programRevision {
           name
           programPhases {
@@ -102,10 +106,14 @@ export async function POST(request: Request) {
       lectures?: LectureData[];
     }
     interface ProgramData {
+      id: string;
       name: string;
       status: string;
       programRevision?: {
         programPhases?: PhaseData[];
+      };
+      program?: {
+        id: string;
       };
       trainings?: {
         nodes: TrainingData[];
@@ -133,6 +141,7 @@ export async function POST(request: Request) {
       })).reverse() || [];
 
       return {
+        programId: up.program?.id || up.id,
         programName: up.name,
         status: up.status,
         phases: phases

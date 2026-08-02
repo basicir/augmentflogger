@@ -29,6 +29,7 @@ export default function FlightRecorderModal() {
     tasks: TaskData[];
   }
   interface ProgramData {
+    programId: string;
     programName: string;
     status: string;
     phases: PhaseData[];
@@ -39,6 +40,16 @@ export default function FlightRecorderModal() {
   const [selectedProgram, setSelectedProgram] = useState('')
   const [selectedTask, setSelectedTask] = useState('')
   const [loadingPrograms, setLoadingPrograms] = useState(false)
+  
+  interface Exercise {
+    id: string;
+    name: string;
+    categoryName: string;
+    grade?: string;
+  }
+  const [taskExercises, setTaskExercises] = useState<Exercise[]>([])
+  const [grades, setGrades] = useState<Record<string, string>>({})
+  const [loadingTaskDetails, setLoadingTaskDetails] = useState(false)
   const [generalComment, setGeneralComment] = useState('')
   
   const supabase = createClient()
@@ -157,6 +168,47 @@ export default function FlightRecorderModal() {
       localStorage.setItem(`lastProg_${ongoingFlight.student_id}`, selectedProgram)
     }
   }, [selectedProgram, ongoingFlight?.student_id])
+
+  // Fetch task details when selectedTask changes
+  useEffect(() => {
+    if (!selectedTask || !ongoingFlight?.student_id || !selectedProgram) {
+      setTaskExercises([])
+      return
+    }
+
+    const prog = programs.find(p => p.programName === selectedProgram)
+    if (!prog?.programId) return
+
+    const fetchTaskDetails = async () => {
+      setLoadingTaskDetails(true)
+      try {
+        const url = `/api/flightlogger/task-details?studentId=${ongoingFlight.student_id}&programId=${prog.programId}&lectureId=${selectedTask}`
+        const res = await fetch(url)
+        if (res.ok) {
+          const data = await res.json()
+          setTaskExercises(data.exercises || [])
+          
+          // Pre-fill existing grades if any (though typically empty for NOT_FLOWN)
+          const newGrades = { ...grades }
+          let hasChanges = false
+          if (data.exercises) {
+            data.exercises.forEach((ex: any) => {
+              if (ex.grade) {
+                newGrades[ex.id] = ex.grade
+                hasChanges = true
+              }
+            })
+          }
+          if (hasChanges) setGrades(newGrades)
+        }
+      } catch (e) {
+        console.error('Error fetching task details', e)
+      } finally {
+        setLoadingTaskDetails(false)
+      }
+    }
+    fetchTaskDetails()
+  }, [selectedTask, ongoingFlight?.student_id, selectedProgram, programs])
 
   if (!isModalOpen || !ongoingFlight) return null
 
@@ -357,24 +409,70 @@ export default function FlightRecorderModal() {
               {selectedTask && (
                 <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <h3 style={{ fontSize: '16px', fontWeight: 600, borderBottom: '1px solid var(--border-default)', paddingBottom: '8px' }}>
-                    Grading (Scaffold)
+                    Grading
                   </h3>
                   
-                  <div style={{ padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', border: '1px dashed var(--border-default)' }}>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '16px' }}>
-                      Competency grading UI will be placed here once the API research is complete.
-                    </p>
-                    
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <span>Example Competency</span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <button style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'white', cursor: 'pointer' }}>-</button>
-                        <span style={{ fontWeight: 600, width: '20px', textAlign: 'center' }}>S</span>
-                        <button style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'white', cursor: 'pointer' }}>+</button>
-                      </div>
-                    </div>
-                    <input type="text" placeholder="Comment for this competency..." style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', fontSize: '14px' }} />
-                  </div>
+                  {loadingTaskDetails ? (
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Loading task details...</p>
+                  ) : taskExercises.length > 0 ? (
+                    (() => {
+                      // Group exercises by category
+                      const grouped: Record<string, Exercise[]> = {}
+                      taskExercises.forEach(ex => {
+                        if (!grouped[ex.categoryName]) grouped[ex.categoryName] = []
+                        grouped[ex.categoryName].push(ex)
+                      })
+
+                      const gradeScale = ["", "1", "2", "3", "4", "5", "S", "U"]
+                      const handleGradeCycle = (exId: string, direction: 'up' | 'down') => {
+                        setGrades(prev => {
+                          const currentGrade = prev[exId] || ""
+                          let idx = gradeScale.indexOf(currentGrade)
+                          if (idx === -1) idx = 0
+                          
+                          if (direction === 'up') {
+                            idx = (idx + 1) % gradeScale.length
+                          } else {
+                            idx = (idx - 1 + gradeScale.length) % gradeScale.length
+                          }
+                          
+                          return { ...prev, [exId]: gradeScale[idx] }
+                        })
+                      }
+
+                      return Object.entries(grouped).map(([catName, exercises]) => (
+                        <div key={catName} style={{ marginBottom: '16px' }}>
+                          <h4 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            {catName}
+                          </h4>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {exercises.map(ex => (
+                              <div key={ex.id} style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                  <span style={{ fontSize: '14px', flex: 1, paddingRight: '12px' }}>{ex.name}</span>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <button 
+                                      onClick={() => handleGradeCycle(ex.id, 'down')}
+                                      style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    >-</button>
+                                    <span style={{ fontWeight: 600, width: '24px', textAlign: 'center', color: grades[ex.id] ? 'var(--primary)' : 'var(--text-secondary)' }}>
+                                      {grades[ex.id] || "-"}
+                                    </span>
+                                    <button 
+                                      onClick={() => handleGradeCycle(ex.id, 'up')}
+                                      style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    >+</button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))
+                    })()
+                  ) : (
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>No exercises found for this task.</p>
+                  )}
 
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>General Comment</label>
