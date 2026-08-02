@@ -48,7 +48,8 @@ export default function FlightRecorderModal() {
     grade?: string;
   }
   const [taskExercises, setTaskExercises] = useState<Exercise[]>([])
-  const [taskDescription, setTaskDescription] = useState('')
+  const [taskDescription, setTaskDescription] = useState<string>('')
+  const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({})
   const [grades, setGrades] = useState<Record<string, string>>({})
   const [exerciseComments, setExerciseComments] = useState<Record<string, string>>({})
   const [loadingTaskDetails, setLoadingTaskDetails] = useState(false)
@@ -536,33 +537,45 @@ export default function FlightRecorderModal() {
                           </h4>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             {exercises.map(ex => (
-                              <div key={ex.id} style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                  <span style={{ fontSize: '14px', flex: 1, paddingRight: '12px' }}>{ex.name}</span>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div key={ex.id} style={{ padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                                  <span style={{ fontSize: '18px', fontWeight: 600, flex: 1, lineHeight: 1.3 }}>{ex.name}</span>
+                                  
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                     <button 
-                                      onClick={() => handleGradeCycle(ex.id, 'down')}
-                                      style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                    >-</button>
-                                    <span style={{ fontWeight: 600, width: '24px', textAlign: 'center', color: grades[ex.id] ? 'var(--primary)' : 'var(--text-secondary)' }}>
-                                      {grades[ex.id] || "-"}
-                                    </span>
-                                    <button 
-                                      onClick={() => handleGradeCycle(ex.id, 'up')}
-                                      style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                    >+</button>
+                                      onClick={() => setExpandedComments(prev => ({ ...prev, [ex.id]: !prev[ex.id] }))}
+                                      style={{ width: '44px', height: '44px', borderRadius: 'var(--radius-md)', background: exerciseComments[ex.id] ? 'var(--primary)' : 'rgba(255,255,255,0.1)', border: 'none', color: exerciseComments[ex.id] ? 'black' : 'white', cursor: 'pointer', fontSize: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    >
+                                      💬
+                                    </button>
+
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-elevated)', padding: '4px', borderRadius: 'var(--radius-full)', border: '1px solid var(--border-default)' }}>
+                                      <button 
+                                        onClick={() => handleGradeCycle(ex.id, 'down')}
+                                        style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', fontSize: '24px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                      >-</button>
+                                      <span style={{ fontWeight: 900, fontSize: '20px', width: '32px', textAlign: 'center', color: grades[ex.id] ? 'var(--primary)' : 'var(--text-secondary)' }}>
+                                        {grades[ex.id] || "-"}
+                                      </span>
+                                      <button 
+                                        onClick={() => handleGradeCycle(ex.id, 'up')}
+                                        style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', fontSize: '24px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                      >+</button>
+                                    </div>
                                   </div>
                                 </div>
-                                <div style={{ marginTop: '8px' }}>
-                                  <input 
-                                    type="text" 
-                                    placeholder="Comment for this competency..." 
-                                    value={exerciseComments[ex.id] || ''}
-                                    onChange={e => setExerciseComments(prev => ({ ...prev, [ex.id]: e.target.value }))}
-                                    onBlur={() => updateFlight({ exercise_comments: exerciseComments })}
-                                    style={{ width: '100%', padding: '8px', fontSize: '13px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'rgba(0,0,0,0.2)', color: 'white' }}
-                                  />
-                                </div>
+
+                                {expandedComments[ex.id] && (
+                                  <div style={{ marginTop: '8px', animation: 'fadeIn 0.2s ease-in-out' }}>
+                                    <textarea 
+                                      placeholder="✏️ Write a comment for this specific competency..." 
+                                      value={exerciseComments[ex.id] || ''}
+                                      onChange={e => setExerciseComments(prev => ({ ...prev, [ex.id]: e.target.value }))}
+                                      onBlur={() => updateFlight({ exercise_comments: exerciseComments })}
+                                      style={{ width: '100%', padding: '16px', fontSize: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'rgba(0,0,0,0.3)', color: 'white', minHeight: '80px', resize: 'vertical' }}
+                                    />
+                                  </div>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -573,14 +586,13 @@ export default function FlightRecorderModal() {
                     <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>No exercises found for this task.</p>
                   )}
 
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>General Comment</label>
+                  <div style={{ marginTop: '24px' }}>
                     <textarea 
                       value={generalComment}
                       onChange={e => setGeneralComment(e.target.value)}
                       onBlur={() => updateFlight({ general_comment: generalComment })}
-                      placeholder="Write a general comment for this task..."
-                      style={{ width: '100%', height: '100px', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', resize: 'vertical' }}
+                      placeholder="📝 General comment for this task..."
+                      style={{ width: '100%', height: '120px', padding: '16px', fontSize: '18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', resize: 'vertical' }}
                     />
                   </div>
                 </div>
@@ -591,9 +603,9 @@ export default function FlightRecorderModal() {
           <div style={{ display: 'flex', gap: '12px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-default)' }}>
             <button 
               onClick={stopFlight}
-              style={{ flex: 1, padding: '12px', background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: 'pointer' }}
+              style={{ flex: 1, padding: '24px', fontSize: '20px', background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '2px solid rgba(239, 68, 68, 0.4)', borderRadius: 'var(--radius-md)', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase' }}
             >
-              Stop Flight
+              🛑 Stop Flight
             </button>
           </div>
         </div>
