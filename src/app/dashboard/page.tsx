@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar'
 import StudentCard, { type PinnedStudent } from '@/components/StudentCard'
 import SearchModal from '@/components/SearchModal'
 import Link from 'next/link'
+import { Folder, FolderOpen, Tag, X, Plane, Settings, Plus } from 'lucide-react'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<{ id: string; username: string } | null>(null)
@@ -218,11 +219,12 @@ export default function DashboardPage() {
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
                 className={`btn ${isGroupingEnabled ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ width: 'auto' }}
+                style={{ width: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}
                 onClick={() => setIsGroupingEnabled(!isGroupingEnabled)}
                 title="Toggle student grouping mode"
               >
-                <span>📁</span> {isGroupingEnabled ? 'Done Grouping' : 'Group Students'}
+                {isGroupingEnabled ? <FolderOpen size={16} /> : <Folder size={16} />} 
+                {isGroupingEnabled ? 'Done Grouping' : 'Group Students'}
               </button>
               <button
                 className="btn btn-primary"
@@ -258,19 +260,21 @@ export default function DashboardPage() {
                     >
                       <button
                         className="group-tab-title"
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                         onClick={() => setSelectedGroupFilter(group)}
                       >
-                        📁 {group} ({count})
+                        <Folder size={14} /> {group} ({count})
                       </button>
                       <button
                         className="group-delete-btn"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         onClick={(e) => {
                           e.stopPropagation()
                           handleDeleteGroup(group)
                         }}
                         title={`Delete group ${group}`}
                       >
-                        ✕
+                        <X size={14} />
                       </button>
                     </div>
                   )
@@ -333,7 +337,7 @@ export default function DashboardPage() {
 
           {pinnedStudents.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">✈</div>
+              <div className="empty-state-icon"><Plane size={32} /></div>
               <h2 className="empty-state-title">No pinned students yet</h2>
               <p className="empty-state-desc">
                 Search by callsign to pin students and organize them into custom groups (e.g., PPL, CPL, Solo).
@@ -345,12 +349,16 @@ export default function DashboardPage() {
                   onClick={() => setShowSearch(true)}
                   id="empty-search-btn"
                 >
-                  <span>+</span> Pin your first student
+                  <Plus size={16} /> Pin your first student
                 </button>
               )}
               {!hasApiKey && (
-                <Link href="/settings" className="btn btn-secondary" style={{ width: 'auto' }}>
-                  ⚙ Add API Key
+                <Link
+                  href="/settings"
+                  className="btn btn-secondary"
+                  style={{ width: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Settings size={16} /> Add API Key
                 </Link>
               )}
             </div>
@@ -359,14 +367,15 @@ export default function DashboardPage() {
               {displayGroups.map((groupKey) => {
                 const students = groupedStudentsMap[groupKey] ?? []
                 if (students.length === 0 && selectedGroupFilter === '__ALL__') return null
-
                 const isUnassigned = groupKey === '__UNASSIGNED__'
-                const groupTitle = isUnassigned ? '🏷️ Unassigned Students' : `📁 ${groupKey}`
 
                 return (
                   <section key={groupKey} className="group-section">
                     <div className="group-section-header">
-                      <h2 className="group-section-title">{groupTitle}</h2>
+                      <h2 className="group-section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {isUnassigned ? <Tag size={18} color="var(--text-muted)" /> : <Folder size={18} color="var(--text-muted)" />} 
+                        {isUnassigned ? 'Unassigned Students' : groupKey}
+                      </h2>
                       <span className="group-section-count">
                         {students.length} student{students.length !== 1 ? 's' : ''}
                       </span>

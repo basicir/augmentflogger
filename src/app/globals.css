@@ -736,10 +736,7 @@ body {
 }
 
 .group-section {
-  background: rgba(17, 24, 39, 0.4);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xl);
-  padding: 24px;
+  padding: 8px 0 24px 0;
 }
 
 .group-section-header {
