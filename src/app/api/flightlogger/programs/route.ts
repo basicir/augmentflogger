@@ -23,15 +23,23 @@ const GET_STUDENT_PROGRAMS_QUERY = `
             }
           }
         }
-        trainings(first: 100, all: true) {
-          nodes {
-            id
-            status
-            lecture {
-              id
-            }
-          }
-        }
+      }
+    }
+  }
+`
+
+const GET_TRAININGS_QUERY = `
+  query GetTrainings($studentId: Id!, $cursor: String) {
+    trainings(userIds: [$studentId], first: 100, after: $cursor, all: true) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      nodes {
+        id
+        status
+        lecture { id }
+        userProgram { id }
       }
     }
   }
@@ -90,7 +98,34 @@ export async function POST(request: Request) {
     const flData = await flResponse.json()
 
     if (flData.errors) {
-      return NextResponse.json({ error: flData.errors[0]?.message || 'GraphQL error' }, { status: 400 })
+      console.error('GraphQL errors:', flData.errors)
+      return NextResponse.json({ error: 'GraphQL error fetching programs' }, { status: 500 })
+    }
+
+    // Fetch all trainings with pagination
+    let allTrainings: any[] = [];
+    let hasNextPage = true;
+    let cursor: string | null = null;
+
+    while (hasNextPage) {
+      const tRes: Response = await fetch(FLIGHTLOGGER_GRAPHQL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: GET_TRAININGS_QUERY,
+          variables: { studentId, cursor }
+        })
+      });
+      const tData = await tRes.json();
+      if (tData.errors || !tData.data?.trainings) break;
+      
+      const trainingsConnection = tData.data.trainings;
+      allTrainings = allTrainings.concat(trainingsConnection.nodes || []);
+      hasNextPage = trainingsConnection.pageInfo?.hasNextPage;
+      cursor = trainingsConnection.pageInfo?.endCursor;
     }
 
     // Define types for the GraphQL response to avoid 'any'
@@ -117,9 +152,6 @@ export async function POST(request: Request) {
       program?: {
         id: string;
       };
-      trainings?: {
-        nodes: TrainingData[];
-      };
     }
 
     const decodeId = (base64Id: string) => {
@@ -136,14 +168,14 @@ export async function POST(request: Request) {
     const programs = (flData.data?.userPrograms?.nodes || []).map((up: ProgramData) => {
       const completedLectures: Record<string, string> = {};
       const userLectureIds: Record<string, string> = {};
-      if (up.trainings && up.trainings.nodes) {
-        up.trainings.nodes.forEach((t: TrainingData) => {
-          if (t.lecture) {
-            completedLectures[t.lecture.id] = t.status;
-            userLectureIds[t.lecture.id] = t.id;
-          }
-        });
-      }
+
+      const programTrainings = allTrainings.filter(t => t.userProgram?.id === up.id);
+      programTrainings.forEach((t: any) => {
+        if (t.lecture) {
+          completedLectures[t.lecture.id] = t.status;
+          userLectureIds[t.lecture.id] = t.id;
+        }
+      });
 
       const phases = up.programRevision?.programPhases?.map((phase: PhaseData) => ({
         phaseName: phase.name,
