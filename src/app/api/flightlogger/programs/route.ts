@@ -122,6 +122,16 @@ export async function POST(request: Request) {
       };
     }
 
+    const decodeId = (base64Id: string) => {
+      try {
+        const decoded = Buffer.from(base64Id, 'base64').toString('ascii');
+        const match = decoded.match(/--(\d+)$/);
+        return match ? match[1] : base64Id;
+      } catch (e) {
+        return base64Id;
+      }
+    };
+
     const programs = (flData.data?.userPrograms?.nodes || []).map((up: ProgramData) => {
       const completedLectures: Record<string, string> = {};
       const userLectureIds: Record<string, string> = {};
@@ -139,13 +149,13 @@ export async function POST(request: Request) {
         tasks: phase.lectures?.map((lecture: LectureData) => ({
           taskId: lecture.id,
           taskName: lecture.name,
-          userLectureId: userLectureIds[lecture.id] || null,
+          userLectureId: userLectureIds[lecture.id] ? decodeId(userLectureIds[lecture.id]) : null,
           status: completedLectures[lecture.id] || "PENDING"
         })).reverse() || []
       })).reverse() || [];
 
       return {
-        userProgramId: up.id,
+        userProgramId: decodeId(up.id),
         programId: up.program?.id || up.id,
         programName: up.name,
         status: up.status,
