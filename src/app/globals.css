@@ -1506,3 +1506,16 @@ body {
     justify-content: center;
   }
 }
+
+/* Logbook Table */
+.logbook-table th, .logbook-table td {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .logbook-table th, .logbook-table td {
+    padding: 6px 4px;
+    font-size: 11px;
+  }
+}
