@@ -32,14 +32,20 @@
             const targetLink = allLinks.find(a => normalize(a.innerText).includes(searchStr));
             
             if (targetLink) {
-                console.log(`[Auto Task Opener] Found it on attempt ${attempts}! Redirecting to: ${targetLink.href}`);
+                // Ensure it ends with /edit for edit mode
+                let finalUrl = targetLink.href;
+                if (!finalUrl.endsWith('/edit')) {
+                    finalUrl = finalUrl.replace(/\/?(\?.*)?$/, '/edit$1');
+                }
+                
+                console.log(`[Auto Task Opener] Found it on attempt ${attempts}! Redirecting to: ${finalUrl}`);
                 clearInterval(intervalId);
                 
                 targetLink.style.backgroundColor = 'yellow';
                 targetLink.style.border = '2px solid red';
                 
                 // Redirect
-                window.location.replace(targetLink.href);
+                window.location.replace(finalUrl);
             } else if (attempts > 50) {
                 // Stop after ~5 seconds
                 console.error(`[Auto Task Opener] Could not find any link matching "${targetTaskName}" after 5 seconds.`);
