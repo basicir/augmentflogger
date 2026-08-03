@@ -176,7 +176,7 @@ export default function FlightList({ flights, utcOffsetHours }: { flights: Fligh
                               </span>
                             )}
                             {flight.time_of_day && (
-                              <span style={{ backgroundColor: is Today ? 'rgba(255,255,255,0.2)' : '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '8px', fontWeight: 700 }}>
+                              <span style={{ backgroundColor: isToday ? 'rgba(255,255,255,0.2)' : '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '8px', fontWeight: 700 }}>
                                 {flight.time_of_day === 'Day' ? <Sun size={10} style={{ display: 'inline', marginRight: '2px' }} /> : (flight.time_of_day === 'Night' ? <Moon size={10} style={{ display: 'inline', marginRight: '2px' }} /> : null)}
                                 {flight.time_of_day}
                               </span>
