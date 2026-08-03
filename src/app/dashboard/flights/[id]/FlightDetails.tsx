@@ -154,7 +154,7 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
                 onClick={() => {
-                  window.dispatchEvent(new CustomEvent('AUGMENTFLOGGER_EXPORT', { detail: flight }));
+                  window.postMessage({ type: 'AUGMENTFLOGGER_EXPORT', payload: flight }, '*');
                 }}
                 style={{ padding: '8px 16px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
