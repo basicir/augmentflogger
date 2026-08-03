@@ -155,7 +155,31 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
               <button
                 onClick={async () => {
                   try {
-                    await navigator.clipboard.writeText(JSON.stringify(flight));
+                    let parsedGrades = flight.grades;
+                    if (typeof parsedGrades === 'string') {
+                      try { parsedGrades = JSON.parse(parsedGrades); } catch (e) {}
+                    }
+                    let parsedExerciseComments = flight.exercise_comments;
+                    if (typeof parsedExerciseComments === 'string') {
+                      try { parsedExerciseComments = JSON.parse(parsedExerciseComments); } catch (e) {}
+                    }
+
+                    const exportData = {
+                      start_time: flight.start_time,
+                      end_time: flight.end_time,
+                      aircraft_registration: flight.aircraft_registration,
+                      pilot_function: flight.pilot_function,
+                      flight_rules: flight.flight_rules,
+                      time_of_day: flight.time_of_day,
+                      flight_type: flight.flight_type,
+                      departure_aerodrome: flight.departure_aerodrome,
+                      destination_aerodrome: flight.destination_aerodrome,
+                      grades: parsedGrades,
+                      exercise_comments: parsedExerciseComments,
+                      general_comment: flight.general_comment,
+                      touch_and_goes: flight.touch_and_goes
+                    };
+                    await navigator.clipboard.writeText(JSON.stringify(exportData));
                     alert('Sikeresen másolva a vágólapra! Most menj a FlightLoggerre, és nyomd meg az Import gombot!');
                   } catch (err) {
                     console.error('Failed to copy text: ', err);
