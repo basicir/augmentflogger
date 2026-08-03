@@ -440,15 +440,15 @@ export default function SettingsPage() {
               FlightLogger Exporter Script (Tampermonkey)
             </div>
             <p className="settings-section-desc" style={{ marginBottom: '16px' }}>
-              Ezzel a kóddal automatizálhatod a repülési adatok áttöltését a FlightLoggerbe. A script telepítéséhez 
-              szükséged lesz a <strong>Tampermonkey</strong> (vagy Greasemonkey) bővítményre a böngésződben.
+              This script automates transferring flight data into FlightLogger. To install it, you will need the 
+              <strong> Tampermonkey</strong> (or Greasemonkey) extension installed in your browser.
               <br/><br/>
-              <strong>Telepítés lépései:</strong>
+              <strong>Installation Steps:</strong>
               <ol style={{ marginLeft: '24px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <li>Telepítsd a Tampermonkey kiegészítőt.</li>
-                <li>Másold ki az alábbi kódot a "Copy Script" gombbal.</li>
-                <li>A Tampermonkey ikonjára kattintva válaszd a "Create a new script..." opciót.</li>
-                <li>Töröld ki az alapértelmezett kódot, illeszd be az imént kimásoltat, majd mentsd el (Ctrl+S / Cmd+S).</li>
+                <li>Install the Tampermonkey browser extension.</li>
+                <li>Copy the code below using the "Copy Script" button.</li>
+                <li>Click on the Tampermonkey extension icon and select "Create a new script...".</li>
+                <li>Delete the default code, paste the script you just copied, and save it (Ctrl+S / Cmd+S).</li>
               </ol>
             </p>
             
