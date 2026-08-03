@@ -367,7 +367,7 @@ body {
 /* Navbar */
 .navbar {
   height: 64px;
-  background: rgba(13, 20, 33, 0.85);
+  background: rgba(8, 12, 20, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-subtle);
