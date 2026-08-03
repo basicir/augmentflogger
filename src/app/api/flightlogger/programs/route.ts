@@ -105,17 +105,10 @@ export async function POST(request: Request) {
     }
 
     const flData = await flResponse.json()
-    
-    // Dump for debugging
-    try {
-      const fs = require('fs')
-      fs.writeFileSync('flightlogger_response.json', JSON.stringify(flData, null, 2))
-    } catch (e) {
-      console.error("Failed to dump response", e)
-    }
 
     if (flData.errors) {
       console.error("GraphQL errors:", JSON.stringify(flData.errors, null, 2))
+      return NextResponse.json({ error: 'GraphQL error', details: flData.errors }, { status: 400 })
     }
 
     if (flData.errors) {
@@ -236,8 +229,8 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ programs })
-  } catch (error) {
+  } catch (error: any) {
     console.error('FlightLogger proxy error fetching programs:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: String(error), stack: error.stack }, { status: 500 })
   }
 }

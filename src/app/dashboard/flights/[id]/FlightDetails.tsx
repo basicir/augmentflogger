@@ -256,7 +256,11 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                 onClick={async () => {
                   try {
                     const res = await fetch(`/api/flightlogger/programs?studentId=${flight.student_id}`);
-                    if (!res.ok) throw new Error('Failed to fetch updated programs');
+                    if (!res.ok) {
+                      const errData = await res.json().catch(() => ({}));
+                      console.error("API Error Response:", errData);
+                      throw new Error(errData.details ? JSON.stringify(errData.details) : (errData.error || 'Failed to fetch updated programs'));
+                    }
                     const data = await res.json();
                     
                     const { error } = await supabase.from('flights').update({
@@ -266,9 +270,9 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                     
                     router.refresh();
                     alert('FlightLogger data updated successfully!');
-                  } catch (e) {
+                  } catch (e: any) {
                     console.error("Failed to refresh programs cache manually", e);
-                    alert("Failed to refresh cache.");
+                    alert("Failed to refresh cache: " + e.message);
                   }
                 }}
                 style={{ padding: '8px 16px', background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
