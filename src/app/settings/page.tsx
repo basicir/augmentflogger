@@ -23,6 +23,8 @@ export default function SettingsPage() {
   const [notificationPermission, setNotificationPermission] = useState<string>('default')
   const [testPushStatus, setTestPushStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [testPushMsg, setTestPushMsg] = useState('')
+  const [scriptContent, setScriptContent] = useState('')
+  const [scriptCopied, setScriptCopied] = useState(false)
 
   const supabase = createClient()
 
@@ -30,7 +32,21 @@ export default function SettingsPage() {
     if (typeof window !== 'undefined' && 'Notification' in window) {
       setNotificationPermission(Notification.permission)
     }
+    
+    // Fetch the master script content
+    fetch('/master_script.user.js')
+      .then(res => res.text())
+      .then(setScriptContent)
+      .catch(err => console.error('Failed to load master script:', err))
   }, [])
+
+  const copyScript = () => {
+    if (scriptContent) {
+      navigator.clipboard.writeText(scriptContent)
+      setScriptCopied(true)
+      setTimeout(() => setScriptCopied(false), 2000)
+    }
+  }
 
   useEffect(() => {
     const loadData = async () => {
@@ -415,6 +431,62 @@ export default function SettingsPage() {
             >
               Remove API Key
             </button>
+          </div>
+
+          {/* Tampermonkey Script Section */}
+          <div className="settings-section">
+            <div className="settings-section-title">
+              <span className="settings-section-title-icon">📜</span>
+              FlightLogger Exporter Script (Tampermonkey)
+            </div>
+            <p className="settings-section-desc" style={{ marginBottom: '16px' }}>
+              Ezzel a kóddal automatizálhatod a repülési adatok áttöltését a FlightLoggerbe. A script telepítéséhez 
+              szükséged lesz a <strong>Tampermonkey</strong> (vagy Greasemonkey) bővítményre a böngésződben.
+              <br/><br/>
+              <strong>Telepítés lépései:</strong>
+              <ol style={{ marginLeft: '24px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <li>Telepítsd a Tampermonkey kiegészítőt.</li>
+                <li>Másold ki az alábbi kódot a "Copy Script" gombbal.</li>
+                <li>A Tampermonkey ikonjára kattintva válaszd a "Create a new script..." opciót.</li>
+                <li>Töröld ki az alapértelmezett kódot, illeszd be az imént kimásoltat, majd mentsd el (Ctrl+S / Cmd+S).</li>
+              </ol>
+            </p>
+            
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: '12px' }}>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                style={{ width: 'auto' }}
+                onClick={copyScript}
+                disabled={!scriptContent}
+              >
+                {scriptCopied ? '✓ Copied!' : 'Copy Script'}
+              </button>
+              <a 
+                href="/master_script.user.js" 
+                download="master_script.user.js"
+                className="btn btn-secondary btn-sm"
+                style={{ width: 'auto', textDecoration: 'none' }}
+              >
+                Download File
+              </a>
+            </div>
+
+            <div style={{
+              backgroundColor: '#1e1e1e',
+              color: '#d4d4d4',
+              padding: '16px',
+              borderRadius: '8px',
+              maxHeight: '300px',
+              overflowY: 'auto',
+              fontFamily: 'monospace',
+              fontSize: '12px',
+              border: '1px solid rgba(255,255,255,0.1)'
+            }}>
+              <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                {scriptContent || 'Loading script...'}
+              </pre>
+            </div>
           </div>
         </div>
       </main>
