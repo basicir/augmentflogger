@@ -14,7 +14,7 @@ export default function FlightRecorderGlobal() {
   const [isDragging, setIsDragging] = useState(false)
   const [showTrash, setShowTrash] = useState(false)
   const [showEndPrompt, setShowEndPrompt] = useState(false)
-  const [touchAndGoes, setTouchAndGoes] = useState('0')
+  const [landingsData, setLandingsData] = useState<any[]>([])
 
   const handleDragStart = () => {
     setIsDragging(true)
@@ -34,6 +34,7 @@ export default function FlightRecorderGlobal() {
     
     if (info.point.x < 150) {
       setShowEndPrompt(true)
+      setLandingsData([{ airport: ongoingFlight?.destination_aerodrome || '', count: 0 }])
       setShowTrash(false)
     } else {
       setShowTrash(false)
@@ -177,18 +178,65 @@ export default function FlightRecorderGlobal() {
         <div className="modal-overlay" style={{ zIndex: 60 }} onClick={(e) => { if (e.target === e.currentTarget) setShowEndPrompt(false) }}>
           <div className="modal-box" style={{ maxWidth: '400px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 'bold', margin: 0 }}>End Flight</h2>
-            <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Enter the number of touch and goes for this flight.</p>
+            <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Review landings for this flight.</p>
             
-            <input 
-              type="number" 
-              min="0"
-              value={touchAndGoes}
-              onChange={(e) => setTouchAndGoes(e.target.value)}
-              style={{ padding: '12px', fontSize: '18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', width: '100%' }}
-              autoFocus
-            />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto' }}>
+              {landingsData.map((l, idx) => (
+                <div key={idx} style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', padding: '12px' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '4px' }}>AIRPORT</div>
+                    <input 
+                      value={l.airport} 
+                      onChange={e => {
+                        const newLandings = [...landingsData];
+                        newLandings[idx].airport = e.target.value.toUpperCase();
+                        setLandingsData(newLandings);
+                      }}
+                      placeholder="e.g. LHBP"
+                      style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%', fontWeight: 'bold', fontSize: '16px' }}
+                    />
+                  </div>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '4px' }}>T&G COUNT</div>
+                    <input 
+                      type="number"
+                      min="0"
+                      value={l.count} 
+                      onChange={e => {
+                        const val = parseInt(e.target.value, 10);
+                        const newLandings = [...landingsData];
+                        newLandings[idx].count = isNaN(val) ? 0 : Math.max(0, val);
+                        setLandingsData(newLandings);
+                      }}
+                      style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%', fontWeight: 'bold', fontSize: '16px' }}
+                    />
+                  </div>
+                  {landingsData.length > 1 && (
+                    <button 
+                      onClick={() => {
+                        const newLandings = landingsData.filter((_, i) => i !== idx);
+                        setLandingsData(newLandings);
+                      }}
+                      style={{ background: 'transparent', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: '16px', padding: '4px' }}
+                      title="Remove"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+              
+              <button
+                onClick={() => {
+                  setLandingsData([...landingsData, { airport: '', count: 0 }]);
+                }}
+                style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)', border: '1px dashed rgba(255,255,255,0.2)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600, fontSize: '13px', textAlign: 'center', marginTop: '4px' }}
+              >
+                + Add Touch & Go Airport
+              </button>
+            </div>
 
-            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
               <button 
                 onClick={() => setShowEndPrompt(false)}
                 style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600 }}
@@ -197,8 +245,7 @@ export default function FlightRecorderGlobal() {
               </button>
               <button 
                 onClick={() => {
-                  const num = parseInt(touchAndGoes, 10)
-                  stopFlight(isNaN(num) ? 0 : Math.max(0, num))
+                  stopFlight(landingsData)
                   setShowEndPrompt(false)
                 }}
                 style={{ flex: 1, padding: '12px', background: '#ef4444', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600 }}

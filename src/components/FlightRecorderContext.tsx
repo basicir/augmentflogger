@@ -111,16 +111,21 @@ export function FlightRecorderProvider({ children }: { children: React.ReactNode
     }
   }
 
-  const stopFlight = async (touchAndGoes?: number) => {
+  const stopFlight = async (landingsData?: any[]) => {
     if (!ongoingFlight) return
 
     const endTime = new Date();
     endTime.setSeconds(0, 0);
 
     const updates: any = { end_time: endTime.toISOString() }
-    if (touchAndGoes !== undefined) {
-      updates.touch_and_goes = touchAndGoes
-      updates.landings = touchAndGoes + 1
+    if (landingsData !== undefined) {
+      updates.landings_data = landingsData
+      
+      // Calculate total touch and goes for backward compatibility
+      let totalTng = 0;
+      landingsData.forEach(l => { totalTng += (l.count || 0) });
+      updates.touch_and_goes = totalTng
+      updates.landings = totalTng + 1
     }
 
     const { error } = await supabase
