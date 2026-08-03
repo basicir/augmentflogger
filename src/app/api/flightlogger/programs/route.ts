@@ -113,31 +113,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'GraphQL error', details: flData.errors }, { status: 400 })
     }
 
-    // Temporary INTROSPECTION to find UserLecture
-    const introRes = await fetch(FLIGHTLOGGER_GRAPHQL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        query: `
-          query {
-            __schema {
-              queryType {
-                fields {
-                  name
-                  type { name }
-                }
-              }
-            }
-          }
-        `
-      })
-    })
-    const introData = await introRes.json()
-    return NextResponse.json({ error: 'Introspection', details: introData }, { status: 400 })
-
     // Fetch all trainings with pagination
     let allTrainings: any[] = [];
     let hasNextPage = true;
