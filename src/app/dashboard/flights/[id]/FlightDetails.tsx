@@ -229,7 +229,8 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                          grades: parsedGrades,
                          exercise_comments: parsedExerciseComments,
                          general_comment: flight.general_comment,
-                         touch_and_goes: flight.touch_and_goes
+                         touch_and_goes: flight.touch_and_goes,
+                         landings_data: flight.landings_data
                        };
                        
                        const b64Data = btoa(unescape(encodeURIComponent(JSON.stringify(exportData))));
@@ -494,28 +495,91 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                   )}
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '150px', fontWeight: 700, fontSize: '13px', color: 'var(--text-secondary)' }}>TOUCH & GOES</div>
-                <div style={{ flex: 1, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', padding: '16px' }}>
-                  {isEditing ? (
-                    <input 
-                      type="number"
-                      min="0"
-                      value={editData.touch_and_goes ?? flight.touch_and_goes ?? 0} 
-                      onChange={e => {
-                        const val = parseInt(e.target.value, 10);
-                        const tng = isNaN(val) ? 0 : Math.max(0, val);
-                        setEditData({...editData, touch_and_goes: tng, landings: tng + 1});
-                      }}
-                      style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%', fontWeight: 'bold', fontSize: '16px' }}
-                    />
-                  ) : (
-                    <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{flight.touch_and_goes ?? 0}</span>
-                  )}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ width: '150px', fontWeight: 700, fontSize: '13px', color: 'var(--text-secondary)' }}>LANDINGS</div>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {(() => {
+                      // Determine the landings data to display
+                      const rawLandings = editData.landings_data || flight.landings_data || [];
+                      // If empty, fallback to the old touch_and_goes value for the first row
+                      let landings = rawLandings.length > 0 ? rawLandings : [
+                        { airport: editData.destination_aerodrome || flight.destination_aerodrome || '', count: editData.touch_and_goes ?? flight.touch_and_goes ?? 0 }
+                      ];
+
+                      return (
+                        <>
+                          {landings.map((l: any, idx: number) => (
+                            <div key={idx} style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', padding: '12px 16px' }}>
+                              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '4px' }}>AIRPORT</div>
+                                {isEditing ? (
+                                  <input 
+                                    value={l.airport} 
+                                    onChange={e => {
+                                      const newLandings = [...landings];
+                                      newLandings[idx].airport = e.target.value.toUpperCase();
+                                      setEditData({...editData, landings_data: newLandings});
+                                    }}
+                                    placeholder="e.g. LHBP"
+                                    style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%', fontWeight: 'bold', fontSize: '16px' }}
+                                  />
+                                ) : (
+                                  <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{l.airport || 'N/A'}</span>
+                                )}
+                              </div>
+                              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '4px' }}>TOUCH & GOES</div>
+                                {isEditing ? (
+                                  <input 
+                                    type="number"
+                                    min="0"
+                                    value={l.count} 
+                                    onChange={e => {
+                                      const val = parseInt(e.target.value, 10);
+                                      const newLandings = [...landings];
+                                      newLandings[idx].count = isNaN(val) ? 0 : Math.max(0, val);
+                                      setEditData({...editData, landings_data: newLandings});
+                                    }}
+                                    style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%', fontWeight: 'bold', fontSize: '16px' }}
+                                  />
+                                ) : (
+                                  <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{l.count}</span>
+                                )}
+                              </div>
+                              {isEditing && landings.length > 1 && (
+                                <button 
+                                  onClick={() => {
+                                    const newLandings = landings.filter((_: any, i: number) => i !== idx);
+                                    setEditData({...editData, landings_data: newLandings});
+                                  }}
+                                  style={{ background: 'transparent', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: '16px', padding: '4px' }}
+                                  title="Remove"
+                                >
+                                  ✕
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          {isEditing && (
+                            <button
+                              onClick={() => {
+                                const newLandings = [...landings, { airport: '', count: 0 }];
+                                setEditData({...editData, landings_data: newLandings});
+                              }}
+                              style={{ padding: '8px', background: 'var(--bg-subtle)', color: 'var(--text-secondary)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600, fontSize: '13px', textAlign: 'center' }}
+                            >
+                              + Add Touch & Go Airport
+                            </button>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '150px', fontWeight: 700, fontSize: '13px', color: 'var(--text-secondary)' }}>ARRIVAL</div>
+                <div style={{ width: '150px', fontWeight: 700, fontSize: '13px', color: 'var(--text-secondary)' }}>FINAL ARRIVAL</div>
                 <div style={{ flex: 1, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', padding: '16px' }}>
                   {isEditing ? (
                     <input 

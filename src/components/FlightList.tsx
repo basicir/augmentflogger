@@ -30,6 +30,7 @@ export interface Flight {
   general_comment: string | null
   touch_and_goes?: number | null
   landings?: number | null
+  landings_data?: any[] | null
 }
 
 export default function FlightList({ flights, utcOffsetHours }: { flights: Flight[], utcOffsetHours: number }) {

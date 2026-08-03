@@ -259,12 +259,39 @@
                 if (data.time_of_day && data.time_of_day !== 'Not Specified') await setCycleButtonValue('.daytime', data.time_of_day);
                 if (data.flight_type && data.flight_type !== 'Not Specified') await setCycleButtonValue('.cross-country', data.flight_type);
 
-                if (data.touch_and_goes && data.touch_and_goes > 0) {
+                // Handle multi-airport Touch & Goes
+                if (data.landings_data && data.landings_data.length > 0) {
+                    for (let i = 0; i < data.landings_data.length; i++) {
+                        const landing = data.landings_data[i];
+                        if (landing.count > 0) {
+                            const landingBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('LANDING'));
+                            if (landingBtn) {
+                                landingBtn.click();
+                                await new Promise(r => setTimeout(r, 1000));
+
+                                const xmarks = Array.from(document.querySelectorAll('[data-icon="xmark"]'));
+                                if (xmarks.length > 0) {
+                                    const lastXmark = xmarks[xmarks.length - 1];
+                                    let current = lastXmark, landingRow = null;
+                                    while (current && current !== document.body) {
+                                        if (current.querySelectorAll('input[readonly]').length >= 2) { landingRow = current; break; }
+                                        current = current.parentElement;
+                                    }
+                                    if (landingRow) {
+                                        const readonlyInputs = Array.from(landingRow.querySelectorAll('input[readonly]'));
+                                        await setReactSelectByClick(readonlyInputs[1].closest('[class*="-control"]'), 'Touch and go');
+                                        await setReactSelectByClick(readonlyInputs[0].closest('[class*="-control"]'), String(landing.count));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else if (data.touch_and_goes && data.touch_and_goes > 0) {
+                    // Fallback for older format
                     const landingBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('LANDING'));
                     if (landingBtn) {
                         landingBtn.click();
                         await new Promise(r => setTimeout(r, 1000));
-
                         const xmarks = Array.from(document.querySelectorAll('[data-icon="xmark"]'));
                         if (xmarks.length > 0) {
                             const lastXmark = xmarks[xmarks.length - 1];
@@ -282,15 +309,31 @@
                     }
                 }
 
+                // Set Airports
                 const airports = Array.from(document.querySelectorAll('.landing-airport-selector'));
                 if (airports.length > 0 && data.departure_aerodrome) {
                     await setAirportSelector(0, data.departure_aerodrome);
                 }
+
+                if (data.landings_data && data.landings_data.length > 0) {
+                    let tngIndex = 1;
+                    for (let i = 0; i < data.landings_data.length; i++) {
+                        const landing = data.landings_data[i];
+                        if (landing.count > 0 && landing.airport) {
+                            if (airports.length > tngIndex) {
+                                await setAirportSelector(tngIndex, landing.airport);
+                            }
+                            tngIndex++;
+                        }
+                    }
+                } else if (airports.length > 2 && data.destination_aerodrome) {
+                    // Fallback for old format
+                    await setAirportSelector(1, data.destination_aerodrome);
+                }
+
+                // Finally set the final arrival destination
                 if (airports.length > 1 && data.destination_aerodrome) {
                     await setAirportSelector(airports.length - 1, data.destination_aerodrome);
-                    if (airports.length > 2) {
-                        await setAirportSelector(1, data.destination_aerodrome);
-                    }
                 }
             }
         }
