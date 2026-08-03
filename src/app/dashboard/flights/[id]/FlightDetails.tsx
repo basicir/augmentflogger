@@ -255,7 +255,11 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
               <button
                 onClick={async () => {
                   try {
-                    const res = await fetch(`/api/flightlogger/programs?studentId=${flight.student_id}`);
+                    const res = await fetch(`/api/flightlogger/programs`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ studentId: flight.student_id })
+                    });
                     if (!res.ok) {
                       const errData = await res.json().catch(() => ({}));
                       console.error("API Error Response:", errData);
