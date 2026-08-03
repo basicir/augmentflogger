@@ -182,47 +182,83 @@ export default function FlightRecorderGlobal() {
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto' }}>
               {landingsData.map((l, idx) => (
-                <div key={idx} style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', padding: '12px' }}>
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '4px' }}>AIRPORT</div>
-                    <input 
-                      value={l.airport} 
-                      onChange={e => {
-                        const newLandings = [...landingsData];
-                        newLandings[idx].airport = e.target.value.toUpperCase();
-                        setLandingsData(newLandings);
-                      }}
-                      placeholder="e.g. LHBP"
-                      style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%', fontWeight: 'bold', fontSize: '16px' }}
-                    />
+                <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                  
+                  {/* Row 1: Header + Remove Button */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600 }}>AIRPORT</div>
+                    {landingsData.length > 1 && (
+                      <button 
+                        onClick={() => {
+                          const newLandings = landingsData.filter((_, i) => i !== idx);
+                          setLandingsData(newLandings);
+                        }}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: '18px', padding: '0 4px', lineHeight: 1 }}
+                        title="Remove"
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '4px' }}>T&G COUNT</div>
-                    <input 
-                      type="number"
-                      min="0"
-                      value={l.count} 
-                      onChange={e => {
-                        const val = parseInt(e.target.value, 10);
-                        const newLandings = [...landingsData];
-                        newLandings[idx].count = isNaN(val) ? 0 : Math.max(0, val);
-                        setLandingsData(newLandings);
-                      }}
-                      style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%', fontWeight: 'bold', fontSize: '16px' }}
-                    />
+                  
+                  {/* Row 2: Airport Input */}
+                  <input 
+                    value={l.airport} 
+                    onChange={e => {
+                      const newLandings = [...landingsData];
+                      newLandings[idx].airport = e.target.value.toUpperCase();
+                      setLandingsData(newLandings);
+                    }}
+                    placeholder="e.g. LHBP"
+                    style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', borderRadius: '6px', padding: '12px', fontWeight: 'bold', fontSize: '18px', textAlign: 'center', width: '100%', outline: 'none' }}
+                  />
+
+                  {/* Row 3: T&G Controls */}
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600, marginTop: '4px' }}>TOUCH & GOES</div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.2)', borderRadius: '6px', padding: '8px' }}>
+                    
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button 
+                        onClick={() => {
+                          const newLandings = [...landingsData];
+                          newLandings[idx].count = Math.max(0, (newLandings[idx].count || 0) - 5);
+                          setLandingsData(newLandings);
+                        }}
+                        style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '6px', width: '44px', height: '44px', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer' }}
+                      >-5</button>
+                      <button 
+                        onClick={() => {
+                          const newLandings = [...landingsData];
+                          newLandings[idx].count = Math.max(0, (newLandings[idx].count || 0) - 1);
+                          setLandingsData(newLandings);
+                        }}
+                        style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '6px', width: '44px', height: '44px', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer' }}
+                      >-1</button>
+                    </div>
+
+                    <div style={{ fontWeight: 'bold', fontSize: '28px', color: 'white' }}>{l.count || 0}</div>
+
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button 
+                        onClick={() => {
+                          const newLandings = [...landingsData];
+                          newLandings[idx].count = (newLandings[idx].count || 0) + 1;
+                          setLandingsData(newLandings);
+                        }}
+                        style={{ background: 'rgba(59, 130, 246, 0.2)', color: 'var(--primary)', border: '1px solid rgba(59, 130, 246, 0.5)', borderRadius: '6px', width: '44px', height: '44px', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer' }}
+                      >+1</button>
+                      <button 
+                        onClick={() => {
+                          const newLandings = [...landingsData];
+                          newLandings[idx].count = (newLandings[idx].count || 0) + 5;
+                          setLandingsData(newLandings);
+                        }}
+                        style={{ background: 'rgba(59, 130, 246, 0.2)', color: 'var(--primary)', border: '1px solid rgba(59, 130, 246, 0.5)', borderRadius: '6px', width: '44px', height: '44px', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer' }}
+                      >+5</button>
+                    </div>
+
                   </div>
-                  {landingsData.length > 1 && (
-                    <button 
-                      onClick={() => {
-                        const newLandings = landingsData.filter((_, i) => i !== idx);
-                        setLandingsData(newLandings);
-                      }}
-                      style={{ background: 'transparent', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: '16px', padding: '4px' }}
-                      title="Remove"
-                    >
-                      ✕
-                    </button>
-                  )}
+
                 </div>
               ))}
               
