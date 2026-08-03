@@ -85,11 +85,14 @@ export function FlightRecorderProvider({ children }: { children: React.ReactNode
       return
     }
 
+    const startTime = new Date();
+    startTime.setSeconds(0, 0);
+
     const newFlight = {
       instructor_id: user.id,
       student_id: studentId,
       student_name: studentName,
-      start_time: new Date().toISOString(),
+      start_time: startTime.toISOString(),
     }
 
     const { data, error } = await supabase
@@ -111,7 +114,10 @@ export function FlightRecorderProvider({ children }: { children: React.ReactNode
   const stopFlight = async (touchAndGoes?: number) => {
     if (!ongoingFlight) return
 
-    const updates: any = { end_time: new Date().toISOString() }
+    const endTime = new Date();
+    endTime.setSeconds(0, 0);
+
+    const updates: any = { end_time: endTime.toISOString() }
     if (touchAndGoes !== undefined) {
       updates.touch_and_goes = touchAndGoes
       updates.landings = touchAndGoes + 1
