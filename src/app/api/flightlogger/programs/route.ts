@@ -123,8 +123,9 @@ export async function POST(request: Request) {
     }
 
     const decodeId = (base64Id: string) => {
+      if (!base64Id) return base64Id;
       try {
-        const decoded = Buffer.from(base64Id, 'base64').toString('ascii');
+        const decoded = atob(base64Id);
         const match = decoded.match(/--(\d+)$/);
         return match ? match[1] : base64Id;
       } catch (e) {
