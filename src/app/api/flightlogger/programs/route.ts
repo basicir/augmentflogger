@@ -13,15 +13,6 @@ const GET_STUDENT_PROGRAMS_QUERY = `
         program {
           id
         }
-        userLectures(first: 500, all: true) {
-          nodes {
-            id
-            status
-            lecture {
-              id
-            }
-          }
-        }
         programRevision {
           name
           programPhases {
@@ -32,6 +23,17 @@ const GET_STUDENT_PROGRAMS_QUERY = `
             }
           }
         }
+      }
+    }
+  }
+`
+
+const TEST_QUERY = `
+  query GetUserLectures($studentId: Id!) {
+    userLectures(userId: $studentId, first: 50, all: true) {
+      nodes {
+        id
+        lecture { id }
       }
     }
   }
@@ -111,10 +113,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'GraphQL error', details: flData.errors }, { status: 400 })
     }
 
-    if (flData.errors) {
-      console.error('GraphQL errors:', flData.errors)
-      return NextResponse.json({ error: 'GraphQL error fetching programs' }, { status: 500 })
-    }
+    // Temporary INTROSPECTION to find UserLecture
+    const introRes = await fetch(FLIGHTLOGGER_GRAPHQL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        query: `
+          query {
+            __schema {
+              queryType {
+                fields {
+                  name
+                  type { name }
+                }
+              }
+            }
+          }
+        `
+      })
+    })
+    const introData = await introRes.json()
+    return NextResponse.json({ error: 'Introspection', details: introData }, { status: 400 })
 
     // Fetch all trainings with pagination
     let allTrainings: any[] = [];
