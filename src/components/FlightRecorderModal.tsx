@@ -410,7 +410,7 @@ export default function FlightRecorderModal() {
 
   return (
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setIsModalOpen(false) }}>
-      <div className="modal-box" style={{ maxWidth: '600px', width: '100%', maxHeight: '85vh', height: activeTab === 'comments' ? '85vh' : 'auto', marginBottom: '10vh', display: 'flex', flexDirection: 'column' }}>
+      <div className="modal-box" style={{ maxWidth: '600px', width: '100%', maxHeight: '85dvh', height: activeTab === 'comments' ? '85dvh' : 'auto', marginBottom: '10dvh', display: 'flex', flexDirection: 'column' }}>
         <div className="modal-header" style={{ flexShrink: 0 }}>
           <h2 className="modal-title">Flight Recorder - {ongoingFlight.student_name}</h2>
         </div>
