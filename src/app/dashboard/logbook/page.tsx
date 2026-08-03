@@ -70,7 +70,7 @@ export default async function LogbookPage() {
     <div className="page-wrapper">
       <Navbar username={instructorUsername} />
       
-      <main className="dashboard-layout" style={{ maxWidth: '1000px', margin: '0 auto', paddingTop: '32px' }}>
+      <main className="dashboard-layout" style={{ maxWidth: '1000px', margin: '0 auto', paddingTop: '32px', paddingLeft: '16px', paddingRight: '16px' }}>
         <header style={{ marginBottom: '32px' }}>
           <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 700 }}>Aircraft Technical Logbook</h1>
         </header>

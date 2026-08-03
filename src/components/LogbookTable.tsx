@@ -48,30 +48,30 @@ export default function LogbookTable({
         {displayDate} — {aircraft}
       </h3>
       <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', minWidth: '800px', background: 'var(--bg-glass)', border: '1px solid var(--border-default)', borderRadius: '8px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', background: 'var(--bg-glass)', border: '1px solid var(--border-default)', borderRadius: '8px' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border-default)', background: 'rgba(255, 255, 255, 0.05)' }}>
-              <th style={{ padding: '12px', color: 'var(--text-secondary)', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>No.</th>
-              <th style={{ padding: '12px', color: 'var(--text-secondary)', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>Preflight done by</th>
-              <th style={{ padding: '12px', color: 'var(--text-secondary)', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>Off-block</th>
-              <th style={{ padding: '12px', color: 'var(--text-secondary)', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>On-block</th>
-              <th style={{ padding: '12px', color: 'var(--text-secondary)', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>Flight time</th>
-              <th style={{ padding: '12px', color: 'var(--text-secondary)', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>Ground time</th>
-              <th style={{ padding: '12px', color: 'var(--text-secondary)', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>LDGS</th>
-              <th style={{ padding: '12px', color: 'var(--text-secondary)', verticalAlign: 'middle' }}>Crew</th>
+              <th style={{ padding: '8px 4px', color: 'var(--text-secondary)', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>No.</th>
+              <th style={{ padding: '8px 4px', color: 'var(--text-secondary)', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>Preflight done by</th>
+              <th style={{ padding: '8px 4px', color: 'var(--text-secondary)', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>Off-block</th>
+              <th style={{ padding: '8px 4px', color: 'var(--text-secondary)', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>On-block</th>
+              <th style={{ padding: '8px 4px', color: 'var(--text-secondary)', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>Flight time</th>
+              <th style={{ padding: '8px 4px', color: 'var(--text-secondary)', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>Ground time</th>
+              <th style={{ padding: '8px 4px', color: 'var(--text-secondary)', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>LDGS</th>
+              <th style={{ padding: '8px 4px', color: 'var(--text-secondary)', verticalAlign: 'middle' }}>Crew</th>
             </tr>
           </thead>
           <tbody>
             {/* 0th Row */}
             <tr style={{ borderBottom: '1px solid var(--border-default)' }}>
-              <td style={{ padding: '12px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>0</td>
-              <td style={{ padding: '12px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>{instructorUsername}</td>
-              <td style={{ padding: '12px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}></td>
-              <td style={{ padding: '12px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}></td>
-              <td style={{ padding: '12px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}></td>
-              <td style={{ padding: '12px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>5'</td>
-              <td style={{ padding: '12px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}></td>
-              <td style={{ padding: '12px', verticalAlign: 'middle' }}>repelőtti</td>
+              <td style={{ padding: '8px 4px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>0</td>
+              <td style={{ padding: '8px 4px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>{instructorUsername}</td>
+              <td style={{ padding: '8px 4px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}></td>
+              <td style={{ padding: '8px 4px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}></td>
+              <td style={{ padding: '8px 4px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}></td>
+              <td style={{ padding: '8px 4px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>5'</td>
+              <td style={{ padding: '8px 4px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}></td>
+              <td style={{ padding: '8px 4px', verticalAlign: 'middle' }}>repelőtti</td>
             </tr>
             
             {/* 1+ Rows */}
@@ -90,14 +90,14 @@ export default function LogbookTable({
 
               return (
                 <tr key={flight.id} style={{ borderBottom: '1px solid var(--border-default)' }}>
-                  <td style={{ padding: '12px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>{index + 1}</td>
-                  <td style={{ padding: '12px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>{instructorUsername}</td>
-                  <td style={{ padding: '12px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>{offBlock}</td>
-                  <td style={{ padding: '12px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>{onBlock}</td>
-                  <td style={{ padding: '12px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>{flightTime}</td>
-                  <td style={{ padding: '12px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>2'</td>
-                  <td style={{ padding: '12px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>{ldgs}</td>
-                  <td style={{ padding: '12px', verticalAlign: 'middle' }}>{crew}</td>
+                  <td style={{ padding: '8px 4px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>{index + 1}</td>
+                  <td style={{ padding: '8px 4px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>{instructorUsername}</td>
+                  <td style={{ padding: '8px 4px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>{offBlock}</td>
+                  <td style={{ padding: '8px 4px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>{onBlock}</td>
+                  <td style={{ padding: '8px 4px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>{flightTime}</td>
+                  <td style={{ padding: '8px 4px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>2'</td>
+                  <td style={{ padding: '8px 4px', borderRight: '1px solid var(--border-default)', verticalAlign: 'middle' }}>{ldgs}</td>
+                  <td style={{ padding: '8px 4px', verticalAlign: 'middle' }}>{crew}</td>
                 </tr>
               )
             })}
