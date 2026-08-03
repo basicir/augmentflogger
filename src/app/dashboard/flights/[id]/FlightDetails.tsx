@@ -43,6 +43,32 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
   const router = useRouter()
   const supabase = createClient()
 
+  useEffect(() => {
+    // If programs_cache is missing userProgramId (old cache format), fetch the updated cache from the API
+    if (flight.programs_cache && flight.programs_cache.length > 0 && flight.programs_cache[0].userProgramId === undefined) {
+      const refreshCache = async () => {
+        try {
+          const res = await fetch('/api/flightlogger/programs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ studentId: flight.student_id })
+          })
+          if (res.ok) {
+            const data = await res.json()
+            if (data.programs) {
+              setFlight(prev => ({ ...prev, programs_cache: data.programs }))
+              // Silently update DB so it doesn't need to fetch next time
+              supabase.from('flights').update({ programs_cache: data.programs }).eq('id', flight.id).then()
+            }
+          }
+        } catch (e) {
+          console.error("Failed to refresh programs cache for old flight", e)
+        }
+      }
+      refreshCache()
+    }
+  }, [flight.programs_cache, flight.student_id, flight.id, supabase])
+
   const formatTime = (d: Date) => `${d.getUTCHours().toString().padStart(2, '0')}:${d.getUTCMinutes().toString().padStart(2, '0')}`
   const formatDate = (d: Date) => `${d.getUTCDate().toString().padStart(2, '0')}.${(d.getUTCMonth()+1).toString().padStart(2, '0')}.${d.getUTCFullYear()}`
 
@@ -95,13 +121,22 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
   }
 
   let flightloggerUrl: string | null = null;
+  let isTaskInstantiated = false;
+  
   if (flight.selected_task && flight.programs_cache) {
     const prog = flight.programs_cache.find((p: any) => p.programName === flight.selected_program)
     if (prog && prog.userProgramId) {
       for (const phase of prog.phases) {
         const task = phase.tasks.find((t: any) => t.taskId === flight.selected_task)
-        if (task && task.userLectureId) {
-          flightloggerUrl = `https://trener.flightlogger.net/users/${flight.student_id}/user_programs/${prog.userProgramId}/user_lectures/${task.userLectureId}/edit`
+        if (task) {
+          if (task.userLectureId) {
+            flightloggerUrl = `https://trener.flightlogger.net/users/${flight.student_id}/user_programs/${prog.userProgramId}/user_lectures/${task.userLectureId}/edit`
+            isTaskInstantiated = true;
+          } else {
+            // Fallback: The task hasn't been booked/instantiated in FlightLogger yet, 
+            // so we open the syllabus page where the user can click it to create the registration.
+            flightloggerUrl = `https://trener.flightlogger.net/users/${flight.student_id}/user_programs/${prog.userProgramId}`
+          }
           break
         }
       }
@@ -210,7 +245,7 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                 }}
                 disabled={!flightloggerUrl}
                 style={{ padding: '8px 16px', background: flightloggerUrl ? 'var(--primary)' : 'var(--bg-elevated)', color: flightloggerUrl ? 'white' : 'var(--text-secondary)', border: 'none', borderRadius: 'var(--radius-md)', cursor: flightloggerUrl ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', opacity: flightloggerUrl ? 1 : 0.5 }}
-                title={!flightloggerUrl ? "No task selected or task hasn't been instantiated yet" : "Open in FlightLogger"}
+                title={!flightloggerUrl ? "Loading program data..." : (isTaskInstantiated ? "Open specific task in FlightLogger" : "Task not yet instantiated. Opening Program Syllabus instead.")}
               >
                 🔗 Open in FlightLogger
               </button>
