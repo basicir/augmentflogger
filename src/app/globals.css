@@ -451,7 +451,6 @@ body {
 /* Dashboard Layout */
 .dashboard-layout {
   min-height: calc(100vh - 64px);
-  background: var(--bg-base);
 }
 
 .dashboard-header {
@@ -929,7 +928,7 @@ body {
 }
 
 .modal-header {
-  padding: 24px 24px 0;
+  padding: 24px 24px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -203,30 +203,6 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
           </h3>
           {!isEditing ? (
             <div style={{ display: 'flex', gap: '8px', width: '100%', flex: 1, marginLeft: '16px' }}>
-              <button onClick={() => { setIsEditing(true); setEditData(flight) }} style={{ flex: 1, padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                <Edit2 size={16} /> Edit
-              </button>
-              <button 
-                onClick={async () => {
-                  if (window.confirm('Are you sure you want to delete this flight? This action cannot be undone.')) {
-                    setIsSaving(true);
-                    try {
-                      const { error } = await supabase.from('flights').delete().eq('id', flight.id);
-                      if (error) throw error;
-                      router.push('/dashboard/flights');
-                      router.refresh();
-                    } catch (e: any) {
-                      console.error("Failed to delete flight", e);
-                      alert("Failed to delete flight: " + e.message);
-                      setIsSaving(false);
-                    }
-                  }
-                }} 
-                disabled={isSaving}
-                style={{ flex: 1, padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: '#ef4444', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-              >
-                <Trash2 size={16} /> Delete
-              </button>
               <button
                 onClick={async () => {
                    if (flightloggerUrl) {
@@ -274,10 +250,34 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                    }
                 }}
                 disabled={!flightloggerUrl}
-                style={{ flex: 1, padding: '8px 16px', background: flightloggerUrl ? 'linear-gradient(135deg, var(--primary) 0%, rgba(16, 185, 129, 0.8) 100%)' : 'var(--bg-elevated)', color: flightloggerUrl ? 'white' : 'var(--text-secondary)', border: flightloggerUrl ? '1px solid rgba(255,255,255,0.2)' : 'none', borderRadius: 'var(--radius-md)', cursor: flightloggerUrl ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', opacity: flightloggerUrl ? 1 : 0.5, boxShadow: flightloggerUrl ? '0 0 10px rgba(16, 185, 129, 0.4)' : 'none' }}
+                style={{ flex: 1, padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: flightloggerUrl ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', opacity: flightloggerUrl ? 1 : 0.5 }}
                 title={!flightloggerUrl ? "Loading program data..." : (isTaskInstantiated ? "Export and Open specific task in FlightLogger" : "Task not yet instantiated. Auto-opening Program Syllabus instead.")}
               >
                 🛫 Export
+              </button>
+              <button onClick={() => { setIsEditing(true); setEditData(flight) }} style={{ flex: 1, padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <Edit2 size={16} /> Edit
+              </button>
+              <button 
+                onClick={async () => {
+                  if (window.confirm('Are you sure you want to delete this flight? This action cannot be undone.')) {
+                    setIsSaving(true);
+                    try {
+                      const { error } = await supabase.from('flights').delete().eq('id', flight.id);
+                      if (error) throw error;
+                      router.push('/dashboard/flights');
+                      router.refresh();
+                    } catch (e: any) {
+                      console.error("Failed to delete flight", e);
+                      alert("Failed to delete flight: " + e.message);
+                      setIsSaving(false);
+                    }
+                  }
+                }} 
+                disabled={isSaving}
+                style={{ flex: 1, padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: '#ef4444', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+              >
+                <Trash2 size={16} /> Delete
               </button>
             </div>
           ) : (

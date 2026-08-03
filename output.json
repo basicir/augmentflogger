@@ -1,0 +1,6 @@
+{
+  "error": {
+    "message": "The provided API token has expired.",
+    "code": "token_expired"
+  }
+}
