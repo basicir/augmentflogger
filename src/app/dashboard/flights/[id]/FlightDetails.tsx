@@ -69,7 +69,7 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
   }
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', background: 'var(--bg-default)', borderRadius: '12px', border: '1px solid var(--border-default)', display: 'flex', flexDirection: 'column', minHeight: '600px' }}>
+    <div style={{ maxWidth: '800px', margin: '0 auto', background: 'var(--bg-default)', borderRadius: '12px', border: '1px solid var(--border-default)', display: 'flex', flexDirection: 'column', minHeight: '600px', height: activeTab === 'comments' ? '85vh' : 'auto' }}>
       <div style={{ padding: '16px', borderBottom: '1px solid var(--border-default)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ margin: 0 }}>Flight Details - {flight.student_name}</h2>
       </div>
