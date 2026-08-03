@@ -149,60 +149,9 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
     <div style={{ maxWidth: '800px', margin: '0 auto', borderRadius: '12px', display: 'flex', flexDirection: 'column', minHeight: '600px', height: activeTab === 'comments' ? `${viewportHeight * 0.85}px` : 'auto' }}>
       <div style={{ padding: '16px', borderBottom: '1px solid var(--border-default)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ margin: 0 }}>Flight Details - {flight.student_name}</h2>
-      </div>
-
-      {/* Tabs */}
-      <div style={{ display: 'flex', borderBottom: '1px solid var(--border-default)', background: 'var(--bg-elevated)', overflowX: 'auto', flexShrink: 0 }}>
-        <button
-          onClick={() => setActiveTab('flight-parameters')}
-          style={{
-            flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'flight-parameters' ? 'var(--primary)' : 'var(--text-secondary)',
-            borderBottom: activeTab === 'flight-parameters' ? '2px solid var(--primary)' : '2px solid transparent',
-            fontWeight: activeTab === 'flight-parameters' ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap'
-          }}
-        >
-          Flight
-        </button>
-        <button
-          onClick={() => setActiveTab('task-parameters')}
-          style={{
-            flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'task-parameters' ? 'var(--primary)' : 'var(--text-secondary)',
-            borderBottom: activeTab === 'task-parameters' ? '2px solid var(--primary)' : '2px solid transparent',
-            fontWeight: activeTab === 'task-parameters' ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap'
-          }}
-        >
-          Grading
-        </button>
-        <button
-          onClick={() => setActiveTab('comments')}
-          style={{
-            flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'comments' ? 'var(--primary)' : 'var(--text-secondary)',
-            borderBottom: activeTab === 'comments' ? '2px solid var(--primary)' : '2px solid transparent',
-            fontWeight: activeTab === 'comments' ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap'
-          }}
-        >
-          Comments
-        </button>
-        <button
-          onClick={() => setActiveTab('description')}
-          style={{
-            flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'description' ? 'var(--primary)' : 'var(--text-secondary)',
-            borderBottom: activeTab === 'description' ? '2px solid var(--primary)' : '2px solid transparent',
-            fontWeight: activeTab === 'description' ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap'
-          }}
-        >
-          Description
-        </button>
-      </div>
-
-      <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {/* EDIT HEADER */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h3 style={{ fontSize: '13px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0, fontWeight: 700 }}>
-            {activeTab === 'flight-parameters' ? '' : (activeTab === 'task-parameters' ? 'GRADING DETAILS' : 'COMMENTS')}
-          </h3>
+        <div style={{ display: 'flex', gap: '8px' }}>
           {!isEditing ? (
-            <div style={{ display: 'flex', gap: '8px', width: '100%', flex: 1, marginLeft: '16px' }}>
+            <>
               <button
                 onClick={async () => {
                    if (flightloggerUrl) {
@@ -250,13 +199,17 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                    }
                 }}
                 disabled={!flightloggerUrl}
-                style={{ flex: 1, padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: flightloggerUrl ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', opacity: flightloggerUrl ? 1 : 0.5 }}
+                style={{ width: '36px', height: '36px', padding: 0, background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: flightloggerUrl ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: flightloggerUrl ? 1 : 0.5 }}
                 title={!flightloggerUrl ? "Loading program data..." : (isTaskInstantiated ? "Export and Open specific task in FlightLogger" : "Task not yet instantiated. Auto-opening Program Syllabus instead.")}
               >
-                <ExternalLink size={16} /> Export
+                <ExternalLink size={18} />
               </button>
-              <button onClick={() => { setIsEditing(true); setEditData(flight) }} style={{ flex: 1, padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                <Edit2 size={16} /> Edit
+              <button 
+                onClick={() => { setIsEditing(true); setEditData(flight) }} 
+                title="Edit flight"
+                style={{ width: '36px', height: '36px', padding: 0, background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Edit2 size={18} />
               </button>
               <button 
                 onClick={async () => {
@@ -275,22 +228,80 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                   }
                 }} 
                 disabled={isSaving}
-                style={{ flex: 1, padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: '#ef4444', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                title="Delete flight"
+                style={{ width: '36px', height: '36px', padding: 0, background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 'var(--radius-md)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                <Trash2 size={16} /> Delete
+                <Trash2 size={18} />
               </button>
-            </div>
+            </>
           ) : (
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <>
               <button onClick={() => setIsEditing(false)} style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
                 Cancel
               </button>
               <button onClick={handleSave} disabled={isSaving} style={{ padding: '8px 16px', background: 'rgba(59, 130, 246, 0.2)', color: 'var(--primary)', border: '1px solid rgba(59, 130, 246, 0.5)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
-                {isSaving ? 'Saving...' : 'Save Changes'}
+                {isSaving ? 'Saving...' : 'Save'}
               </button>
-            </div>
+            </>
           )}
         </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', borderBottom: '1px solid var(--border-default)', background: 'var(--bg-elevated)', overflowX: 'auto', flexShrink: 0 }}>
+        <button
+          onClick={() => setActiveTab('flight-parameters')}
+          style={{
+            flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'flight-parameters' ? 'var(--primary)' : 'var(--text-secondary)',
+            borderBottom: activeTab === 'flight-parameters' ? '2px solid var(--primary)' : '2px solid transparent',
+            fontWeight: activeTab === 'flight-parameters' ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap'
+          }}
+        >
+          Flight
+        </button>
+        <button
+          onClick={() => setActiveTab('task-parameters')}
+          style={{
+            flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'task-parameters' ? 'var(--primary)' : 'var(--text-secondary)',
+            borderBottom: activeTab === 'task-parameters' ? '2px solid var(--primary)' : '2px solid transparent',
+            fontWeight: activeTab === 'task-parameters' ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap'
+          }}
+        >
+          Grading
+        </button>
+        <button
+          onClick={() => setActiveTab('comments')}
+          style={{
+            flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'comments' ? 'var(--primary)' : 'var(--text-secondary)',
+            borderBottom: activeTab === 'comments' ? '2px solid var(--primary)' : '2px solid transparent',
+            fontWeight: activeTab === 'comments' ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap'
+          }}
+        >
+          Comments
+        </button>
+        <button
+          onClick={() => setActiveTab('description')}
+          style={{
+            flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'description' ? 'var(--primary)' : 'var(--text-secondary)',
+            borderBottom: activeTab === 'description' ? '2px solid var(--primary)' : '2px solid transparent',
+            fontWeight: activeTab === 'description' ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap'
+          }}
+        >
+          Description
+        </button>
+      </div>
+
+      <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {activeTab === 'task-parameters' && (
+          <h3 style={{ fontSize: '13px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0, marginBottom: '16px', fontWeight: 700 }}>
+            GRADING DETAILS
+          </h3>
+        )}
+        {activeTab === 'comments' && (
+          <h3 style={{ fontSize: '13px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0, marginBottom: '16px', fontWeight: 700 }}>
+            COMMENTS
+          </h3>
+        )}
 
         {activeTab === 'flight-parameters' && (
           <>
