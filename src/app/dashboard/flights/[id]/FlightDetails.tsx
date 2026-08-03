@@ -129,14 +129,25 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
       for (const phase of prog.phases) {
         const task = phase.tasks.find((t: any) => t.taskId === flight.selected_task)
         if (task) {
-          if (task.userLectureId) {
-            flightloggerUrl = `https://trener.flightlogger.net/users/${flight.student_id}/user_programs/${prog.userProgramId}/user_lectures/${task.userLectureId}/edit`
-            isTaskInstantiated = true;
-          } else {
-            // Fallback: The task hasn't been booked/instantiated in FlightLogger yet, 
-            // so we open the syllabus page where the user can click it to create the registration.
-            flightloggerUrl = `https://trener.flightlogger.net/users/${flight.student_id}/user_programs/${prog.userProgramId}`
-          }
+          const rawTaskId = task.taskId || flight.selected_task;
+          const decodedTaskId = (() => {
+            if (!rawTaskId) return rawTaskId;
+            try {
+              if (rawTaskId.includes('--')) return rawTaskId.split('--')[1];
+              // Try to decode if it's base64
+              if (/^[A-Za-z0-9+/=]+$/.test(rawTaskId)) {
+                const decoded = atob(rawTaskId);
+                const match = decoded.match(/--(\d+)$/);
+                if (match) return match[1];
+              }
+              return rawTaskId;
+            } catch (e) {
+              return rawTaskId;
+            }
+          })();
+
+          flightloggerUrl = `https://trener.flightlogger.net/users/${flight.student_id}/user_programs/${prog.userProgramId}/user_lectures/${decodedTaskId}/edit`
+          isTaskInstantiated = !!task.userLectureId;
           break
         }
       }
@@ -245,7 +256,7 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                 }}
                 disabled={!flightloggerUrl}
                 style={{ padding: '8px 16px', background: flightloggerUrl ? 'var(--primary)' : 'var(--bg-elevated)', color: flightloggerUrl ? 'white' : 'var(--text-secondary)', border: 'none', borderRadius: 'var(--radius-md)', cursor: flightloggerUrl ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', opacity: flightloggerUrl ? 1 : 0.5 }}
-                title={!flightloggerUrl ? "Loading program data..." : (isTaskInstantiated ? "Open specific task in FlightLogger" : "Task not yet instantiated. Opening Program Syllabus instead.")}
+                title={!flightloggerUrl ? "Loading program data..." : "Open task in FlightLogger"}
               >
                 🔗 Open in FlightLogger
               </button>
