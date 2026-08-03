@@ -1420,7 +1420,7 @@ body {
   }
 
   .navbar-brand-name {
-    font-size: 0.95rem;
+    display: none;
   }
 
   .navbar-brand-icon {
