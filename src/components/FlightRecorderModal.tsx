@@ -19,6 +19,32 @@ export default function FlightRecorderModal() {
   const [recentAerodromes, setRecentAerodromes] = useState<string[]>([])
   const [availableAircraft, setAvailableAircraft] = useState<string[]>([])
   
+  // Viewport Height for mobile keyboard fix
+  const [viewportHeight, setViewportHeight] = useState(typeof window !== 'undefined' ? window.innerHeight : 800)
+
+  useEffect(() => {
+    const updateViewport = () => {
+      if (window.visualViewport) {
+        setViewportHeight(window.visualViewport.height);
+      } else {
+        setViewportHeight(window.innerHeight);
+      }
+    };
+    updateViewport();
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateViewport);
+    } else {
+      window.addEventListener('resize', updateViewport);
+    }
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', updateViewport);
+      } else {
+        window.removeEventListener('resize', updateViewport);
+      }
+    };
+  }, []);
+  
   // Rewind Start Time State
   const [isRewindActive, setIsRewindActive] = useState(false)
   const [rewindMinutes, setRewindMinutes] = useState(0)
@@ -410,7 +436,7 @@ export default function FlightRecorderModal() {
 
   return (
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setIsModalOpen(false) }}>
-      <div className="modal-box" style={{ maxWidth: '600px', width: '100%', maxHeight: '85dvh', height: activeTab === 'comments' ? '85dvh' : 'auto', marginBottom: '10dvh', display: 'flex', flexDirection: 'column' }}>
+      <div className="modal-box" style={{ maxWidth: '600px', width: '100%', maxHeight: `${viewportHeight * 0.85}px`, height: activeTab === 'comments' ? `${viewportHeight * 0.85}px` : 'auto', marginBottom: `${viewportHeight * 0.10}px`, display: 'flex', flexDirection: 'column' }}>
         <div className="modal-header" style={{ flexShrink: 0 }}>
           <h2 className="modal-title">Flight Recorder - {ongoingFlight.student_name}</h2>
         </div>

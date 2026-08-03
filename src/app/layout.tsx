@@ -1,8 +1,16 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { FlightRecorderProvider } from '@/components/FlightRecorderContext'
 import FlightRecorderGlobal from '@/components/FlightRecorderGlobal'
 import FlightRecorderModal from '@/components/FlightRecorderModal'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  interactiveWidget: 'resizes-content',
+}
 
 export const metadata: Metadata = {
   title: 'AugmentFlogger — Flight Instructor Dashboard',
