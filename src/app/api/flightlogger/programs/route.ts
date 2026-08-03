@@ -105,6 +105,18 @@ export async function POST(request: Request) {
     }
 
     const flData = await flResponse.json()
+    
+    // Dump for debugging
+    try {
+      const fs = require('fs')
+      fs.writeFileSync('flightlogger_response.json', JSON.stringify(flData, null, 2))
+    } catch (e) {
+      console.error("Failed to dump response", e)
+    }
+
+    if (flData.errors) {
+      console.error("GraphQL errors:", JSON.stringify(flData.errors, null, 2))
+    }
 
     if (flData.errors) {
       console.error('GraphQL errors:', flData.errors)
