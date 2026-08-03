@@ -18,23 +18,33 @@
     if (targetTaskName) {
         console.log(`[Auto Task Opener] Looking for task: "${targetTaskName}"`);
         
-        // FlightLogger tasks are inside <a> tags within the table
-        const allLinks = Array.from(document.querySelectorAll('a'));
-        
-        // Find the link where the visible text matches the task name
-        const targetLink = allLinks.find(a => a.innerText.trim() === targetTaskName.trim());
-        
-        if (targetLink) {
-            console.log(`[Auto Task Opener] Found it! Redirecting to: ${targetLink.href}`);
+        // Normalize the target string for robust matching
+        const normalize = (str) => str.replace(/\s+/g, ' ').trim().toLowerCase();
+        const searchStr = normalize(targetTaskName);
+
+        // Keep trying to find the link for a few seconds (in case of slow DOM loading or Turbo)
+        let attempts = 0;
+        const intervalId = setInterval(() => {
+            attempts++;
+            const allLinks = Array.from(document.querySelectorAll('a'));
             
-            // Highlight it visually just in case it takes a split second
-            targetLink.style.backgroundColor = 'yellow';
-            targetLink.style.border = '2px solid red';
+            // Find the link where the normalized visible text includes the target name
+            const targetLink = allLinks.find(a => normalize(a.innerText).includes(searchStr));
             
-            // Redirect the page to the specific edit URL
-            window.location.replace(targetLink.href);
-        } else {
-            console.error(`[Auto Task Opener] Could not find any link matching "${targetTaskName}".`);
-        }
+            if (targetLink) {
+                console.log(`[Auto Task Opener] Found it on attempt ${attempts}! Redirecting to: ${targetLink.href}`);
+                clearInterval(intervalId);
+                
+                targetLink.style.backgroundColor = 'yellow';
+                targetLink.style.border = '2px solid red';
+                
+                // Redirect
+                window.location.replace(targetLink.href);
+            } else if (attempts > 50) {
+                // Stop after ~5 seconds
+                console.error(`[Auto Task Opener] Could not find any link matching "${targetTaskName}" after 5 seconds.`);
+                clearInterval(intervalId);
+            }
+        }, 100); // check every 100ms
     }
 })();
