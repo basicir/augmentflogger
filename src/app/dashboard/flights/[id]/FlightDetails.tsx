@@ -152,6 +152,14 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
           </h3>
           {!isEditing ? (
             <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('AUGMENTFLOGGER_EXPORT', { detail: flight }));
+                }}
+                style={{ padding: '8px 16px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                🚀 Export to FlightLogger
+              </button>
               <button 
                 onClick={async () => {
                   if (window.confirm('Are you sure you want to delete this flight? This action cannot be undone.')) {
@@ -173,7 +181,7 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
               >
                 🗑️ Delete
               </button>
-              <button onClick={() => { setIsEditing(true); setEditData(flight) }} style={{ padding: '8px 16px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
+              <button onClick={() => { setIsEditing(true); setEditData(flight) }} style={{ padding: '8px 16px', background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
                 ✏️ Edit
               </button>
             </div>
