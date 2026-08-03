@@ -136,7 +136,7 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
             // Fallback: The task hasn't been booked/instantiated in FlightLogger yet, 
             // or the cache is old. We open the syllabus page where the user can click it.
             // We append the taskName so a Tampermonkey script can automatically find and click it!
-            flightloggerUrl = `https://trener.flightlogger.net/users/${flight.student_id}/user_programs/${prog.userProgramId}?auto_open_task=${encodeURIComponent(task.taskName)}`
+            flightloggerUrl = `https://trener.flightlogger.net/users/${flight.student_id}/user_programs/${prog.userProgramId}#auto_open_task=${encodeURIComponent(task.taskName)}`
             isTaskInstantiated = false
           }
           break
