@@ -94,6 +94,20 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
     setEditData({ ...editData, exercise_comments: { ...currentComments, [exId]: comment } })
   }
 
+  let flightloggerUrl: string | null = null;
+  if (flight.selected_task && flight.programs_cache) {
+    const prog = flight.programs_cache.find((p: any) => p.programName === flight.selected_program)
+    if (prog && prog.userProgramId) {
+      for (const phase of prog.phases) {
+        const task = phase.tasks.find((t: any) => t.taskId === flight.selected_task)
+        if (task && task.userLectureId) {
+          flightloggerUrl = `https://trener.flightlogger.net/users/${flight.student_id}/user_programs/${prog.userProgramId}/user_lectures/${task.userLectureId}/edit`
+          break
+        }
+      }
+    }
+  }
+
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', background: 'var(--bg-default)', borderRadius: '12px', border: '1px solid var(--border-default)', display: 'flex', flexDirection: 'column', minHeight: '600px', height: activeTab === 'comments' ? `${viewportHeight * 0.85}px` : 'auto' }}>
       <div style={{ padding: '16px', borderBottom: '1px solid var(--border-default)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -189,6 +203,16 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                 style={{ padding: '8px 16px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 📋 Export to Clipboard
+              </button>
+              <button
+                onClick={() => {
+                   if (flightloggerUrl) window.open(flightloggerUrl, '_blank');
+                }}
+                disabled={!flightloggerUrl}
+                style={{ padding: '8px 16px', background: flightloggerUrl ? 'var(--primary)' : 'var(--bg-elevated)', color: flightloggerUrl ? 'white' : 'var(--text-secondary)', border: 'none', borderRadius: 'var(--radius-md)', cursor: flightloggerUrl ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', opacity: flightloggerUrl ? 1 : 0.5 }}
+                title={!flightloggerUrl ? "No task selected or task hasn't been instantiated yet" : "Open in FlightLogger"}
+              >
+                🔗 Open in FlightLogger
               </button>
               <button 
                 onClick={async () => {

@@ -25,6 +25,7 @@ const GET_STUDENT_PROGRAMS_QUERY = `
         }
         trainings(first: 100, all: true) {
           nodes {
+            id
             status
             lecture {
               id
@@ -98,6 +99,7 @@ export async function POST(request: Request) {
       name?: string;
     }
     interface TrainingData {
+      id: string;
       status: string;
       lecture?: LectureData;
     }
@@ -120,13 +122,14 @@ export async function POST(request: Request) {
       };
     }
 
-    // Format the response just like the script
     const programs = (flData.data?.userPrograms?.nodes || []).map((up: ProgramData) => {
       const completedLectures: Record<string, string> = {};
+      const userLectureIds: Record<string, string> = {};
       if (up.trainings && up.trainings.nodes) {
         up.trainings.nodes.forEach((t: TrainingData) => {
           if (t.lecture) {
             completedLectures[t.lecture.id] = t.status;
+            userLectureIds[t.lecture.id] = t.id;
           }
         });
       }
@@ -136,11 +139,13 @@ export async function POST(request: Request) {
         tasks: phase.lectures?.map((lecture: LectureData) => ({
           taskId: lecture.id,
           taskName: lecture.name,
+          userLectureId: userLectureIds[lecture.id] || null,
           status: completedLectures[lecture.id] || "PENDING"
         })).reverse() || []
       })).reverse() || [];
 
       return {
+        userProgramId: up.id,
         programId: up.program?.id || up.id,
         programName: up.name,
         status: up.status,
