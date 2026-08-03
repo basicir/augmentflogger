@@ -205,54 +205,54 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
                 onClick={async () => {
-                  try {
-                    let parsedGrades = flight.grades;
-                    if (typeof parsedGrades === 'string') {
-                      try { parsedGrades = JSON.parse(parsedGrades); } catch (e) {}
-                    }
-                    let parsedExerciseComments = flight.exercise_comments;
-                    if (typeof parsedExerciseComments === 'string') {
-                      try { parsedExerciseComments = JSON.parse(parsedExerciseComments); } catch (e) {}
-                    }
-
-                    const exportData = {
-                      start_time: flight.start_time,
-                      end_time: flight.end_time,
-                      aircraft_registration: flight.aircraft_registration,
-                      pilot_function: flight.pilot_function,
-                      flight_rules: flight.flight_rules,
-                      time_of_day: flight.time_of_day,
-                      flight_type: flight.flight_type,
-                      departure_aerodrome: flight.departure_aerodrome,
-                      destination_aerodrome: flight.destination_aerodrome,
-                      grades: parsedGrades,
-                      exercise_comments: parsedExerciseComments,
-                      general_comment: flight.general_comment,
-                      touch_and_goes: flight.touch_and_goes
-                    };
-                    await navigator.clipboard.writeText(JSON.stringify(exportData));
-                    alert('Sikeresen másolva a vágólapra! Most menj a FlightLoggerre, és nyomd meg az Import gombot!');
-                  } catch (err) {
-                    console.error('Failed to copy text: ', err);
-                    alert('Hiba a vágólapra másoláskor!');
-                  }
-                }}
-                style={{ padding: '8px 16px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
-              >
-                📋 Export to Clipboard
-              </button>
-              <button
-                onClick={() => {
                    if (flightloggerUrl) {
-                     console.log('Opening FlightLogger URL:', flightloggerUrl);
-                     window.open(flightloggerUrl, '_blank');
+                     try {
+                       let parsedGrades = flight.grades;
+                       if (typeof parsedGrades === 'string') {
+                         try { parsedGrades = JSON.parse(parsedGrades); } catch (e) {}
+                       }
+                       let parsedExerciseComments = flight.exercise_comments;
+                       if (typeof parsedExerciseComments === 'string') {
+                         try { parsedExerciseComments = JSON.parse(parsedExerciseComments); } catch (e) {}
+                       }
+
+                       const exportData = {
+                         start_time: flight.start_time,
+                         end_time: flight.end_time,
+                         aircraft_registration: flight.aircraft_registration,
+                         pilot_function: flight.pilot_function,
+                         flight_rules: flight.flight_rules,
+                         time_of_day: flight.time_of_day,
+                         flight_type: flight.flight_type,
+                         departure_aerodrome: flight.departure_aerodrome,
+                         destination_aerodrome: flight.destination_aerodrome,
+                         grades: parsedGrades,
+                         exercise_comments: parsedExerciseComments,
+                         general_comment: flight.general_comment,
+                         touch_and_goes: flight.touch_and_goes
+                       };
+                       
+                       const b64Data = btoa(unescape(encodeURIComponent(JSON.stringify(exportData))));
+                       let finalUrl = flightloggerUrl;
+                       if (finalUrl.includes('#')) {
+                         finalUrl += `&export_data=${b64Data}`;
+                       } else {
+                         finalUrl += `#export_data=${b64Data}`;
+                       }
+                       
+                       console.log('Opening FlightLogger URL:', finalUrl);
+                       window.open(finalUrl, '_blank');
+                     } catch (err) {
+                       console.error('Failed to encode export data: ', err);
+                       alert('Hiba az adatok exportálásakor!');
+                     }
                    }
                 }}
                 disabled={!flightloggerUrl}
                 style={{ padding: '8px 16px', background: flightloggerUrl ? 'var(--primary)' : 'var(--bg-elevated)', color: flightloggerUrl ? 'white' : 'var(--text-secondary)', border: 'none', borderRadius: 'var(--radius-md)', cursor: flightloggerUrl ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', opacity: flightloggerUrl ? 1 : 0.5 }}
-                title={!flightloggerUrl ? "Loading program data..." : (isTaskInstantiated ? "Open specific task in FlightLogger" : "Task not yet instantiated. Opening Program Syllabus instead.")}
+                title={!flightloggerUrl ? "Loading program data..." : (isTaskInstantiated ? "Export and Open specific task in FlightLogger" : "Task not yet instantiated. Auto-opening Program Syllabus instead.")}
               >
-                🔗 Open in FlightLogger
+                🛫 Export & Open in FlightLogger
               </button>
               <button
                 onClick={async () => {

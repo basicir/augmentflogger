@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         FlightLogger Auto-Filler (Clipboard Import)
+// @name         FlightLogger Master Exporter
 // @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  Vágólap alapú adatátvitel React-ből + Auto kitöltés (Reptér támogatással)
+// @version      2.0
+// @description  Handles auto-opening green tasks and auto-filling flight data from URL hash
 // @author       Te Neved
-// @match        https://*.flightlogger.net/*
+// @match        *://*.flightlogger.net/*
 // @grant        none
 // ==/UserScript==
 
@@ -12,7 +12,7 @@
     'use strict';
 
     // ==========================================
-    // LÁTVÁNYOS ÉRTESÍTÉSI RENDSZER (TOAST)
+    // NOTIFICATION SYSTEM
     // ==========================================
     const showNotification = (message, type = 'warning') => {
         const toast = document.createElement('div');
@@ -38,7 +38,7 @@
     };
 
     // ==========================================
-    // SEGÉDFÜGGVÉNYEK
+    // AUTO-FILL HELPERS
     // ==========================================
     const setReactInput = async (selector, val) => {
         const el = document.querySelector(selector);
@@ -233,10 +233,9 @@
     };
 
     // ==========================================
-    // FŐ KITÖLTŐ FOLYAMAT (DINAMIKUS)
+    // AUTO-FILL MAIN FUNCTION
     // ==========================================
     const autoFillFlightData = async (data) => {
-
         if (await switchTab('Flight')) {
             if (data.aircraft_registration && await setAircraftCallsign(data.aircraft_registration)) {
                 await new Promise(r => setTimeout(r, 1000));
@@ -247,7 +246,7 @@
                     await setReactInput('.primaryFlightLogStart .time-input input', `${String(sd.getHours()).padStart(2, '0')}:${String(sd.getMinutes()).padStart(2, '0')}`);
                 }
 
-                await new Promise(r => setTimeout(r, 1000)); // Várakozás az onblock előtt
+                await new Promise(r => setTimeout(r, 1000));
 
                 if (data.end_time) {
                     const ed = new Date(data.end_time);
@@ -284,14 +283,11 @@
                 }
 
                 const airports = Array.from(document.querySelectorAll('.landing-airport-selector'));
-
                 if (airports.length > 0 && data.departure_aerodrome) {
                     await setAirportSelector(0, data.departure_aerodrome);
                 }
-
                 if (airports.length > 1 && data.destination_aerodrome) {
                     await setAirportSelector(airports.length - 1, data.destination_aerodrome);
-
                     if (airports.length > 2) {
                         await setAirportSelector(1, data.destination_aerodrome);
                     }
@@ -319,38 +315,75 @@
     };
 
     // ==========================================
-    // UI GOMB A VÁGÓLAP BEOLVASÁSÁHOZ
+    // ROUTING & EXECUTION PIPELINE
     // ==========================================
-    const btn = document.createElement('button');
-    btn.textContent = "⬇️ Import from Clipboard";
-    btn.style.position = 'fixed';
-    btn.style.bottom = '20px';
-    btn.style.left = '20px';
-    btn.style.zIndex = '999999';
-    btn.style.padding = '12px 20px';
-    btn.style.backgroundColor = '#27ae60';
-    btn.style.color = 'white';
-    btn.style.border = 'none';
-    btn.style.borderRadius = '8px';
-    btn.style.cursor = 'pointer';
-    btn.style.boxShadow = '0px 4px 10px rgba(0,0,0,0.3)';
-    btn.style.fontWeight = 'bold';
+    const hashStr = window.location.hash.substring(1);
+    const urlParams = new URLSearchParams(hashStr);
+    const exportDataB64 = urlParams.get('export_data');
+    const autoOpenTask = urlParams.get('auto_open_task');
 
-    btn.onclick = async () => {
-        try {
-            const text = await navigator.clipboard.readText();
-            const data = JSON.parse(text);
-            if (data && (data.aircraft_registration || data.start_time)) {
-                showNotification("Adatok beolvasva! Kitöltés indul...", "warning");
-                await autoFillFlightData(data);
-            } else {
-                showNotification("A vágólapon lévő adat nem tűnik érvényes repülésnek!", "error");
-            }
-        } catch (e) {
-            showNotification("Nem sikerült beolvasni a vágólapot. Adj engedélyt (ha a böngésző kéri), vagy másold ki újra az adatokat!", "error");
-            console.error(e);
+    if (exportDataB64) {
+        
+        // 1. PHASE: We are on a syllabus page, need to auto-click the task to open it
+        if (autoOpenTask) {
+            console.log(`[Master Exporter] Looking for task: "${autoOpenTask}"`);
+            
+            const normalize = (str) => str.replace(/\s+/g, ' ').trim().toLowerCase();
+            const searchStr = normalize(autoOpenTask);
+
+            let attempts = 0;
+            const intervalId = setInterval(() => {
+                attempts++;
+                const allLinks = Array.from(document.querySelectorAll('a'));
+                const targetLink = allLinks.find(a => normalize(a.innerText).includes(searchStr));
+                
+                if (targetLink) {
+                    let finalUrl = targetLink.href;
+                    if (!finalUrl.endsWith('/edit')) {
+                        finalUrl = finalUrl.replace(/\/?(\?.*)?$/, '/edit$1');
+                    }
+                    
+                    // Forward the export data to the edit page
+                    finalUrl += `#export_data=${exportDataB64}`;
+                    
+                    console.log(`[Master Exporter] Redirecting to: ${finalUrl}`);
+                    clearInterval(intervalId);
+                    window.location.replace(finalUrl);
+                } else if (attempts > 50) {
+                    console.error(`[Master Exporter] Could not find any link matching "${autoOpenTask}".`);
+                    clearInterval(intervalId);
+                }
+            }, 100);
+            return;
         }
-    };
-    document.body.appendChild(btn);
 
+        // 2. PHASE: We are on an Edit page (or RED task was opened directly)
+        // Ensure we are on an edit page before injecting data
+        if (window.location.pathname.endsWith('/edit')) {
+            console.log("[Master Exporter] Edit page detected. Parsing export data...");
+            
+            try {
+                // Decode base64 -> uri component -> json string -> object
+                const dataStr = decodeURIComponent(escape(atob(exportDataB64)));
+                const data = JSON.parse(dataStr);
+                
+                // Clear hash so it doesn't run again on page reload
+                history.replaceState(null, '', window.location.pathname + window.location.search);
+                
+                showNotification("Adatok felismerve! Kitöltés indul 3 másodpercen belül...", "warning");
+                
+                // Wait for React to mount the edit forms
+                setTimeout(() => {
+                    autoFillFlightData(data).catch(err => {
+                        console.error(err);
+                        showNotification("Hiba történt a kitöltés során!", "error");
+                    });
+                }, 3000);
+                
+            } catch (err) {
+                console.error("[Master Exporter] Failed to parse export data:", err);
+                showNotification("Érvénytelen adat a linkben!", "error");
+            }
+        }
+    }
 })();
