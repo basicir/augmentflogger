@@ -8,7 +8,7 @@ import { Flight } from '@/components/FlightList'
 
 export default function FlightDetails({ initialFlight, utcOffsetHours }: { initialFlight: Flight, utcOffsetHours: number }) {
   const [flight, setFlight] = useState<Flight>(initialFlight)
-  const [activeTab, setActiveTab] = useState<'flight-parameters' | 'task-parameters' | 'comments'>('flight-parameters')
+  const [activeTab, setActiveTab] = useState<'flight-parameters' | 'task-parameters' | 'comments' | 'description'>('flight-parameters')
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({})
 
   const [isEditing, setIsEditing] = useState(false)
@@ -105,6 +105,16 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
           }}
         >
           Comments
+        </button>
+        <button
+          onClick={() => setActiveTab('description')}
+          style={{
+            flex: 1, padding: '16px', background: 'none', border: 'none', color: activeTab === 'description' ? 'var(--primary)' : 'var(--text-secondary)',
+            borderBottom: activeTab === 'description' ? '2px solid var(--primary)' : '2px solid transparent',
+            fontWeight: activeTab === 'description' ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap'
+          }}
+        >
+          Description
         </button>
       </div>
 
@@ -480,24 +490,35 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
         )}
 
         {activeTab === 'comments' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-              <h3 style={{ fontSize: '18px', fontWeight: 600, borderBottom: '1px solid var(--border-default)', paddingBottom: '12px', marginBottom: '16px' }}>
-                General Comment
-              </h3>
+              <h4 style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase' }}>General Comment</h4>
               {isEditing ? (
                 <textarea
                   value={editData.general_comment ?? flight.general_comment ?? ''}
-                  onChange={e => setEditData({ ...editData, general_comment: e.target.value })}
-                  placeholder="Enter a general comment for the entire flight..."
-                  style={{ width: '100%', padding: '16px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', color: 'white', outline: 'none', resize: 'vertical', minHeight: '200px', fontFamily: 'inherit', fontSize: '15px', lineHeight: 1.5 }}
+                  onChange={e => {
+                    e.target.style.height = 'auto';
+                    e.target.style.height = e.target.scrollHeight + 'px';
+                    setEditData({ ...editData, general_comment: e.target.value })
+                  }}
+                  style={{ width: '100%', minHeight: '100px', padding: '12px', fontSize: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', overflow: 'hidden', resize: 'none' }}
                 />
               ) : (
-                <div style={{ padding: '24px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', fontSize: '16px', lineHeight: 1.6, whiteSpace: 'pre-wrap', minHeight: '100px' }}>
-                  {flight.general_comment || <span style={{ color: 'var(--text-secondary)' }}>No general comment recorded.</span>}
+                <div style={{ padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', minHeight: '60px', whiteSpace: 'pre-wrap' }}>
+                  {flight.general_comment || <span style={{ color: 'var(--text-secondary)' }}>No general comment.</span>}
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {activeTab === 'description' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div 
+              className="trix-content"
+              style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', color: 'var(--text-primary)', lineHeight: '1.6' }}
+              dangerouslySetInnerHTML={{ __html: flight.task_description_cache || '<p style="color:var(--text-secondary)">No description available for this task.</p>' }}
+            />
           </div>
         )}
       </div>

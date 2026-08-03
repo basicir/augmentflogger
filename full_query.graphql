@@ -1,0 +1,507 @@
+query UserLecture_fetchExistingUserLecture($userLectureId: String!) {
+  userLecture(id: $userLectureId) {
+    id
+    vrflowUrl
+    updatedAt
+    lectureType
+    lessonCategory
+    title
+    description
+    briefing
+    status
+    failedPerformance
+    done
+    approved
+    submittedAt
+    preFlightTimeSeconds
+    postFlightTimeSeconds
+    submittedBy {
+      id
+      formattedName
+      callSign
+      __typename
+    }
+    prevUserLecture {
+      id
+      url
+      __typename
+    }
+    prevUserLectureUrl
+    nextUserLecture {
+      id
+      url
+      __typename
+    }
+    nextUserLectureUrl
+    lastFlownUserLecture {
+      id
+      lectureType
+      title
+      url
+      __typename
+    }
+    hasPassedRepetitionLessons
+    abilities
+    parentUserLecture {
+      id
+      title
+      url
+      __typename
+    }
+    duration {
+      flightType
+      vfrDualTimeSeconds
+      vfrSoloTimeSeconds
+      vfrSpicTimeSeconds
+      vfrSimTimeSeconds
+      ifrDualTimeSeconds
+      ifrSpicTimeSeconds
+      ifrSimTimeSeconds
+      multiEngineTimeSeconds
+      nightTimeSeconds
+      pilotFlyingTimeSeconds
+      pilotMonitoringTimeSeconds
+      crossCountryTimeSeconds
+      asymmetricTimeSeconds
+      floatTimeSeconds
+      instrumentTimeSeconds
+      auprtTimeSeconds
+      blockTimeSeconds
+      vfrTimeSeconds
+      ifrTimeSeconds
+      preFlightTimeSeconds
+      postFlightTimeSeconds
+      __typename
+    }
+    categories {
+      id
+      categoryId
+      name
+      extraExercisesAllowed
+      mandatory
+      exercises {
+        id
+        name
+        nameLink
+        description
+        exercise {
+          id
+          name
+          masterExerciseId
+          nameLink
+          description
+          __typename
+        }
+        carryForward
+        gradeId
+        flagged
+        comment
+        statisticGroupId
+        normGradeId
+        gradedCompetencies {
+          id
+          coreCompetencyId
+          gradedIndicators {
+            id
+            performanceIndicatorId
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      extraExercises {
+        carryForward
+        id
+        name
+        nameLink
+        description
+        gradeId
+        flagged
+        comment
+        masterListExerciseId
+        statisticGroupId
+        editable
+        normGradeId
+        gradedCompetencies {
+          id
+          coreCompetencyId
+          gradedIndicators {
+            id
+            performanceIndicatorId
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    extraExercises {
+      id
+      name
+      nameLink
+      description
+      gradeId
+      flagged
+      carryForward
+      comment
+      masterListExerciseId
+      statisticGroupId
+      editable
+      normGradeId
+      gradedCompetencies {
+        id
+        coreCompetencyId
+        gradedIndicators {
+          id
+          performanceIndicatorId
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    flights {
+      id
+      typeOfTimerMeasurement
+      typeOfTimer
+      offBlockAt
+      onBlockAt
+      airborneAt
+      landingAt
+      tachoTimeOnStart
+      tachoTimeOnEnd
+      flightType
+      attachedTrackedFlights {
+        id
+        resourceUrl
+        resourceName
+        trackableFlight {
+          id
+          registration
+          providerType
+          providerName
+          status
+          engineOn
+          offBlock
+          onBlock
+          takeoff
+          landing
+          engineOff
+          viewUrl
+          kmlUrl
+          attachedTrackedFlights {
+            id
+            resourceUrl
+            resourceName
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      primaryFlightLog {
+        isEnabled
+        type
+        measurementType
+        durationFormat
+        startsAt
+        endsAt
+        startSeconds
+        endSeconds
+        durationSeconds
+        __typename
+      }
+      secondaryFlightLog {
+        isEnabled
+        type
+        measurementType
+        durationFormat
+        startsAt
+        endsAt
+        startSeconds
+        endSeconds
+        durationSeconds
+        __typename
+      }
+      tertiaryFlightLog {
+        isEnabled
+        type
+        measurementType
+        durationFormat
+        startsAt
+        endsAt
+        startSeconds
+        endSeconds
+        durationSeconds
+        __typename
+      }
+      simulatorClass
+      activityType
+      vfrTimeSeconds
+      ifrTimeSeconds
+      dayTimeSeconds
+      nightTimeSeconds
+      localTimeSeconds
+      crossCountryTimeSeconds
+      asymmetricTimeSeconds
+      floatTimeSeconds
+      instrumentTimeSeconds
+      auprtTimeSeconds
+      pilotFlyingTimeSeconds
+      pilotMonitoringTimeSeconds
+      totalFuel
+      fuelAdded
+      oilAdded
+      oilAddedTwo
+      fuelMeasurement
+      oilBurnUnit
+      oilBurnUnitTwo
+      submittedAt
+      submittedByInstructor {
+        id
+        __typename
+      }
+      departureAirport {
+        id
+        name
+        disabled
+        __typename
+      }
+      arrivalAirport {
+        id
+        name
+        disabled
+        __typename
+      }
+      aircraft {
+        asymmetricTimeEnabled
+        floatTimeEnabled
+        instrumentTimeEnabled
+        primaryLog {
+          isEnabled
+          type
+          measurementType
+          durationFormat
+          totalSeconds
+          prefillIsEnabled
+          actionButtonsIsEnabled
+          durationWarningIsEnabled
+          durationWarningPercent
+          offsetWarningIsEnabled
+          offsetWarningStartSeconds
+          offsetWarningEndSeconds
+          withinPrimary
+          __typename
+        }
+        secondaryLog {
+          isEnabled
+          type
+          measurementType
+          durationFormat
+          totalSeconds
+          prefillIsEnabled
+          actionButtonsIsEnabled
+          durationWarningIsEnabled
+          durationWarningPercent
+          offsetWarningIsEnabled
+          offsetWarningStartSeconds
+          offsetWarningEndSeconds
+          withinPrimary
+          __typename
+        }
+        tertiaryLog {
+          isEnabled
+          type
+          measurementType
+          durationFormat
+          totalSeconds
+          prefillIsEnabled
+          actionButtonsIsEnabled
+          durationWarningIsEnabled
+          durationWarningPercent
+          offsetWarningIsEnabled
+          offsetWarningStartSeconds
+          offsetWarningEndSeconds
+          withinPrimary
+          __typename
+        }
+        id
+        callsign
+        model
+        modelId
+        aircraftClass
+        aircraftType
+        enabledPMF
+        defaultPMF
+        fillOutTacho
+        enableTaxiTime
+        disabled
+        taxiOutTimeMins
+        taxiInTimeMins
+        tacho
+        defaultTimerStart
+        timerWarningType
+        tachoWarningPercent
+        totalFuel
+        totalFuelWithAccountSetting
+        fuelCoefficientMeasurement
+        oilBurnUnit
+        oilBurnUnitTwo
+        typeOfTimer
+        typeOfTimerMeasurement
+        homeAirport {
+          id
+          name
+          disabled
+          __typename
+        }
+        currentAirport {
+          id
+          name
+          disabled
+          __typename
+        }
+        updatedAt
+        defaultEngineType
+        flightTrackerActive
+        flightTrackingProvider
+        asymmetricTimeEnabled
+        floatTimeEnabled
+        instrumentTimeEnabled
+        auprtTimeEnabled
+        __typename
+      }
+      landings {
+        id
+        count
+        airport {
+          id
+          name
+          disabled
+          __typename
+        }
+        landingType
+        nightLanding
+        isArrival
+        __typename
+      }
+      pilotTrainingExercises {
+        name
+        grade
+        __typename
+      }
+      __typename
+    }
+    documents {
+      id
+      name
+      modifiedAt
+      userId
+      userCallSign
+      filename
+      fileUrl
+      abilities
+      __typename
+    }
+    debriefing {
+      remarks
+      instructorNote
+      studentNote
+      __typename
+    }
+    instructor {
+      id
+      formattedName
+      callSign
+      __typename
+    }
+    bookings {
+      id
+      __typename
+    }
+    holdItems {
+      id
+      name
+      gradeId
+      statisticGroupId
+      comment
+      normGradeId
+      originUserLecture {
+        displayName
+        url
+        __typename
+      }
+      gradedCompetencies {
+        id
+        coreCompetencyId
+        gradedIndicators {
+          id
+          performanceIndicatorId
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    freeHoldItems {
+      id
+      name
+      gradeId
+      statisticGroupId
+      comment
+      normGradeId
+      carryForwardTimes
+      originUserLecture {
+        displayName
+        url
+        __typename
+      }
+      __typename
+    }
+    programId
+    userProgram {
+      programRevision {
+        lessonLandingDefault
+        cbtaEnabled
+        ptrGradingEnabled
+        __typename
+      }
+      program {
+        id
+        aircraftType
+        __typename
+      }
+      __typename
+    }
+    programPhase {
+      id
+      name
+      __typename
+    }
+    registration {
+      id
+      hasChangelog
+      signedBySender
+      signedByReceiver
+      fullySigned
+      __typename
+    }
+    __typename
+  }
+  grades {
+    id
+    name
+    abbreviation
+    value
+    subgrade
+    hil
+    position
+    defaultGrade
+    autoFlag
+    includeInStatistics
+    __typename
+  }
+}
+
