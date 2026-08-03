@@ -275,7 +275,7 @@ export default function FlightRecorderModal() {
             categoryName: 'Competencies', // Default category
             grade: 'S' // Default grade
           }))
-          const desc = foundTask.description || ''
+          const desc = `<h3 style="margin-top:0;margin-bottom:8px;color:var(--primary);font-size:16px;">Matched Task: ${foundTask.task_name}</h3><hr style="border:0;border-bottom:1px solid var(--border-default);margin-bottom:16px;" />` + (foundTask.description || '')
           
           setTaskExercises(exes)
           setTaskDescription(desc)
@@ -438,16 +438,6 @@ export default function FlightRecorderModal() {
             Grading
           </button>
           <button
-            onClick={() => setActiveTab('description')}
-            style={{
-              flex: 1, padding: '12px', background: 'none', border: 'none', color: activeTab === 'description' ? 'var(--primary)' : 'var(--text-secondary)',
-              borderBottom: activeTab === 'description' ? '2px solid var(--primary)' : '2px solid transparent',
-              fontWeight: activeTab === 'description' ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap'
-            }}
-          >
-            Description
-          </button>
-          <button
             onClick={() => setActiveTab('comments')}
             style={{
               flex: 1, padding: '12px', background: 'none', border: 'none', color: activeTab === 'comments' ? 'var(--primary)' : 'var(--text-secondary)',
@@ -456,6 +446,16 @@ export default function FlightRecorderModal() {
             }}
           >
             Comments
+          </button>
+          <button
+            onClick={() => setActiveTab('description')}
+            style={{
+              flex: 1, padding: '12px', background: 'none', border: 'none', color: activeTab === 'description' ? 'var(--primary)' : 'var(--text-secondary)',
+              borderBottom: activeTab === 'description' ? '2px solid var(--primary)' : '2px solid transparent',
+              fontWeight: activeTab === 'description' ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap'
+            }}
+          >
+            Description
           </button>
         </div>
 
@@ -754,21 +754,19 @@ export default function FlightRecorderModal() {
           )}
 
           {activeTab === 'comments' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 600, borderBottom: '1px solid var(--border-default)', paddingBottom: '8px', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 600, borderBottom: '1px solid var(--border-default)', paddingBottom: '8px', marginBottom: '12px', flexShrink: 0 }}>
                   General Comment
                 </h3>
                 <textarea 
                   value={generalComment}
                   onChange={e => {
-                    e.target.style.height = 'auto';
-                    e.target.style.height = e.target.scrollHeight + 'px';
                     setGeneralComment(e.target.value);
                   }}
                   onBlur={() => updateFlight({ general_comment: generalComment })}
                   placeholder="📝 Write a general comment for this task..."
-                  style={{ width: '100%', minHeight: '100px', padding: '16px', fontSize: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', overflow: 'hidden', resize: 'none' }}
+                  style={{ width: '100%', flex: 1, padding: '16px', fontSize: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', overflow: 'auto', resize: 'none' }}
                 />
               </div>
             </div>

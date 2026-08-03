@@ -490,21 +490,19 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
         )}
 
         {activeTab === 'comments' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div>
-              <h4 style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase' }}>General Comment</h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+              <h4 style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase', flexShrink: 0 }}>General Comment</h4>
               {isEditing ? (
                 <textarea
                   value={editData.general_comment ?? flight.general_comment ?? ''}
                   onChange={e => {
-                    e.target.style.height = 'auto';
-                    e.target.style.height = e.target.scrollHeight + 'px';
                     setEditData({ ...editData, general_comment: e.target.value })
                   }}
-                  style={{ width: '100%', minHeight: '100px', padding: '12px', fontSize: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', overflow: 'hidden', resize: 'none' }}
+                  style={{ width: '100%', flex: 1, padding: '12px', fontSize: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', overflow: 'auto', resize: 'none' }}
                 />
               ) : (
-                <div style={{ padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', minHeight: '60px', whiteSpace: 'pre-wrap' }}>
+                <div style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', whiteSpace: 'pre-wrap', overflowY: 'auto' }}>
                   {flight.general_comment || <span style={{ color: 'var(--text-secondary)' }}>No general comment.</span>}
                 </div>
               )}
