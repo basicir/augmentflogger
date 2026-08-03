@@ -146,7 +146,7 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
   }
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', background: 'var(--bg-default)', borderRadius: '12px', border: '1px solid var(--border-default)', display: 'flex', flexDirection: 'column', minHeight: '600px', height: activeTab === 'comments' ? `${viewportHeight * 0.85}px` : 'auto' }}>
+    <div style={{ maxWidth: '800px', margin: '0 auto', borderRadius: '12px', display: 'flex', flexDirection: 'column', minHeight: '600px', height: activeTab === 'comments' ? `${viewportHeight * 0.85}px` : 'auto' }}>
       <div style={{ padding: '16px', borderBottom: '1px solid var(--border-default)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ margin: 0 }}>Flight Details - {flight.student_name}</h2>
       </div>
@@ -202,7 +202,31 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
             {activeTab === 'flight-parameters' ? '' : (activeTab === 'task-parameters' ? 'GRADING DETAILS' : 'COMMENTS')}
           </h3>
           {!isEditing ? (
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px', width: '100%', flex: 1, marginLeft: '16px' }}>
+              <button onClick={() => { setIsEditing(true); setEditData(flight) }} style={{ flex: 1, padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <Edit2 size={16} /> Edit
+              </button>
+              <button 
+                onClick={async () => {
+                  if (window.confirm('Are you sure you want to delete this flight? This action cannot be undone.')) {
+                    setIsSaving(true);
+                    try {
+                      const { error } = await supabase.from('flights').delete().eq('id', flight.id);
+                      if (error) throw error;
+                      router.push('/dashboard/flights');
+                      router.refresh();
+                    } catch (e: any) {
+                      console.error("Failed to delete flight", e);
+                      alert("Failed to delete flight: " + e.message);
+                      setIsSaving(false);
+                    }
+                  }
+                }} 
+                disabled={isSaving}
+                style={{ flex: 1, padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: '#ef4444', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+              >
+                <Trash2 size={16} /> Delete
+              </button>
               <button
                 onClick={async () => {
                    if (flightloggerUrl) {
@@ -250,66 +274,10 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                    }
                 }}
                 disabled={!flightloggerUrl}
-                style={{ padding: '8px 16px', background: flightloggerUrl ? 'var(--primary)' : 'var(--bg-elevated)', color: flightloggerUrl ? 'white' : 'var(--text-secondary)', border: 'none', borderRadius: 'var(--radius-md)', cursor: flightloggerUrl ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', opacity: flightloggerUrl ? 1 : 0.5 }}
+                style={{ flex: 1, padding: '8px 16px', background: flightloggerUrl ? 'linear-gradient(135deg, var(--primary) 0%, rgba(16, 185, 129, 0.8) 100%)' : 'var(--bg-elevated)', color: flightloggerUrl ? 'white' : 'var(--text-secondary)', border: flightloggerUrl ? '1px solid rgba(255,255,255,0.2)' : 'none', borderRadius: 'var(--radius-md)', cursor: flightloggerUrl ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', opacity: flightloggerUrl ? 1 : 0.5, boxShadow: flightloggerUrl ? '0 0 10px rgba(16, 185, 129, 0.4)' : 'none' }}
                 title={!flightloggerUrl ? "Loading program data..." : (isTaskInstantiated ? "Export and Open specific task in FlightLogger" : "Task not yet instantiated. Auto-opening Program Syllabus instead.")}
               >
-                🛫 Export & Open in FlightLogger
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    const res = await fetch(`/api/flightlogger/programs`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ studentId: flight.student_id })
-                    });
-                    if (!res.ok) {
-                      const errData = await res.json().catch(() => ({}));
-                      console.error("API Error Response:", errData);
-                      throw new Error(errData.details ? JSON.stringify(errData.details) : (errData.error || 'Failed to fetch updated programs'));
-                    }
-                    const data = await res.json();
-                    
-                    const { error } = await supabase.from('flights').update({
-                      programs_cache: data.programs
-                    }).eq('id', flight.id);
-                    if (error) throw error;
-                    
-                    router.refresh();
-                    alert('FlightLogger data updated successfully!');
-                  } catch (e: any) {
-                    console.error("Failed to refresh programs cache manually", e);
-                    alert("Failed to refresh cache: " + e.message);
-                  }
-                }}
-                style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
-                title="Refresh FlightLogger Data"
-              >
-                <RefreshCw size={16} /> Refresh
-              </button>
-              <button 
-                onClick={async () => {
-                  if (window.confirm('Are you sure you want to delete this flight? This action cannot be undone.')) {
-                    setIsSaving(true);
-                    try {
-                      const { error } = await supabase.from('flights').delete().eq('id', flight.id);
-                      if (error) throw error;
-                      router.push('/dashboard/flights');
-                      router.refresh();
-                    } catch (e: any) {
-                      console.error("Failed to delete flight", e);
-                      alert("Failed to delete flight: " + e.message);
-                      setIsSaving(false);
-                    }
-                  }
-                }} 
-                disabled={isSaving}
-                style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: '#ef4444', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
-              >
-                <Trash2 size={16} /> Delete
-              </button>
-              <button onClick={() => { setIsEditing(true); setEditData(flight) }} style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Edit2 size={16} /> Edit
+                🛫 Export
               </button>
             </div>
           ) : (

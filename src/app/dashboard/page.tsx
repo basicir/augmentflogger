@@ -239,87 +239,85 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Group Filter Tabs Bar */}
+          {/* Group Filter Chips Bar */}
           {pinnedStudents.length > 0 && (
-            <div className="groups-bar">
-              <div className="groups-tabs">
-                <button
-                  className={`group-tab ${selectedGroupFilter === '__ALL__' ? 'active' : ''}`}
-                  onClick={() => setSelectedGroupFilter('__ALL__')}
-                >
-                  All Students ({pinnedStudents.length})
-                </button>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '24px' }}>
+              <button
+                onClick={() => setSelectedGroupFilter('__ALL__')}
+                style={{
+                  padding: '6px 16px', borderRadius: '999px', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'all 0.2s',
+                  background: selectedGroupFilter === '__ALL__' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                  color: selectedGroupFilter === '__ALL__' ? 'white' : 'var(--text-secondary)',
+                  border: selectedGroupFilter === '__ALL__' ? '1px solid var(--primary)' : '1px solid var(--border-default)'
+                }}
+              >
+                All Students ({pinnedStudents.length})
+              </button>
 
-                {availableGroups.map((group) => {
-                  const count = (groupedStudentsMap[group] ?? []).length
-                  const isActive = selectedGroupFilter === group
-                  return (
-                    <div
-                      key={group}
-                      className={`group-tab-wrapper ${isActive ? 'active' : ''}`}
+              {availableGroups.map((group) => {
+                const count = (groupedStudentsMap[group] ?? []).length
+                const isActive = selectedGroupFilter === group
+                return (
+                  <div key={group} style={{ display: 'flex', alignItems: 'center', background: isActive ? 'var(--primary)' : 'rgba(255,255,255,0.05)', borderRadius: '999px', border: isActive ? '1px solid var(--primary)' : '1px solid var(--border-default)', transition: 'all 0.2s', overflow: 'hidden' }}>
+                    <button
+                      onClick={() => setSelectedGroupFilter(group)}
+                      style={{ padding: '6px 12px 6px 16px', background: 'transparent', border: 'none', color: isActive ? 'white' : 'var(--text-secondary)', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
                     >
-                      <button
-                        className="group-tab-title"
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-                        onClick={() => setSelectedGroupFilter(group)}
-                      >
-                        <Folder size={14} /> {group} ({count})
-                      </button>
-                      <button
-                        className="group-delete-btn"
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDeleteGroup(group)
-                        }}
-                        title={`Delete group ${group}`}
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )
-                })}
-
-                {(groupedStudentsMap['__UNASSIGNED__'] ?? []).length > 0 && (
-                  <button
-                    className={`group-tab ${selectedGroupFilter === '__UNASSIGNED__' ? 'active' : ''}`}
-                    onClick={() => setSelectedGroupFilter('__UNASSIGNED__')}
-                  >
-                    Unassigned ({(groupedStudentsMap['__UNASSIGNED__'] ?? []).length})
-                  </button>
-                )}
-
-                {!creatingGroup ? (
-                  <button
-                    className="group-tab group-tab-add"
-                    onClick={() => setCreatingGroup(true)}
-                  >
-                    + Add Group
-                  </button>
-                ) : (
-                  <form onSubmit={handleCreateGroup} className="new-group-inline-form">
-                    <input
-                      type="text"
-                      className="new-group-inline-input"
-                      placeholder="Group name (e.g. PPL Batch)"
-                      value={groupInput}
-                      onChange={(e) => setGroupInput(e.target.value)}
-                      autoFocus
-                    />
-                    <button type="submit" className="btn btn-primary btn-sm" style={{ padding: '4px 10px' }}>
-                      Add
+                      <Folder size={14} /> {group} ({count})
                     </button>
                     <button
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      style={{ padding: '4px 8px' }}
-                      onClick={() => setCreatingGroup(false)}
+                      onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group) }}
+                      title={`Delete group ${group}`}
+                      style={{ padding: '6px 12px 6px 4px', background: 'transparent', border: 'none', color: isActive ? 'white' : 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                     >
-                      ✕
+                      <X size={14} />
                     </button>
-                  </form>
-                )}
-              </div>
+                  </div>
+                )
+              })}
+
+              {(groupedStudentsMap['__UNASSIGNED__'] ?? []).length > 0 && (
+                <button
+                  onClick={() => setSelectedGroupFilter('__UNASSIGNED__')}
+                  style={{
+                    padding: '6px 16px', borderRadius: '999px', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'all 0.2s',
+                    background: selectedGroupFilter === '__UNASSIGNED__' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                    color: selectedGroupFilter === '__UNASSIGNED__' ? 'white' : 'var(--text-secondary)',
+                    border: selectedGroupFilter === '__UNASSIGNED__' ? '1px solid var(--primary)' : '1px solid var(--border-default)'
+                  }}
+                >
+                  Unassigned ({(groupedStudentsMap['__UNASSIGNED__'] ?? []).length})
+                </button>
+              )}
+
+              {!creatingGroup ? (
+                <button
+                  onClick={() => setCreatingGroup(true)}
+                  style={{
+                    padding: '6px 16px', borderRadius: '999px', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'all 0.2s',
+                    background: 'transparent', color: 'var(--text-secondary)', border: '1px dashed var(--border-default)'
+                  }}
+                >
+                  <Plus size={14} /> Add Group
+                </button>
+              ) : (
+                <form onSubmit={handleCreateGroup} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--bg-elevated)', padding: '4px', borderRadius: '999px', border: '1px solid var(--primary)' }}>
+                  <input
+                    type="text"
+                    placeholder="Group name..."
+                    value={groupInput}
+                    onChange={(e) => setGroupInput(e.target.value)}
+                    autoFocus
+                    style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', padding: '4px 12px', fontSize: '14px', width: '140px' }}
+                  />
+                  <button type="submit" style={{ padding: '4px 10px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '999px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+                    Add
+                  </button>
+                  <button type="button" onClick={() => setCreatingGroup(false)} style={{ padding: '4px 8px', background: 'transparent', color: 'var(--text-muted)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                    <X size={14} />
+                  </button>
+                </form>
+              )}
             </div>
           )}
         </div>

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Flight } from '@/components/FlightList'
 import LogbookTable from '@/components/LogbookTable'
+import Navbar from '@/components/Navbar'
 
 export const metadata = {
   title: 'Aircraft Technical Logbook - AugmentFlogger',
@@ -66,23 +67,13 @@ export default async function LogbookPage() {
   const sortedDates = Object.keys(groupedFlights).sort((a, b) => b.localeCompare(a))
 
   return (
-    <div style={{ padding: '32px', maxWidth: '1000px', margin: '0 auto' }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '32px' }}>
-        <Link href="/" className="back-btn" style={{ 
-          background: 'var(--bg-glass)', 
-          border: '1px solid var(--border-default)', 
-          borderRadius: 'var(--radius-full)', 
-          padding: '8px 16px', 
-          textDecoration: 'none', 
-          color: 'var(--text-primary)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
-          <span>←</span> Back to Dashboard
-        </Link>
-        <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 700 }}>Aircraft Technical Logbook</h1>
-      </header>
+    <div className="page-wrapper">
+      <Navbar username={instructorUsername} />
+      
+      <main className="dashboard-layout" style={{ maxWidth: '1000px', margin: '0 auto', paddingTop: '32px' }}>
+        <header style={{ marginBottom: '32px' }}>
+          <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 700 }}>Aircraft Technical Logbook</h1>
+        </header>
 
       {(!flights || flights.length === 0) ? (
         <div style={{ 
@@ -111,6 +102,7 @@ export default async function LogbookPage() {
           })}
         </div>
       )}
+      </main>
     </div>
   )
 }

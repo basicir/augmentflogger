@@ -736,7 +736,7 @@ export default function FlightRecorderModal() {
                                   </div>
                                   
                                   {/* Grade Buttons (Remaining space) */}
-                                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-elevated)', padding: '6px', borderRadius: 'var(--radius-full)', border: '1px solid var(--border-default)', margin: '2px 0 2px 8px' }}>
+                                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '2px 0 2px 8px' }}>
                                     <button 
                                       onClick={() => handleGradeCycle(ex.id, 'down')}
                                       style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', fontSize: '28px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingBottom: '4px' }}
