@@ -153,12 +153,18 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
           {!isEditing ? (
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
-                onClick={() => {
-                  window.postMessage({ type: 'AUGMENTFLOGGER_EXPORT', payload: flight }, '*');
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(JSON.stringify(flight));
+                    alert('Sikeresen másolva a vágólapra! Most menj a FlightLoggerre, és nyomd meg az Import gombot!');
+                  } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                    alert('Hiba a vágólapra másoláskor!');
+                  }
                 }}
                 style={{ padding: '8px 16px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
-                🚀 Export to FlightLogger
+                📋 Export to Clipboard
               </button>
               <button 
                 onClick={async () => {
