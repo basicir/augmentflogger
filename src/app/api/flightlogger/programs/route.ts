@@ -13,6 +13,15 @@ const GET_STUDENT_PROGRAMS_QUERY = `
         program {
           id
         }
+        userLectures(first: 500, all: true) {
+          nodes {
+            id
+            status
+            lecture {
+              id
+            }
+          }
+        }
         programRevision {
           name
           programPhases {
@@ -146,6 +155,15 @@ export async function POST(request: Request) {
       id: string;
       name: string;
       status: string;
+      userLectures?: {
+        nodes: {
+          id: string;
+          status: string;
+          lecture: {
+            id: string;
+          }
+        }[];
+      };
       programRevision?: {
         programPhases?: PhaseData[];
       };
@@ -168,6 +186,15 @@ export async function POST(request: Request) {
     const programs = (flData.data?.userPrograms?.nodes || []).map((up: ProgramData) => {
       const completedLectures: Record<string, string> = {};
       const userLectureIds: Record<string, string> = {};
+      
+      const specificUserLectureIds: Record<string, string> = {};
+      if (up.userLectures?.nodes) {
+        up.userLectures.nodes.forEach(ul => {
+          if (ul.lecture?.id) {
+            specificUserLectureIds[ul.lecture.id] = decodeId(ul.id);
+          }
+        });
+      }
 
       const programTrainings = allTrainings.filter(t => t.userProgram?.id === up.id);
       programTrainings.forEach((t: any) => {
@@ -182,7 +209,7 @@ export async function POST(request: Request) {
         tasks: phase.lectures?.map((lecture: LectureData) => ({
           taskId: lecture.id,
           taskName: lecture.name,
-          userLectureId: userLectureIds[lecture.id] ? decodeId(userLectureIds[lecture.id]) : null,
+          userLectureId: specificUserLectureIds[lecture.id] || (userLectureIds[lecture.id] ? decodeId(userLectureIds[lecture.id]) : null),
           status: completedLectures[lecture.id] || "PENDING"
         })).reverse() || []
       })).reverse() || [];

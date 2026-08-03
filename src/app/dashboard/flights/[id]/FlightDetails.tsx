@@ -129,25 +129,14 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
       for (const phase of prog.phases) {
         const task = phase.tasks.find((t: any) => t.taskId === flight.selected_task)
         if (task) {
-          const rawTaskId = task.taskId || flight.selected_task;
-          const decodedTaskId = (() => {
-            if (!rawTaskId) return rawTaskId;
-            try {
-              if (rawTaskId.includes('--')) return rawTaskId.split('--')[1];
-              // Try to decode if it's base64
-              if (/^[A-Za-z0-9+/=]+$/.test(rawTaskId)) {
-                const decoded = atob(rawTaskId);
-                const match = decoded.match(/--(\d+)$/);
-                if (match) return match[1];
-              }
-              return rawTaskId;
-            } catch (e) {
-              return rawTaskId;
-            }
-          })();
-
-          flightloggerUrl = `https://trener.flightlogger.net/users/${flight.student_id}/user_programs/${prog.userProgramId}/user_lectures/${decodedTaskId}/edit`
-          isTaskInstantiated = !!task.userLectureId;
+          if (task.userLectureId) {
+            flightloggerUrl = `https://trener.flightlogger.net/users/${flight.student_id}/user_programs/${prog.userProgramId}/user_lectures/${task.userLectureId}/edit`
+            isTaskInstantiated = true;
+          } else {
+            // Fallback: The task hasn't been booked/instantiated in FlightLogger yet, 
+            // or the cache is old. We open the syllabus page where the user can click it.
+            flightloggerUrl = `https://trener.flightlogger.net/users/${flight.student_id}/user_programs/${prog.userProgramId}`
+          }
           break
         }
       }
@@ -252,13 +241,40 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
               </button>
               <button
                 onClick={() => {
-                   if (flightloggerUrl) window.open(flightloggerUrl, '_blank');
+                   if (flightloggerUrl) {
+                     console.log('Opening FlightLogger URL:', flightloggerUrl);
+                     window.open(flightloggerUrl, '_blank');
+                   }
                 }}
                 disabled={!flightloggerUrl}
                 style={{ padding: '8px 16px', background: flightloggerUrl ? 'var(--primary)' : 'var(--bg-elevated)', color: flightloggerUrl ? 'white' : 'var(--text-secondary)', border: 'none', borderRadius: 'var(--radius-md)', cursor: flightloggerUrl ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', opacity: flightloggerUrl ? 1 : 0.5 }}
-                title={!flightloggerUrl ? "Loading program data..." : "Open task in FlightLogger"}
+                title={!flightloggerUrl ? "Loading program data..." : (isTaskInstantiated ? "Open specific task in FlightLogger" : "Task not yet instantiated. Opening Program Syllabus instead.")}
               >
                 🔗 Open in FlightLogger
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    const res = await fetch(`/api/flightlogger/programs?studentId=${flight.student_id}`);
+                    if (!res.ok) throw new Error('Failed to fetch updated programs');
+                    const data = await res.json();
+                    
+                    const { error } = await supabase.from('flights').update({
+                      programs_cache: data.programs
+                    }).eq('id', flight.id);
+                    if (error) throw error;
+                    
+                    router.refresh();
+                    alert('FlightLogger data updated successfully!');
+                  } catch (e) {
+                    console.error("Failed to refresh programs cache manually", e);
+                    alert("Failed to refresh cache.");
+                  }
+                }}
+                style={{ padding: '8px 16px', background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                title="Refresh FlightLogger Data"
+              >
+                🔄 Refresh
               </button>
               <button 
                 onClick={async () => {
