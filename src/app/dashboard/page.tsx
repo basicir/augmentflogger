@@ -241,13 +241,13 @@ export default function DashboardPage() {
 
           {/* Group Filter Text Tabs Bar */}
           {pinnedStudents.length > 0 && (
-            <div style={{ display: 'flex', gap: '24px', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid var(--border-default)', overflowX: 'auto', paddingBottom: '2px' }}>
+            <div style={{ display: 'flex', gap: '24px', alignItems: 'center', overflowX: 'auto', paddingBottom: '0px', marginTop: '24px', marginBottom: '-1px' }}>
               <button
                 onClick={() => setSelectedGroupFilter('__ALL__')}
                 style={{
                   padding: '8px 4px', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'all 0.2s', background: 'transparent',
                   color: selectedGroupFilter === '__ALL__' ? 'var(--text-primary)' : 'var(--text-secondary)',
-                  border: 'none', borderBottom: selectedGroupFilter === '__ALL__' ? '2px solid var(--primary)' : '2px solid transparent', marginBottom: '-3px'
+                  border: 'none', borderBottom: selectedGroupFilter === '__ALL__' ? '2px solid var(--primary)' : '2px solid transparent', marginBottom: '0px'
                 }}
               >
                 All Students <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '12px', fontSize: '11px', fontWeight: 700 }}>{pinnedStudents.length}</span>
@@ -257,7 +257,7 @@ export default function DashboardPage() {
                 const count = (groupedStudentsMap[group] ?? []).length
                 const isActive = selectedGroupFilter === group
                 return (
-                  <div key={group} style={{ display: 'flex', alignItems: 'center', gap: '4px', borderBottom: isActive ? '2px solid var(--primary)' : '2px solid transparent', marginBottom: '-3px', transition: 'all 0.2s' }}>
+                  <div key={group} style={{ display: 'flex', alignItems: 'center', gap: '4px', borderBottom: isActive ? '2px solid var(--primary)' : '2px solid transparent', marginBottom: '0px', transition: 'all 0.2s' }}>
                     <button
                       onClick={() => setSelectedGroupFilter(group)}
                       style={{ padding: '8px 4px', background: 'transparent', border: 'none', color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
@@ -283,45 +283,12 @@ export default function DashboardPage() {
                   style={{
                     padding: '8px 4px', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'all 0.2s', background: 'transparent',
                     color: selectedGroupFilter === '__UNASSIGNED__' ? 'var(--text-primary)' : 'var(--text-secondary)',
-                    border: 'none', borderBottom: selectedGroupFilter === '__UNASSIGNED__' ? '2px solid var(--primary)' : '2px solid transparent', marginBottom: '-3px'
+                    border: 'none', borderBottom: selectedGroupFilter === '__UNASSIGNED__' ? '2px solid var(--primary)' : '2px solid transparent', marginBottom: '0px'
                   }}
                 >
                   Unassigned <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '12px', fontSize: '11px', fontWeight: 700 }}>{(groupedStudentsMap['__UNASSIGNED__'] ?? []).length}</span>
                 </button>
               )}
-
-              <div style={{ marginLeft: 'auto', paddingBottom: '6px' }}>
-                {!creatingGroup ? (
-                  <button
-                    onClick={() => setCreatingGroup(true)}
-                    style={{
-                      padding: '4px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', transition: 'all 0.2s',
-                      background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border-default)'
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'white'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
-                  >
-                    <Plus size={14} /> New Group
-                  </button>
-                ) : (
-                  <form onSubmit={handleCreateGroup} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <input
-                      type="text"
-                      placeholder="Group name..."
-                      value={groupInput}
-                      onChange={(e) => setGroupInput(e.target.value)}
-                      autoFocus
-                      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--primary)', color: 'white', borderRadius: '6px', outline: 'none', padding: '4px 8px', fontSize: '13px', width: '130px' }}
-                    />
-                    <button type="submit" style={{ padding: '4px 10px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
-                      Add
-                    </button>
-                    <button type="button" onClick={() => setCreatingGroup(false)} style={{ padding: '4px 8px', background: 'transparent', color: 'var(--text-muted)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                      <X size={14} />
-                    </button>
-                  </form>
-                )}
-              </div>
             </div>
           )}
         </div>

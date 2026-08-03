@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Flight } from '@/components/FlightList'
-import { Loader2, ArrowLeft, PlaneTakeoff, RefreshCw, Trash2, Edit2, X } from 'lucide-react'
+import { Loader2, ArrowLeft, PlaneTakeoff, RefreshCw, Trash2, Edit2, X, ExternalLink } from 'lucide-react'
 export default function FlightDetails({ initialFlight, utcOffsetHours }: { initialFlight: Flight, utcOffsetHours: number }) {
   const [flight, setFlight] = useState<Flight>(initialFlight)
   const [activeTab, setActiveTab] = useState<'flight-parameters' | 'task-parameters' | 'comments' | 'description'>('flight-parameters')
@@ -253,7 +253,7 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                 style={{ flex: 1, padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: flightloggerUrl ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', opacity: flightloggerUrl ? 1 : 0.5 }}
                 title={!flightloggerUrl ? "Loading program data..." : (isTaskInstantiated ? "Export and Open specific task in FlightLogger" : "Task not yet instantiated. Auto-opening Program Syllabus instead.")}
               >
-                🛫 Export
+                <ExternalLink size={16} /> Export
               </button>
               <button onClick={() => { setIsEditing(true); setEditData(flight) }} style={{ flex: 1, padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                 <Edit2 size={16} /> Edit

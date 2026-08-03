@@ -454,7 +454,7 @@ body {
 }
 
 .dashboard-header {
-  padding: 40px 32px 24px;
+  padding: 40px 32px 0px;
   background: linear-gradient(180deg, rgba(13,20,33,0.8) 0%, transparent 100%);
   border-bottom: 1px solid var(--border-subtle);
 }
