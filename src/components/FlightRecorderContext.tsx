@@ -33,7 +33,7 @@ interface FlightRecorderContextType {
   ongoingFlight: OngoingFlight | null
   isModalOpen: boolean
   startFlight: (studentId: string, studentName: string) => Promise<void>
-  stopFlight: (touchAndGoes?: number) => Promise<void>
+  stopFlight: (landingsData?: any[]) => Promise<void>
   updateFlight: (updates: Partial<OngoingFlight>) => Promise<void>
   setIsModalOpen: (open: boolean) => void
   loading: boolean
