@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Flight } from '@/components/FlightList'
-
+import { Loader2, ArrowLeft, PlaneTakeoff, RefreshCw, Trash2, Edit2, X } from 'lucide-react'
 export default function FlightDetails({ initialFlight, utcOffsetHours }: { initialFlight: Flight, utcOffsetHours: number }) {
   const [flight, setFlight] = useState<Flight>(initialFlight)
   const [activeTab, setActiveTab] = useState<'flight-parameters' | 'task-parameters' | 'comments' | 'description'>('flight-parameters')
@@ -282,10 +282,10 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                     alert("Failed to refresh cache: " + e.message);
                   }
                 }}
-                style={{ padding: '8px 16px', background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
                 title="Refresh FlightLogger Data"
               >
-                🔄 Refresh
+                <RefreshCw size={16} /> Refresh
               </button>
               <button 
                 onClick={async () => {
@@ -296,29 +296,29 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                       if (error) throw error;
                       router.push('/dashboard/flights');
                       router.refresh();
-                    } catch (e) {
+                    } catch (e: any) {
                       console.error("Failed to delete flight", e);
-                      alert("Failed to delete flight.");
+                      alert("Failed to delete flight: " + e.message);
                       setIsSaving(false);
                     }
                   }
                 }} 
                 disabled={isSaving}
-                style={{ padding: '8px 16px', background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}
+                style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: '#ef4444', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
-                🗑️ Delete
+                <Trash2 size={16} /> Delete
               </button>
-              <button onClick={() => { setIsEditing(true); setEditData(flight) }} style={{ padding: '8px 16px', background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
-                ✏️ Edit
+              <button onClick={() => { setIsEditing(true); setEditData(flight) }} style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Edit2 size={16} /> Edit
               </button>
             </div>
           ) : (
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setIsEditing(false)} style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
+              <button onClick={() => setIsEditing(false)} style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
                 Cancel
               </button>
-              <button onClick={handleSave} disabled={isSaving} style={{ padding: '8px 16px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
-                {isSaving ? 'Saving...' : '💾 Save'}
+              <button onClick={handleSave} disabled={isSaving} style={{ padding: '8px 16px', background: 'rgba(59, 130, 246, 0.2)', color: 'var(--primary)', border: '1px solid rgba(59, 130, 246, 0.5)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
+                {isSaving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           )}
@@ -567,7 +567,7 @@ export default function FlightDetails({ initialFlight, utcOffsetHours }: { initi
                                 const newLandings = [...landings, { airport: '', count: 0 }];
                                 setEditData({...editData, landings_data: newLandings});
                               }}
-                              style={{ padding: '8px', background: 'var(--bg-subtle)', color: 'var(--text-secondary)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600, fontSize: '13px', textAlign: 'center' }}
+                              style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px dashed rgba(255,255,255,0.2)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600, fontSize: '13px', textAlign: 'center' }}
                             >
                               + Add Touch & Go Airport
                             </button>

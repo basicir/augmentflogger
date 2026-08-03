@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useFlightRecorder } from './FlightRecorderContext'
 import { motion, PanInfo } from 'framer-motion'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
+import { Timer, Trash2 } from 'lucide-react'
 
 export default function FlightRecorderGlobal() {
   const { ongoingFlight, setIsModalOpen, stopFlight, userId } = useFlightRecorder()
@@ -128,7 +129,7 @@ export default function FlightRecorderGlobal() {
             borderRight: showTrash ? '2px solid #ef4444' : '2px dashed rgba(255,255,255,0.5)',
           }}
         >
-          <span style={{ fontSize: '48px', opacity: showTrash ? 1 : 0.5, transform: showTrash ? 'scale(1.2)' : 'scale(1)', transition: 'all 0.3s' }}>🗑️</span>
+          <div style={{ opacity: showTrash ? 1 : 0.5, transform: showTrash ? 'scale(1.2)' : 'scale(1)', transition: 'all 0.3s' }}><Trash2 size={48} /></div>
         </motion.div>
       )}
       <div 
@@ -166,7 +167,7 @@ export default function FlightRecorderGlobal() {
             fontSize: '16px',
           }}
         >
-          <span style={{ fontSize: '20px' }}>⏱</span>
+          <Timer size={20} />
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', userSelect: 'none' }}>
             <span style={{ fontSize: '12px', opacity: 0.9, lineHeight: 1 }}>{ongoingFlight.student_name}</span>
             <span>{elapsed}</span>

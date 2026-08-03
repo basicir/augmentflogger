@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { Plane, X, Check } from 'lucide-react'
 
 export interface PinnedStudent {
   id: string
@@ -106,9 +107,9 @@ export default function StudentCard({
         onClick={(e) => { e.preventDefault(); onUnpin(student.id); }}
         aria-label={`Unpin ${fullName}`}
         title="Unpin student"
-        style={{ zIndex: 10 }}
+        style={{ zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
-        ✕
+        <X size={16} />
       </button>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
@@ -151,7 +152,7 @@ export default function StudentCard({
         style={{ color: flightDetails.color }}
         title={student.lastFlightDate ? new Date(student.lastFlightDate).toLocaleString() : undefined}
       >
-        <span>✈</span> {flightDetails.text}
+        <Plane size={14} style={{ marginRight: '4px' }} /> {flightDetails.text}
       </div>
 
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 8, position: 'relative', zIndex: 10 }}>
@@ -165,10 +166,10 @@ export default function StudentCard({
                 onChange={(e) => handleSelectGroup(e.target.value)}
                 title="Click to assign or change group"
               >
-                <option value="__NONE__">🏷️ No Group</option>
+                <option value="__NONE__">No Group</option>
                 {availableGroups.map((g) => (
                   <option key={g} value={g}>
-                    📁 {g}
+                    {g}
                   </option>
                 ))}
                 <option value="__NEW__">+ New Group…</option>
@@ -184,13 +185,14 @@ export default function StudentCard({
                 onChange={(e) => setNewGroupInput(e.target.value)}
                 autoFocus
               />
-              <button type="submit" className="btn-group-save">✓</button>
+              <button type="submit" className="btn-group-save" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Check size={14} /></button>
               <button
                 type="button"
                 className="btn-group-cancel"
                 onClick={() => setEditingGroup(false)}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                ✕
+                <X size={14} />
               </button>
             </form>
           )

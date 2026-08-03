@@ -9,6 +9,8 @@ interface NavbarProps {
   username?: string
 }
 
+import { Plane, LayoutDashboard, PlaneTakeoff, BookOpen, Settings, LogOut } from 'lucide-react'
+
 export default function Navbar({ username }: NavbarProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -25,7 +27,7 @@ export default function Navbar({ username }: NavbarProps) {
   return (
     <nav className="navbar" role="navigation" aria-label="Main navigation">
       <Link href="/dashboard" className="navbar-brand">
-        <div className="navbar-brand-icon">✈</div>
+        <div className="navbar-brand-icon"><Plane size={24} /></div>
         <span className="navbar-brand-name">Augment<span>Flogger</span></span>
       </Link>
 
@@ -35,7 +37,7 @@ export default function Navbar({ username }: NavbarProps) {
           className={`navbar-link ${pathname === '/dashboard' ? 'active' : ''}`}
           id="nav-dashboard"
         >
-          <span>⊞</span>
+          <LayoutDashboard size={20} />
           <span className="nav-link-text">Dashboard</span>
         </Link>
 
@@ -44,7 +46,7 @@ export default function Navbar({ username }: NavbarProps) {
           className={`navbar-link ${pathname === '/dashboard/flights' ? 'active' : ''}`}
           id="nav-flights"
         >
-          <span>✈️</span>
+          <PlaneTakeoff size={20} />
           <span className="nav-link-text">My Flights</span>
         </Link>
 
@@ -53,7 +55,7 @@ export default function Navbar({ username }: NavbarProps) {
           className={`navbar-link ${pathname === '/dashboard/logbook' ? 'active' : ''}`}
           id="nav-logbook"
         >
-          <span>📖</span>
+          <BookOpen size={20} />
           <span className="nav-link-text">Logbook</span>
         </Link>
 
@@ -62,7 +64,7 @@ export default function Navbar({ username }: NavbarProps) {
           className={`navbar-link ${pathname === '/settings' ? 'active' : ''}`}
           id="nav-settings"
         >
-          <span>⚙</span>
+          <Settings size={20} />
           <span className="nav-link-text">Settings</span>
         </Link>
 
@@ -80,12 +82,13 @@ export default function Navbar({ username }: NavbarProps) {
           className="btn btn-ghost btn-sm"
           id="nav-logout"
           aria-label="Sign out"
+          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
         >
           {loggingOut ? (
             <span className="spinner spinner-sm" />
           ) : (
             <>
-              <span className="nav-logout-icon">→</span>
+              <LogOut size={18} />
               <span className="nav-link-text">Sign out</span>
             </>
           )}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { Plane, Sun, Moon } from 'lucide-react'
 
 export interface Flight {
   id: string
@@ -145,7 +146,7 @@ export default function FlightList({ flights, utcOffsetHours }: { flights: Fligh
                             <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '8px' }}>
                               <div style={{ flex: 1, height: '1px', backgroundColor: isToday ? 'rgba(255,255,255,0.3)' : '#475569' }}></div>
                               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '-4px' }}>
-                                <span style={{ fontSize: '14px', transform: 'rotate(45deg)', display: 'inline-block' }}>✈️</span>
+                                <span style={{ color: 'var(--text-secondary)' }}><Plane size={14} /></span>
                                 <span style={{ fontSize: '10px', fontWeight: 700, marginTop: '2px' }}>{durationFormatted}</span>
                               </div>
                               <div style={{ flex: 1, height: '1px', backgroundColor: isToday ? 'rgba(255,255,255,0.3)' : '#475569' }}></div>
@@ -173,7 +174,8 @@ export default function FlightList({ flights, utcOffsetHours }: { flights: Fligh
                         )}
                         {flight.time_of_day && (
                           <span style={{ backgroundColor: isToday ? 'rgba(255,255,255,0.2)' : '#64748B', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '8px', fontWeight: 700 }}>
-                            {flight.time_of_day === 'Day' ? '☀️' : (flight.time_of_day === 'Night' ? '🌙' : flight.time_of_day)}
+                            {flight.time_of_day === 'Day' ? <Sun size={10} style={{ display: 'inline', marginRight: '2px' }} /> : (flight.time_of_day === 'Night' ? <Moon size={10} style={{ display: 'inline', marginRight: '2px' }} /> : null)}
+                            {flight.time_of_day}
                           </span>
                         )}
                         {flight.flight_type && (
