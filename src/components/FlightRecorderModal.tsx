@@ -95,8 +95,10 @@ export default function FlightRecorderModal() {
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({})
   const [grades, setGrades] = useState<Record<string, string>>({})
   const [exerciseComments, setExerciseComments] = useState<Record<string, string>>({})
+  const exerciseCommentsRef = useRef<Record<string, string>>({})
   const [loadingTaskDetails, setLoadingTaskDetails] = useState(false)
   const [generalComment, setGeneralComment] = useState('')
+  const generalCommentRef = useRef<string>('')
   
   const supabase = createClient()
 
@@ -117,10 +119,40 @@ export default function FlightRecorderModal() {
       if (ongoingFlight.task_exercises_cache && taskExercises.length === 0) setTaskExercises(ongoingFlight.task_exercises_cache)
       if (ongoingFlight.task_description_cache && !taskDescription) setTaskDescription(ongoingFlight.task_description_cache)
       if (ongoingFlight.grades && Object.keys(grades).length === 0) setGrades(ongoingFlight.grades)
-      if (ongoingFlight.exercise_comments && Object.keys(exerciseComments).length === 0) setExerciseComments(ongoingFlight.exercise_comments)
-      if (ongoingFlight.general_comment && !generalComment) setGeneralComment(ongoingFlight.general_comment)
+      if (ongoingFlight.exercise_comments && Object.keys(exerciseComments).length === 0) {
+        setExerciseComments(ongoingFlight.exercise_comments)
+        exerciseCommentsRef.current = ongoingFlight.exercise_comments
+      }
+      if (ongoingFlight.general_comment && !generalComment) {
+        setGeneralComment(ongoingFlight.general_comment)
+        generalCommentRef.current = ongoingFlight.general_comment
+      }
     }
   }, [ongoingFlight])
+
+  // Debounced auto-save for exercise comments
+  useEffect(() => {
+    if (JSON.stringify(exerciseCommentsRef.current) === JSON.stringify(exerciseComments)) return;
+    exerciseCommentsRef.current = exerciseComments;
+
+    const handler = setTimeout(() => {
+      updateFlight({ exercise_comments: exerciseComments });
+    }, 1000);
+
+    return () => clearTimeout(handler);
+  }, [exerciseComments]);
+
+  // Debounced auto-save for general comment
+  useEffect(() => {
+    if (generalCommentRef.current === generalComment) return;
+    generalCommentRef.current = generalComment;
+
+    const handler = setTimeout(() => {
+      updateFlight({ general_comment: generalComment });
+    }, 1000);
+
+    return () => clearTimeout(handler);
+  }, [generalComment]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -760,7 +792,6 @@ export default function FlightRecorderModal() {
                                         e.target.style.height = e.target.scrollHeight + 'px';
                                         setExerciseComments(prev => ({ ...prev, [ex.id]: e.target.value }));
                                       }}
-                                      onBlur={() => updateFlight({ exercise_comments: exerciseComments })}
                                       style={{ width: '100%', padding: '16px', fontSize: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'rgba(0,0,0,0.3)', color: 'white', minHeight: '80px', overflow: 'hidden', resize: 'none' }}
                                     />
                                   </div>
@@ -790,7 +821,6 @@ export default function FlightRecorderModal() {
                   onChange={e => {
                     setGeneralComment(e.target.value);
                   }}
-                  onBlur={() => updateFlight({ general_comment: generalComment })}
                   placeholder="📝 Write a general comment for this task..."
                   style={{ width: '100%', flex: 1, padding: '16px', fontSize: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'white', overflow: 'auto', resize: 'none' }}
                 />
